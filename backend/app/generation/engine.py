@@ -117,6 +117,8 @@ def extractive_summary(e: Evidence, max_sentences: int = 2) -> str:
 
 
 class AnswerEngine:
+    label = "versionproof"
+
     def __init__(self, db: Session, retriever: Retriever, llm: LLMProvider | None = None):
         self.db = db
         self.retriever = retriever

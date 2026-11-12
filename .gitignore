@@ -9,3 +9,4 @@ out/
 *.egg-info/
 .mypy_cache/
 .ruff_cache/
+reports/

@@ -93,3 +93,57 @@ aggregate metrics and per-question results. Reports export as JSON and CSV.
 ## Threats to validity
 Small synthetic dataset; author-written questions; judge bias; corpus constructed to contain the
 answer; single product; lexical baseline in PostgreSQL rather than BM25.
+
+## Phase 5: baseline comparison (answer level)
+
+| | Engine | Retrieval | Abstention / verdict logic |
+|---|---|---|---|
+| A | `NoRetrievalEngine` | none | model self-report only. **Requires an LLM; never simulated.** |
+| B | `TraditionalRagEngine` | same retriever, `enforce_version=false` | none: answers from the top results and presents the answer as valid (verdict recorded as `applies`) |
+| C | `AnswerEngine` | version-constrained + exclusion list | coverage-based abstention, evidence-derived verdict, conflict surfacing, citation validation |
+
+B and C share the retriever, corpus, `top_k` and generation mode, so the only independent
+variable is version-awareness. Run with `scripts/benchmark_all.py` (writes JSON + CSV under
+`reports/`) or from the Evaluation Lab.
+
+### Splits
+- `nimbus-synthetic:1` (**dev**, 10 q): used while designing C's rules. Results on it are tuned.
+- `nimbus-synthetic-heldout:1` (**held_out**, 12 q): written before any run and never used to
+  change a rule or threshold. After the single run below, **no change was made to the engine**.
+
+### Measured (2026-11-12, hybrid retrieval, k=5, `hashed-bow-v1` embeddings, extractive generation)
+
+| split | engine | correct abstention | applicability acc. | outdated recommendation | citation validity | supported answer |
+|---|---|---|---|---|---|---|
+| dev | B traditional RAG | 0.80 | 0.60 | 0.50 | 0.60 | 0.67 |
+| dev | C VersionProof | 1.00 | 1.00 | 0.00 | 1.00 | 1.00 |
+| held-out | B traditional RAG | 0.83 | 0.58 | 0.67 | 0.67 | 0.71 |
+| held-out | C VersionProof | 1.00 | 0.92 | 0.00 | 1.00 | 1.00 |
+
+Baseline A was **not run** (no LLM available in the development environment).
+
+### What this does and does not show
+- On held-out questions C cited no outdated source (B: 2 of 3 outdated-trap questions) and its
+  citations were all applicable (B: 0.67). This is consistent with H1 at the mechanism level.
+- C's held-out miss (h03, "Is the Async Trigger Framework available?" on Summer '24): an
+  applicable document that merely *mentions* the framework cleared the coverage threshold, so C
+  answered `applies` instead of `not_applicable`. Lexical coverage cannot tell "about X" from
+  "mentions X". Left unfixed on purpose: fixing it now would turn the held-out set into a dev set.
+- n = 12, one fictional product, questions and corpus by the same author, extractive generation,
+  a bag-of-words stand-in for embeddings. The corpus was built to contain version traps, so the
+  size of the B-C gap says nothing about real documentation. No statistical claim is made.
+- C is slower (p50 roughly 2x B) because of the second pass that builds the exclusion list.
+
+## LLM-judged metrics (Ragas)
+VersionProof does not execute an LLM judge. `GET /api/evaluation/runs/{id}/ragas.json` exports
+answer runs as `question / answer / contexts / ground_truth` records, the shape Ragas-style
+faithfulness, answer-relevancy and context precision/recall evaluators consume. Running them
+needs a judge model and the current Ragas API, neither of which could be verified in the
+development environment, so no Ragas code path is claimed to work. Judge scores, when produced,
+must be stored with the judge model id and reported separately from the deterministic metrics.
+
+## Observability
+Every HTTP request is logged as structured JSON (`request_id`, method, path, status,
+`duration_ms`) and returns `x-request-id` and `server-timing` headers; answers and benchmark rows
+carry retrieval and end-to-end latency. OpenTelemetry tracing and token-cost accounting are not
+implemented (cost is only measurable with a real LLM provider).

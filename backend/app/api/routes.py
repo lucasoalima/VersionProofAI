@@ -16,6 +16,7 @@ from app.embeddings.interfaces import EmbeddingUnavailable
 from app.embeddings.providers import get_embedding_provider
 from app.evaluation.answer_runner import run_answer_benchmark
 from app.evaluation.retrieval_runner import run_retrieval_benchmark
+from app.generation.baselines import NoRetrievalEngine, TraditionalRagEngine
 from app.generation.engine import AnswerEngine
 from app.generation.interfaces import LLMUnavailable
 from app.generation.providers import get_llm_provider
@@ -304,23 +305,12 @@ def export_run_csv(run_id: uuid.UUID, db: Session = Depends(get_db)):
     if r is None:
         raise HTTPException(404, "run not found")
     buf = io.StringIO()
-    cols = [
-        "id",
-        "case",
-        "target_version",
-        "recall_at_k",
-        "mrr",
-        "ndcg_at_k",
-        "outdated_surfaced",
-        "applicability_correct",
-        "top_applicability_status",
-        "should_abstain",
-        "retrieval_latency_ms",
-        "error",
-    ]
+    rows = r.per_question or []
+    scalar = {k for q in rows for k, v in q.items() if not isinstance(v, list | dict)}
+    cols = ["id", *sorted(scalar - {"id", "answer"}), *(["answer"] if "answer" in scalar else [])]
     w = csv.DictWriter(buf, fieldnames=cols, extrasaction="ignore")
     w.writeheader()
-    w.writerows(r.per_question or [])
+    w.writerows(rows)
     return PlainTextResponse(buf.getvalue(), media_type="text/csv")
 
 
@@ -369,22 +359,59 @@ def ask(req: AskRequest, db: Session = Depends(get_db)):
     )
 
 
+class AnswerBenchmarkRequest(RetrievalBenchmarkRequest):
+    baseline: str = Field(
+        default="versionproof", pattern="^(versionproof|traditional_rag|no_retrieval)$"
+    )
+
+
 @router.post("/evaluation/answer-runs", status_code=201)
-def create_answer_run(req: RetrievalBenchmarkRequest, db: Session = Depends(get_db)):
-    """Answer-level benchmark with the version-aware engine (extractive unless an LLM is configured)."""
+def create_answer_run(req: AnswerBenchmarkRequest, db: Session = Depends(get_db)):
+    """Answer-level benchmark. versionproof and traditional_rag run without an LLM (extractive);
+    no_retrieval (baseline A) requires one and returns 501 otherwise - it is never simulated."""
     dataset = db.get(EvaluationDataset, req.dataset_id)
     if dataset is None:
         raise HTTPException(404, "dataset not found")
     try:
-        retriever = build_retriever(db, req.mode)
         llm = get_llm_provider()
+        if req.baseline == "no_retrieval":
+            if llm is None:
+                raise HTTPException(
+                    501,
+                    "Baseline A (LLM without retrieval) requires LLM_PROVIDER to be configured.",
+                )
+            engine = NoRetrievalEngine(llm)
+        else:
+            retriever = build_retriever(db, req.mode)
+            engine = (AnswerEngine if req.baseline == "versionproof" else TraditionalRagEngine)(
+                db, retriever, llm
+            )
     except EmbeddingUnavailable as exc:
         raise HTTPException(501, str(exc)) from exc
     except LLMUnavailable as exc:
         raise HTTPException(503, str(exc)) from exc
-    return _run_out(
-        run_answer_benchmark(db, dataset, AnswerEngine(db, retriever, llm), top_k=req.top_k)
-    )
+    return _run_out(run_answer_benchmark(db, dataset, engine, top_k=req.top_k))
+
+
+@router.get("/evaluation/runs/{run_id}/ragas.json")
+def export_run_for_ragas(run_id: uuid.UUID, db: Session = Depends(get_db)):
+    """Records shaped for Ragas-style judges (question, answer, contexts, ground_truth).
+    VersionProof does not run an LLM judge itself; see docs/evaluation-methodology.md."""
+    r = db.get(EvaluationRun, run_id)
+    if r is None:
+        raise HTTPException(404, "run not found")
+    if not r.strategy.startswith("answer:"):
+        raise HTTPException(422, "only answer runs can be exported for Ragas")
+    return [
+        {
+            "id": q["id"],
+            "question": q["question"],
+            "answer": q["answer"],
+            "contexts": q["contexts"],
+            "ground_truth": q["reference_answer"],
+        }
+        for q in r.per_question
+    ]
 
 
 @router.get("/compare")

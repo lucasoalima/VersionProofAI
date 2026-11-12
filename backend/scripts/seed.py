@@ -21,26 +21,28 @@ if __name__ == "__main__":
     with SessionLocal() as db:
         res = IngestionPipeline(db).ingest_path(DATA / "synthetic")
         print("ingestion:", json.dumps(res.as_dict(), indent=2))
-        spec = json.loads((DATA / "evaluation" / "synthetic_v1.json").read_text())
-        existing = db.scalar(
-            select(EvaluationDataset).where(
-                EvaluationDataset.name == spec["name"], EvaluationDataset.version == spec["version"]
-            )
-        )
-        if existing is None:
-            db.add(
-                EvaluationDataset(
-                    name=spec["name"],
-                    version=spec["version"],
-                    description=spec["description"],
-                    is_synthetic=spec["is_synthetic"],
-                    split=spec["split"],
-                    records=spec["records"],
+        for path in sorted((DATA / "evaluation").glob("*.json")):
+            spec = json.loads(path.read_text())
+            existing = db.scalar(
+                select(EvaluationDataset).where(
+                    EvaluationDataset.name == spec["name"],
+                    EvaluationDataset.version == spec["version"],
                 )
             )
-            db.commit()
-            print(
-                f"registered evaluation dataset {spec['name']} v{spec['version']} ({len(spec['records'])} records)"
-            )
-        else:
-            print("evaluation dataset already registered")
+            if existing is None:
+                db.add(
+                    EvaluationDataset(
+                        name=spec["name"],
+                        version=spec["version"],
+                        description=spec["description"],
+                        is_synthetic=spec["is_synthetic"],
+                        split=spec["split"],
+                        records=spec["records"],
+                    )
+                )
+                db.commit()
+                print(
+                    f"registered {spec['name']} v{spec['version']} [{spec['split']}] ({len(spec['records'])} records)"
+                )
+            else:
+                print(f"{spec['name']} v{spec['version']} already registered")

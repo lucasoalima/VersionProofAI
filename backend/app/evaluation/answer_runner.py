@@ -19,24 +19,23 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.evaluation.metrics import summarize
-from app.generation.engine import AnswerEngine
 from app.models import Document, EvaluationDataset, EvaluationRun
 from app.retrieval.interfaces import RetrievalFilters
 
 
 def run_answer_benchmark(
-    db: Session,
-    dataset: EvaluationDataset,
-    engine: AnswerEngine,
-    *,
-    top_k: int = 5,
-    label: str = "versionproof",
+    db: Session, dataset: EvaluationDataset, engine, *, top_k: int = 5
 ) -> EvaluationRun:
     gen = engine.llm.model_id if engine.llm else "extractive"
     run = EvaluationRun(
         dataset_id=dataset.id,
-        strategy=f"answer:{label}:{engine.retriever.name}",
-        config={"top_k": top_k, "dataset": f"{dataset.name}:{dataset.version}", "generation": gen},
+        strategy=f"answer:{engine.label}:{engine.retriever.name if engine.retriever else 'none'}",
+        config={
+            "top_k": top_k,
+            "dataset": f"{dataset.name}:{dataset.version}",
+            "split": dataset.split,
+            "generation": gen,
+        },
         model_identifier=engine.llm.model_id if engine.llm else None,
     )
     db.add(run)
@@ -92,6 +91,10 @@ def run_answer_benchmark(
                     else None
                 ),
                 "generation_mode": a.generation_mode,
+                "question": rec["question"],
+                "reference_answer": rec.get("reference_answer"),
+                "contexts": [by_chunk[c].excerpt for c in a.citations if c in by_chunk]
+                or [e.excerpt for e in a.evidence[:3]],
                 "warnings": a.warnings,
                 "answer": a.answer,
                 "end_to_end_latency_ms": a.diagnostics.get("end_to_end_latency_ms"),

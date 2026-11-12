@@ -8,7 +8,11 @@
 - The LLM path was tested only with a scripted fake provider; the Anthropic client has not been
   run against the real API. Baselines A (no retrieval) and B (traditional RAG + generation) and
   Ragas metrics are Phase 5.
-- Abstention/verdict thresholds were tuned on the 10-question dev set; no held-out validation.
+- Abstention/verdict rules were tuned on the 10-question dev set. One held-out run (12 q) exists;
+  it exposed a known failure: lexical coverage cannot tell a document *about* a feature from one
+  that *mentions* it (h03). Not fixed, to keep the held-out split honest.
+- Baseline A and Ragas scoring have never been executed; OpenTelemetry and cost accounting are
+  not implemented.
 - Conflict detection covers numeric disagreement between similarly titled documents only.
 - Extractive answers quote the source; they do not synthesise across documents.
 - Version comparison is pattern-based (English change verbs, sentence-local) and pairs documents
@@ -34,6 +38,6 @@
 - The constrained path issues two queries to build the excluded list; latency roughly doubles.
 
 ## Verified in this environment
-Phase 1–4 tests (82) were executed against PostgreSQL 16.x + pgvector 0.8.0 built from source;
+Phase 1–5 tests (86) were executed against PostgreSQL 16.x + pgvector 0.8.0 built from source;
 the Next.js build was executed with Node 22. Docker Compose and GitHub Actions configurations
 are provided but were not executed here.

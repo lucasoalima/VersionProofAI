@@ -15,7 +15,7 @@
 - `backend/app/embeddings` `EmbeddingProvider`; `hashed` (tests) and `sentence_transformers`
 - `backend/app/evaluation` deterministic metrics; retrieval and answer benchmark runners
 - `backend/app/comparison` `ComparisonEngine` (compare + timeline), statement extraction
-- `backend/app/generation` `LLMProvider`; `AnswerEngine` (see docs/answer-engine.md); prompt builder
+- `backend/app/generation` `baselines.py` (A no-retrieval, B traditional RAG); `LLMProvider`; `AnswerEngine` (see docs/answer-engine.md); prompt builder
 - `backend/app/chunking`   `Chunker` protocol; `HeadingChunker`
 - `backend/app/api`        FastAPI routes; `capabilities()` reflects configured providers
 - `data/synthetic`         fixtures; `data/evaluation` datasets
@@ -36,8 +36,10 @@ Implement `DocumentLoader` in `app/ingestion/loaders.py`. Do not touch the pipel
 Remote URLs (Phase 6) must go through an allowlist and SSRF guard; see docs/security.md.
 
 ## Phase status
-Phase 4 done (deterministic comparison engine, change classification with provenance, timeline).
-Next: Phase 5 — baseline A (LLM, no retrieval) and B (unconstrained retrieval + generation) through
-`run_answer_benchmark`, Ragas metrics behind an optional extra, a held-out question split (the
-answer-engine thresholds were tuned on the dev split), report exports, OpenTelemetry spans.
-Then Phase 6: real, permitted Salesforce documentation.
+Phase 5 done with gaps (baselines B/C measured on dev + held-out; A, Ragas, OTel not run).
+DO NOT tune the answer engine against `nimbus-synthetic-heldout`; write a new held-out split first.
+Next:
+1. With real credentials: run baseline A and LLM generation; exercise `sentence_transformers`;
+   verify the Anthropic client; add Ragas scoring against the verified current API.
+2. Known failure to address (then validate on a NEW held-out set): "mentions X" vs "about X".
+3. Phase 6: real, permitted Salesforce documentation (review terms first; no arbitrary scraping).

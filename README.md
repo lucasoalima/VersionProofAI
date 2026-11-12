@@ -8,13 +8,12 @@ hybrid retrieval, explicit version-applicability metadata, document revision tra
 reproducible evaluation lab that measures whether version-aware retrieval actually reduces
 outdated recommendations compared with conventional RAG.
 
-> **Status: Phase 4 (Version Intelligence) complete.** Ingestion, versioned knowledge base,
-> lexical + semantic + hybrid retrieval with version constraints and an exclusion list, a
-> grounded answer engine (abstention, conflict surfacing, validated citations; LLM optional),
-> deterministic version comparison with a release timeline, retrieval and answer benchmarks,
-> dashboard, tests and CI. The LLM baselines A/B, Ragas and a held-out dataset (Phase 5) and
-> real Salesforce documentation (Phase 6) are not implemented yet. The UI says so explicitly
-> rather than showing placeholder numbers. See [docs/limitations.md](docs/limitations.md).
+> **Status: Phase 5 (Evaluation) complete, with stated gaps.** Everything through version
+> comparison, plus baselines B (traditional RAG) and C (VersionProof) measured on a dev and a
+> held-out split, exports (JSON / CSV / Ragas-shaped), and request logging. **Not done:**
+> baseline A and any LLM-generated answer were never run against a real model; no real embedding
+> model was exercised; Ragas scoring and OpenTelemetry are not implemented; real Salesforce
+> documentation is Phase 6. See [docs/limitations.md](docs/limitations.md).
 
 ## 1. The problem
 
@@ -105,6 +104,7 @@ Retrieval-only benchmarks (no LLM) run from the Evaluation Lab page, the API
 cd backend && python scripts/seed.py                       # registers data/evaluation/synthetic_v1.json
 EMBEDDING_PROVIDER=hashed python scripts/benchmark_retrieval.py   # lexical/semantic/hybrid x constrained/unconstrained
 EMBEDDING_PROVIDER=hashed python scripts/benchmark_answers.py     # answer engine: abstention, citations, verdicts
+EMBEDDING_PROVIDER=hashed python scripts/benchmark_all.py         # A (if LLM) / B / C on dev + held-out, writes reports/
 ```
 
 `EMBEDDING_PROVIDER=sentence_transformers` (with `pip install -e ".[embeddings]"`) uses a real
@@ -128,14 +128,19 @@ excluded list exists: the supporting document is still found, labelled *not appl
 kept out of the recommendations. The remaining applicability miss is the not-in-KB question;
 retrieval always returns *something*; abstaining is the answer engine's job.
 
-Answer-level run (extractive mode, no LLM, same dataset): correct abstention 1.00, applicability
-accuracy 1.00, outdated recommendation 0.00, citation validity 1.00, supported answers 1.00.
-**Read this as a smoke test, not a result**: the abstention and verdict rules were adjusted
-while looking at these same 10 questions, so the figures are tuned-on-dev by construction. A
-held-out and a real-documentation dataset are required before any claim
-(see [docs/answer-engine.md](docs/answer-engine.md)). Full
-definitions in [docs/evaluation-methodology.md](docs/evaluation-methodology.md). The dashboard
-only shows metrics from recorded `EvaluationRun` rows; it never displays illustrative numbers.
+Answer-level comparison on the **held-out** split (12 questions never used for tuning; hybrid
+retrieval, extractive generation, `hashed-bow-v1` embeddings):
+
+| | Outdated source recommended | Citation validity | Applicability accuracy | Correct abstention |
+|---|---|---|---|---|
+| B: traditional RAG | 0.67 | 0.67 | 0.58 | 0.83 |
+| C: VersionProof | **0.00** | **1.00** | 0.92 | 1.00 |
+
+C's one miss is documented, not patched: an applicable document that merely mentions a feature
+was taken as evidence that the feature exists in that release. Twelve questions on a fictional
+corpus built to contain version traps support the mechanism, not a general claim; baseline A
+(LLM without retrieval) has not been run. Reproduce with `python scripts/benchmark_all.py`.
+Details and threats to validity: [docs/evaluation-methodology.md](docs/evaluation-methodology.md).
 
 ## 8. What the system cannot reliably determine
 
