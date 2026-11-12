@@ -9,7 +9,7 @@ export type ProductDetail = Product & { releases: Release[] };
 export type Job = { id: string; source_path: string; status: string; started_at: string; finished_at: string | null; stats: Record<string, unknown>; error: string | null };
 export type Dashboard = {
   products: Product[]; document_count: number; revision_count: number; chunk_count: number; embedded_chunk_count: number;
-  recent_jobs: Job[]; evaluation_runs: { id: string; strategy: string; model_identifier: string | null; started_at: string; metrics: Record<string, number> }[];
+  recent_jobs: Job[]; recent_queries: { id: string; created_at: string; question: string; target_version: string | null; mode: string; applicability_status: string; abstained: boolean; generation_mode: string; latency_ms: number }[]; evaluation_runs: { id: string; strategy: string; model_identifier: string | null; started_at: string; metrics: Record<string, number> }[];
   capabilities: Record<string, boolean | string>;
 };
 export type Revision = { id: string; revision_number: number; checksum: string; published_at: string | null; last_updated_at: string | null; effective_from: string | null; effective_to: string | null; applicability_provenance: string; metadata_provenance: Record<string, string>; technical_tokens: string[]; chunk_count: number; ingested_at: string };
@@ -35,3 +35,5 @@ export type Dataset = { id: string; name: string; version: string; split: string
 export type EvalRun = { id: string; dataset_id: string; strategy: string; config: Record<string, unknown>; model_identifier: string | null; started_at: string; finished_at: string | null; metrics: Record<string, number | null>; per_question: Record<string, unknown>[] };
 export const getDatasets = () => serverGet<Dataset[]>("/api/evaluation/datasets");
 export const getRuns = () => serverGet<EvalRun[]>("/api/evaluation/runs");
+
+export type Answer = { answer: string; target_product: string; target_version: string | null; applicability_status: string; abstained: boolean; generation_mode: string; model_identifier: string | null; evidence: Evidence[]; excluded: Evidence[]; citations: string[]; warnings: string[]; unresolved_questions: string[]; conflicts: { chunk_ids: string[]; titles: string[]; differing_values: string[][] }[]; diagnostics: Record<string, unknown> };

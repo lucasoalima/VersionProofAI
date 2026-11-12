@@ -80,7 +80,15 @@ def test_semantic_and_hybrid_via_api_with_hashed_provider(client, monkeypatch):
     b = client.post("/api/embeddings/build").json()
     assert b["model_id"] == "hashed-bow-v1" and b["embedded"] > 0
     for mode in ("semantic", "hybrid"):
-        r = client.post("/api/search", json={"query": "NIMBUS_LIMIT_EXCEEDED_0427", "product": "nimbus-crm", "target_version": "Winter '25", "mode": mode})
+        r = client.post(
+            "/api/search",
+            json={
+                "query": "NIMBUS_LIMIT_EXCEEDED_0427",
+                "product": "nimbus-crm",
+                "target_version": "Winter '25",
+                "mode": mode,
+            },
+        )
         assert r.status_code == 200, r.text
         assert r.json()["results"][0]["strategy"] == mode
     ds = client.get("/api/evaluation/datasets").json()

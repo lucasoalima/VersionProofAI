@@ -7,6 +7,8 @@ const styles: Record<string, string> = {
   inferred_not_applicable: "border-sky-300 bg-sky-50 text-sky-800 dark:border-sky-800 dark:bg-sky-950 dark:text-sky-300",
   verified: "border-emerald-300 text-emerald-800 dark:border-emerald-800 dark:text-emerald-300",
   inferred: "border-sky-300 text-sky-800 dark:border-sky-800 dark:text-sky-300",
+  abstained: "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300",
+  cited: "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900",
   completed: "border-emerald-300 text-emerald-800 dark:border-emerald-800 dark:text-emerald-300",
   failed: "border-rose-300 text-rose-800 dark:border-rose-800 dark:text-rose-300",
 };

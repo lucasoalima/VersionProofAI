@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Link key={href} href={href} className="rounded-md px-2 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800">{label}</Link>
               ))}
             </nav>
-            <div className="muted mt-8 text-xs">Phase 2 · lexical · semantic · hybrid</div>
+            <div className="muted mt-8 text-xs">Phase 3 · grounded answers</div>
           </aside>
           <main className="flex-1 p-8">{children}</main>
         </div>

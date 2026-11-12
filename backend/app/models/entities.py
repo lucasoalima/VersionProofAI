@@ -310,3 +310,19 @@ class EvaluationRun(Base):
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     metrics: Mapped[dict] = mapped_column(JSON, default=dict)
     per_question: Mapped[list] = mapped_column(JSON, default=list)
+
+
+class QueryLog(Base):
+    """One row per /api/ask call. Stores the question and outcome, never retrieved content."""
+
+    __tablename__ = "query_logs"
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=_uuid)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    product_slug: Mapped[str] = mapped_column(String(100))
+    target_version: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    mode: Mapped[str] = mapped_column(String(30))
+    question: Mapped[str] = mapped_column(Text)
+    applicability_status: Mapped[str] = mapped_column(String(30))
+    abstained: Mapped[bool] = mapped_column(Boolean, default=False)
+    generation_mode: Mapped[str] = mapped_column(String(30))
+    latency_ms: Mapped[int] = mapped_column(Integer)

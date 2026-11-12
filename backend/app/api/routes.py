@@ -13,14 +13,20 @@ from app.db.session import get_db
 from app.embeddings.indexer import build_embeddings
 from app.embeddings.interfaces import EmbeddingUnavailable
 from app.embeddings.providers import get_embedding_provider
+from app.evaluation.answer_runner import run_answer_benchmark
 from app.evaluation.retrieval_runner import run_retrieval_benchmark
+from app.generation.engine import AnswerEngine
+from app.generation.interfaces import LLMUnavailable
+from app.generation.providers import get_llm_provider
 from app.ingestion.paths import ForbiddenPathError, resolve_within_root
 from app.ingestion.pipeline import IngestionPipeline
-from app.models import EvaluationDataset, EvaluationRun, IngestionJob
+from app.models import EvaluationDataset, EvaluationRun, IngestionJob, QueryLog
 from app.retrieval.factory import build_retriever
 from app.retrieval.interfaces import RetrievalFilters
 from app.retrieval.service import retrieve_with_exclusions
 from app.schemas.api import (
+    AnswerOut,
+    AskRequest,
     ChunkOut,
     DashboardOut,
     DocumentDetailOut,
@@ -315,3 +321,66 @@ def export_run_csv(run_id: uuid.UUID, db: Session = Depends(get_db)):
     w.writeheader()
     w.writerows(r.per_question or [])
     return PlainTextResponse(buf.getvalue(), media_type="text/csv")
+
+
+def _ev_out(e) -> EvidenceOut:
+    return EvidenceOut(**{**e.__dict__, "applicability_status": e.applicability_status.value})
+
+
+@router.post("/ask", response_model=AnswerOut)
+def ask(req: AskRequest, db: Session = Depends(get_db)):
+    """Grounded answer. Works without an LLM (extractive mode); the verdict, abstention and
+    citation checks are deterministic either way."""
+    try:
+        retriever = build_retriever(db, req.mode)
+    except EmbeddingUnavailable as exc:
+        raise HTTPException(501, str(exc)) from exc
+    try:
+        llm = get_llm_provider()
+    except LLMUnavailable as exc:
+        raise HTTPException(503, f"LLM provider misconfigured: {exc}") from exc
+    filters = RetrievalFilters(product_slug=req.product, target_version=req.target_version)
+    try:
+        a = AnswerEngine(db, retriever, llm).answer(req.question, filters, req.top_k)
+    except LookupError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except VersionOrderingError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    db.add(
+        QueryLog(
+            product_slug=req.product,
+            target_version=req.target_version,
+            mode=req.mode,
+            question=req.question,
+            applicability_status=a.applicability_status,
+            abstained=a.abstained,
+            generation_mode=a.generation_mode,
+            latency_ms=int(a.diagnostics.get("end_to_end_latency_ms", 0)),
+        )
+    )
+    db.commit()
+    return AnswerOut(
+        **{
+            **a.__dict__,
+            "evidence": [_ev_out(e) for e in a.evidence],
+            "excluded": [_ev_out(e) for e in a.excluded],
+        }
+    )
+
+
+@router.post("/evaluation/answer-runs", status_code=201)
+def create_answer_run(req: RetrievalBenchmarkRequest, db: Session = Depends(get_db)):
+    """Answer-level benchmark with the version-aware engine (extractive unless an LLM is configured)."""
+    dataset = db.get(EvaluationDataset, req.dataset_id)
+    if dataset is None:
+        raise HTTPException(404, "dataset not found")
+    try:
+        retriever = build_retriever(db, req.mode)
+        llm = get_llm_provider()
+    except EmbeddingUnavailable as exc:
+        raise HTTPException(501, str(exc)) from exc
+    except LLMUnavailable as exc:
+        raise HTTPException(503, str(exc)) from exc
+    return _run_out(
+        run_answer_benchmark(db, dataset, AnswerEngine(db, retriever, llm), top_k=req.top_k)
+    )

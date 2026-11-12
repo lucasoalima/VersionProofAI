@@ -13,7 +13,8 @@
 - `backend/app/versioning` `VersionOrdering` strategies, `applicability.resolve`
 - `backend/app/retrieval`  `Retriever` protocol; `base.py` shared SQL; lexical/semantic/hybrid; `service.py` exclusion list
 - `backend/app/embeddings` `EmbeddingProvider`; `hashed` (tests) and `sentence_transformers`
-- `backend/app/evaluation` deterministic metrics + retrieval benchmark runner
+- `backend/app/evaluation` deterministic metrics; retrieval and answer benchmark runners
+- `backend/app/generation` `LLMProvider`; `AnswerEngine` (see docs/answer-engine.md); prompt builder
 - `backend/app/chunking`   `Chunker` protocol; `HeadingChunker`
 - `backend/app/api`        FastAPI routes; `capabilities()` reflects configured providers
 - `data/synthetic`         fixtures; `data/evaluation` datasets
@@ -34,6 +35,7 @@ Implement `DocumentLoader` in `app/ingestion/loaders.py`. Do not touch the pipel
 Remote URLs (Phase 6) must go through an allowlist and SSRF guard; see docs/security.md.
 
 ## Phase status
-Phase 2 done (semantic + hybrid + retrieval benchmarks + exclusion list). Next: Phase 3 — `LLMProvider`
-protocol, grounded answer engine with structured response, citation validation against chunk ids,
-abstention (relevance threshold + evidence sufficiency), conflict surfacing; must stay optional.
+Phase 3 done (answer engine, abstention, conflicts, citation validation, answer benchmark).
+Next: Phase 4 — version comparison engine over `DocumentRevision`/`FeatureChange` (deterministic diff
+first), change classification with provenance, timeline view. Then Phase 5: baselines A/B with
+generation, Ragas, held-out dataset.

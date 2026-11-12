@@ -128,6 +128,31 @@ class SearchResponse(BaseModel):
     notices: list[str]
 
 
+class AskRequest(BaseModel):
+    question: str = Field(min_length=2, max_length=2000)
+    product: str
+    target_version: str | None = None
+    mode: str = Field(default="lexical", pattern="^(lexical|semantic|hybrid)$")
+    top_k: int = Field(default=5, ge=1, le=20)
+
+
+class AnswerOut(BaseModel):
+    answer: str
+    target_product: str
+    target_version: str | None
+    applicability_status: str
+    abstained: bool
+    generation_mode: str
+    model_identifier: str | None
+    evidence: list[EvidenceOut]
+    excluded: list[EvidenceOut]
+    citations: list[str]
+    warnings: list[str]
+    unresolved_questions: list[str]
+    conflicts: list[dict[str, Any]]
+    diagnostics: dict[str, Any]
+
+
 class DashboardOut(BaseModel):
     products: list[ProductOut]
     document_count: int
@@ -135,5 +160,6 @@ class DashboardOut(BaseModel):
     chunk_count: int
     embedded_chunk_count: int
     recent_jobs: list[IngestionJobOut]
+    recent_queries: list[dict[str, Any]]
     evaluation_runs: list[dict[str, Any]]
     capabilities: dict[str, Any]

@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     embedding_dimensions: int = 384
     llm_provider: str = "none"
     llm_api_key: str | None = None
+    llm_model: str = ""
+    # Abstention: minimum share of the question's content terms that the best evidence must cover.
+    min_evidence_coverage: float = 0.5
     # Hard limits for document processing (resource exhaustion guard).
     max_document_bytes: int = 2_000_000
     max_documents_per_job: int = 500

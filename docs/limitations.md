@@ -5,7 +5,12 @@
   possible); semantic/hybrid were validated with the deterministic `hashed-bow-v1` provider.
 - No cross-encoder reranker implementation yet (protocol only).
 - No approximate vector index (deliberate; see retrieval-design.md).
-- Answer generation, citations, abstention (Phase 3). The Ask page shows evidence only.
+- The LLM path was tested only with a scripted fake provider; the Anthropic client has not been
+  run against the real API. Baselines A (no retrieval) and B (traditional RAG + generation) and
+  Ragas metrics are Phase 5.
+- Abstention/verdict thresholds were tuned on the 10-question dev set; no held-out validation.
+- Conflict detection covers numeric disagreement between similarly titled documents only.
+- Extractive answers quote the source; they do not synthesise across documents.
 - Version comparison, feature history, timelines (Phase 4). `Feature`/`FeatureChange` exist in
   the schema but are unused.
 - LLM baselines (A and B with generation), Ragas metrics, citation validity, abstention rate
@@ -28,6 +33,6 @@
 - The constrained path issues two queries to build the excluded list; latency roughly doubles.
 
 ## Verified in this environment
-Phase 1–2 tests (59) were executed against PostgreSQL 16.x + pgvector 0.8.0 built from source;
+Phase 1–3 tests (74) were executed against PostgreSQL 16.x + pgvector 0.8.0 built from source;
 the Next.js build was executed with Node 22. Docker Compose and GitHub Actions configurations
 are provided but were not executed here.

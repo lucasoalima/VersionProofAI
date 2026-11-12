@@ -13,5 +13,6 @@ from app.models.entities import (  # noqa: F401
     MetadataProvenance,
     Product,
     ProductRelease,
+    QueryLog,
     TrustLevel,
 )

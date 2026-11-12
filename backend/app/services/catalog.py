@@ -15,6 +15,7 @@ from app.models import (
     IngestionJob,
     Product,
     ProductRelease,
+    QueryLog,
 )
 from app.schemas.api import (
     ChunkOut,
@@ -180,6 +181,21 @@ def dashboard(db: Session, capabilities: dict) -> dict:
         )
         or 0,
         "recent_jobs": list_jobs(db, 10),
+        "recent_queries": [
+            {
+                "id": str(q.id),
+                "created_at": q.created_at.isoformat(),
+                "question": q.question,
+                "product": q.product_slug,
+                "target_version": q.target_version,
+                "mode": q.mode,
+                "applicability_status": q.applicability_status,
+                "abstained": q.abstained,
+                "generation_mode": q.generation_mode,
+                "latency_ms": q.latency_ms,
+            }
+            for q in db.scalars(select(QueryLog).order_by(QueryLog.created_at.desc()).limit(10))
+        ],
         "evaluation_runs": [
             {
                 "id": str(r.id),

@@ -8,11 +8,12 @@ hybrid retrieval, explicit version-applicability metadata, document revision tra
 reproducible evaluation lab that measures whether version-aware retrieval actually reduces
 outdated recommendations compared with conventional RAG.
 
-> **Status: Phase 2 (Retrieval) complete.** Ingestion, versioned knowledge base, lexical +
-> semantic (pgvector) + hybrid (RRF) retrieval with version constraints and an explicit
-> exclusion list, retrieval-only benchmarks with stored runs, dashboard, Evaluation Lab, tests
-> and CI. Grounded answer generation (Phase 3), version comparison (Phase 4), the LLM
-> baselines (Phase 5) and real Salesforce documentation (Phase 6) are not implemented yet. The
+> **Status: Phase 3 (Answer Generation) complete.** Ingestion, versioned knowledge base,
+> lexical + semantic + hybrid retrieval with version constraints and an exclusion list, a
+> grounded answer engine (abstention, conflict surfacing, validated citations; LLM optional),
+> retrieval and answer benchmarks with stored runs, dashboard, Evaluation Lab, tests and CI.
+> Version comparison (Phase 4), the LLM baselines A/B and Ragas (Phase 5) and real Salesforce
+> documentation (Phase 6) are not implemented yet. The
 > UI says so explicitly rather than showing placeholder numbers. See
 > [docs/limitations.md](docs/limitations.md).
 
@@ -44,7 +45,7 @@ flowchart LR
   C -- verified & in range --> E[Evidence: applies]
   C -- verified & out of range --> X[Excluded list<br/>explains, never recommends]
   C -- unknown / inferred --> U[Evidence: flagged unknown/inferred]
-  E --> A[Grounded answer + citations<br/>Phase 3]
+  E --> A[Grounded answer + validated citations]
   U --> A
 ```
 
@@ -103,7 +104,8 @@ Retrieval-only benchmarks (no LLM) run from the Evaluation Lab page, the API
 
 ```bash
 cd backend && python scripts/seed.py                       # registers data/evaluation/synthetic_v1.json
-EMBEDDING_PROVIDER=hashed python scripts/benchmark_retrieval.py   # lexical/semantic/hybrid × constrained/unconstrained
+EMBEDDING_PROVIDER=hashed python scripts/benchmark_retrieval.py   # lexical/semantic/hybrid x constrained/unconstrained
+EMBEDDING_PROVIDER=hashed python scripts/benchmark_answers.py     # answer engine: abstention, citations, verdicts
 ```
 
 `EMBEDDING_PROVIDER=sentence_transformers` (with `pip install -e ".[embeddings]"`) uses a real
@@ -125,7 +127,14 @@ The constraint eliminates outdated sources from the recommendation set at the co
 on questions whose correct answer is "this does not exist in your version" — which is why the
 excluded list exists: the supporting document is still found, labelled *not applicable*, and
 kept out of the recommendations. The remaining applicability miss is the not-in-KB question;
-retrieval always returns *something*, and deciding to abstain is Phase 3's job. Full
+retrieval always returns *something*; abstaining is the answer engine's job.
+
+Answer-level run (extractive mode, no LLM, same dataset): correct abstention 1.00, applicability
+accuracy 1.00, outdated recommendation 0.00, citation validity 1.00, supported answers 1.00.
+**Read this as a smoke test, not a result**: the abstention and verdict rules were adjusted
+while looking at these same 10 questions, so the figures are tuned-on-dev by construction. A
+held-out and a real-documentation dataset are required before any claim
+(see [docs/answer-engine.md](docs/answer-engine.md)). Full
 definitions in [docs/evaluation-methodology.md](docs/evaluation-methodology.md). The dashboard
 only shows metrics from recorded `EvaluationRun` rows; it never displays illustrative numbers.
 

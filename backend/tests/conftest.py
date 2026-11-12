@@ -49,7 +49,7 @@ def db(engine):
         conn.execute(
             text(
                 "TRUNCATE products, product_releases, documentation_sources, documents, document_revisions, "
-                "document_chunks, features, feature_changes, ingestion_jobs, evaluation_datasets, evaluation_runs CASCADE"
+                "document_chunks, features, feature_changes, ingestion_jobs, evaluation_datasets, evaluation_runs, query_logs CASCADE"
             )
         )
     Session = sessionmaker(bind=engine, expire_on_commit=False)

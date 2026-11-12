@@ -60,9 +60,19 @@ export default async function DashboardPage() {
           )}
         </div>
         <div className="card">
+          <h2 className="mb-3 font-medium">Recent queries</h2>
+          {d.recent_queries.length === 0 ? <p className="muted">No questions asked yet.</p> : (
+            <ul className="space-y-2 text-sm">{d.recent_queries.map(q => (
+              <li key={q.id} className="flex items-start justify-between gap-3 border-t border-zinc-100 pt-2 first:border-0 first:pt-0 dark:border-zinc-800">
+                <div><div>{q.question}</div><div className="muted text-xs">{q.target_version ?? "no version"} · {q.mode} · {q.generation_mode} · {q.latency_ms} ms</div></div>
+                <Badge value={q.abstained ? "abstained" : q.applicability_status} />
+              </li>))}</ul>
+          )}
+        </div>
+        <div className="card">
           <h2 className="mb-3 font-medium">Evaluation runs</h2>
-          {d.evaluation_runs.length === 0 ? <p className="muted">No benchmark has been executed. The Evaluation Lab arrives in Phase 5; no numbers are shown until a run is recorded.</p> : (
-            <ul className="text-sm">{d.evaluation_runs.map(r => <li key={r.id}>{r.strategy} · {r.model_identifier ?? "no LLM"} · {JSON.stringify(r.metrics)}</li>)}</ul>
+          {d.evaluation_runs.length === 0 ? <p className="muted">No benchmark has been executed yet. Run one from the Evaluation Lab; no numbers are shown until a run is recorded.</p> : (
+            <ul className="text-sm">{d.evaluation_runs.map(r => <li key={r.id}><span className="font-mono text-xs">{r.strategy}</span> · {r.model_identifier ?? "no model"} · <span className="muted text-xs">{Object.entries(r.metrics).filter(([, v]) => typeof v === "number").slice(1, 5).map(([k, v]) => `${k}=${v}`).join(" ")}</span></li>)}</ul>
           )}
         </div>
       </section>

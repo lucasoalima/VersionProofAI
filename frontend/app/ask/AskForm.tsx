@@ -1,16 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/Badge";
-import { PUBLIC_API, type Evidence, type Product, type ProductDetail, type SearchResponse } from "@/lib/api";
+import { PUBLIC_API, type Answer, type Evidence, type Product, type ProductDetail } from "@/lib/api";
 
 export function AskForm({ products }: { products: Product[] }) {
   const [product, setProduct] = useState(products[0]?.slug ?? "");
   const [releases, setReleases] = useState<string[]>([]);
   const [version, setVersion] = useState("");
   const [mode, setMode] = useState("lexical");
-  const [enforce, setEnforce] = useState(true);
-  const [query, setQuery] = useState("");
-  const [res, setRes] = useState<SearchResponse | null>(null);
+    const [query, setQuery] = useState("");
+  const [res, setRes] = useState<Answer | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -27,13 +26,13 @@ export function AskForm({ products }: { products: Product[] }) {
     e.preventDefault();
     setBusy(true); setError(null); setRes(null);
     try {
-      const r = await fetch(`${PUBLIC_API}/api/search`, {
+      const r = await fetch(`${PUBLIC_API}/api/ask`, {
         method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ query, product, target_version: version || null, mode, enforce_version: enforce, top_k: 10 }),
+        body: JSON.stringify({ question: query, product, target_version: version || null, mode, top_k: 5 }),
       });
       const body = await r.json();
       if (!r.ok) throw new Error(body.detail ?? r.statusText);
-      setRes(body as SearchResponse);
+      setRes(body as Answer);
     } catch (err) { setError(String((err as Error).message)); } finally { setBusy(false); }
   }
 
@@ -56,32 +55,37 @@ export function AskForm({ products }: { products: Product[] }) {
               <option value="semantic">semantic (pgvector cosine)</option>
               <option value="hybrid">hybrid (RRF)</option>
             </select></label>
-          <label className="flex items-end gap-2 pb-2 text-sm"><input type="checkbox" checked={enforce} onChange={e => setEnforce(e.target.checked)} /> Enforce version as constraint</label>
+          <div className="muted flex items-end pb-2 text-xs">Version is always enforced as a constraint here. Unconstrained retrieval is available in the Evaluation Lab as the traditional-RAG baseline.</div>
         </div>
         <textarea className="w-full rounded-md border border-zinc-300 bg-transparent p-2 font-mono text-sm dark:border-zinc-700" rows={3} placeholder="Is this workaround still required in release X?" value={query} onChange={e => setQuery(e.target.value)} />
-        <button disabled={busy || query.length < 2 || !product} className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-40 dark:bg-zinc-100 dark:text-zinc-900">{busy ? "Retrieving…" : "Retrieve evidence"}</button>
+        <button disabled={busy || query.length < 2 || !product} className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-40 dark:bg-zinc-100 dark:text-zinc-900">{busy ? "Answering…" : "Ask"}</button>
       </form>
 
       {error && <div className="card border-rose-300 text-sm">{error}</div>}
 
       {res && (
         <section className="space-y-3">
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            <span className="muted">{res.results.length} result(s) · {res.retrieval_latency_ms} ms · {res.mode}</span>
-            {res.target_version && <Badge value={`target ${res.target_version}`} />}
-            {!res.enforce_version && <Badge value="version not enforced" />}
-          </div>
-          {res.notices.map(n => <div key={n} className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">{n}</div>)}
-          <div className="card border-zinc-300 text-sm">
-            <strong>Answer generation is not configured.</strong> Phase 3 adds a grounded answer engine with abstention. Until then, inspect the evidence directly — the applicability badge tells you whether each source is verified for the target version.
-          </div>
-          {res.results.map(r => <EvidenceCard key={r.chunk_id} e={r} />)}
-          {res.results.length === 0 && <p className="muted">No matching evidence. Nothing in the knowledge base satisfies the query under the current constraints.</p>}
+          <article className={`card ${res.abstained ? "border-amber-300 dark:border-amber-800" : ""}`}>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <Badge value={res.abstained ? "abstained" : res.applicability_status} />
+              {res.target_version && <Badge value={`target ${res.target_version}`} />}
+              <Badge value={res.generation_mode === "llm" ? `llm ${res.model_identifier}` : res.generation_mode} />
+              <span className="muted text-xs">{String(res.diagnostics.end_to_end_latency_ms)} ms · coverage {String(res.diagnostics.coverage_results)}</span>
+            </div>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed">{res.answer}</p>
+            {res.generation_mode !== "llm" && <p className="muted mt-2 text-xs">Extractive answer: text quoted from the best-covering source, no language model involved.</p>}
+            {res.citations.length > 0 && <p className="muted mt-2 text-xs">Cited: {res.evidence.filter(e => res.citations.includes(e.chunk_id)).map(e => `#${e.rank} ${e.title}`).join(" · ")}</p>}
+          </article>
+          {res.warnings.map(n => <div key={n} className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">{n}</div>)}
+          {res.conflicts.map(c => <div key={c.chunk_ids.join()} className="rounded-md border border-rose-300 bg-rose-50 p-3 text-sm text-rose-900 dark:border-rose-800 dark:bg-rose-950 dark:text-rose-200"><b>Conflict:</b> “{c.titles[0]}” states {c.differing_values[0].join(", ")} · “{c.titles[1]}” states {c.differing_values[1].join(", ")}</div>)}
+          {res.unresolved_questions.length > 0 && <div className="card text-sm"><b>Unresolved:</b><ul className="list-disc pl-5">{res.unresolved_questions.map(q => <li key={q}>{q}</li>)}</ul></div>}
+          <h3 className="pt-2 text-sm font-medium">Evidence ({res.evidence.length})</h3>
+          {res.evidence.map(r => <EvidenceCard key={r.chunk_id} e={r} cited={res.citations.includes(r.chunk_id)} />)}
           {res.excluded.length > 0 && (
             <div className="space-y-2 border-t border-dashed border-rose-300 pt-4 dark:border-rose-800">
               <h3 className="text-sm font-medium">Relevant but not applicable to {res.target_version}</h3>
               <p className="muted text-xs">These sources match the question but are verified for other releases. They explain what exists elsewhere; they are never recommendations for the target version.</p>
-              {res.excluded.map(r => <EvidenceCard key={r.chunk_id} e={r} />)}
+              {res.excluded.map(r => <EvidenceCard key={r.chunk_id} e={r} cited={false} />)}
             </div>
           )}
         </section>
@@ -90,16 +94,17 @@ export function AskForm({ products }: { products: Product[] }) {
   );
 }
 
-function EvidenceCard({ e }: { e: Evidence }) {
+function EvidenceCard({ e, cited }: { e: Evidence; cited: boolean }) {
   const [open, setOpen] = useState(false);
   return (
     <article className="card">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <div className="font-medium">#{e.rank} {e.title}</div>
-          <div className="muted text-xs">{e.heading ? `§ ${e.heading} · ` : ""}score {e.score.toFixed(3)} · {e.strategy} · query {String(e.diagnostics.query_mode)}</div>
+          <div className="muted text-xs">{e.heading ? `§ ${e.heading} · ` : ""}score {e.score.toFixed(3)} · {e.strategy}</div>
         </div>
         <div className="flex flex-wrap gap-1">
+          {cited && <Badge value="cited" />}
           <Badge value={e.applicability_status} />
           <Badge value={e.applicability_provenance} />
           <Badge value={e.trust_level} />

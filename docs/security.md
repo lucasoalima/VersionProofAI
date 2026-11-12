@@ -12,12 +12,14 @@
 - **Fail loudly.** `/api/health` returns 503 without a database; semantic mode returns 501 without
   an embedding provider.
 
+- **Prompt injection.** Constant system prompt; retrieved text only in delimited, sanitised
+  user-turn blocks; citations validated server-side; verdict and abstention never depend on model
+  output (docs/answer-engine.md). Tested with a poisoned-document fixture.
+- **Query log** stores the question and outcome only, never retrieved content or keys.
+
 ## Planned
 - **Remote URLs (Phase 6):** scheme/host allowlist, DNS resolution check against private ranges,
   redirect limits, size/time limits, robots and terms review per source.
-- **Prompt injection (Phase 3):** retrieved text is data; it is placed in a delimited user-turn
-  block, never in the system prompt; the model is instructed to cite only supplied chunk ids and
-  citations are validated against the database before display.
 - **Output sanitisation:** answers rendered as text, never as HTML.
 - **Admin auth:** ingestion and evaluation endpoints behind an API key/role before any
   non-local deployment.

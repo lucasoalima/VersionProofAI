@@ -2,7 +2,7 @@ import { getDatasets, getRuns } from "@/lib/api";
 import { RunForm } from "./RunForm";
 
 export const dynamic = "force-dynamic";
-const cols: [string, string][] = [["recall_at_k", "Recall@k"], ["mrr", "MRR"], ["ndcg_at_k", "nDCG@k"], ["outdated_surfaced_rate", "Outdated surfaced"], ["applicability_accuracy", "Applicability acc."], ["retrieval_latency_ms_p50", "p50 ms"], ["errors", "Errors"]];
+const cols: [string, string][] = [["recall_at_k", "Recall@k"], ["mrr", "MRR"], ["ndcg_at_k", "nDCG@k"], ["outdated_surfaced_rate", "Outdated surfaced"], ["applicability_accuracy", "Applicability acc."], ["retrieval_latency_ms_p50", "p50 ms"], ["correct_abstention_rate", "Abstention ok"], ["outdated_recommendation_rate", "Outdated cited"], ["citation_validity_rate", "Citation valid"]];
 
 export default async function EvaluationPage() {
   const [datasets, runs] = await Promise.all([getDatasets(), getRuns()]);
@@ -10,7 +10,7 @@ export default async function EvaluationPage() {
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">Evaluation Lab</h1>
-        <p className="muted">Retrieval-only benchmarks (no LLM). Every row is a stored run with its configuration; nothing here is illustrative.</p>
+        <p className="muted">Retrieval and answer benchmarks. Every row is a stored run with its configuration; nothing here is illustrative.</p>
       </header>
       <RunForm datasets={datasets ?? []} />
       <section className="card overflow-x-auto">

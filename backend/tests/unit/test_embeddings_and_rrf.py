@@ -18,10 +18,24 @@ def test_hashed_provider_is_deterministic_normalised_and_overlap_sensitive():
 
 
 def _ev(cid: str, rank: int, strategy: str) -> Evidence:
-    return Evidence(chunk_id=cid, document_id="d", revision_id="r", title=cid, source_url=None, heading=None,
-                    excerpt="", score=1.0, rank=rank, effective_from=None, effective_to=None,
-                    applicability_status=ApplicabilityStatus.unknown, applicability_provenance="unknown",
-                    published_at=None, trust_level="synthetic", strategy=strategy)
+    return Evidence(
+        chunk_id=cid,
+        document_id="d",
+        revision_id="r",
+        title=cid,
+        source_url=None,
+        heading=None,
+        excerpt="",
+        score=1.0,
+        rank=rank,
+        effective_from=None,
+        effective_to=None,
+        applicability_status=ApplicabilityStatus.unknown,
+        applicability_provenance="unknown",
+        published_at=None,
+        trust_level="synthetic",
+        strategy=strategy,
+    )
 
 
 def test_rrf_rewards_agreement_and_is_deterministic():
@@ -31,7 +45,9 @@ def test_rrf_rewards_agreement_and_is_deterministic():
     order = [e.chunk_id for e, _, _ in fused]
     assert order[0] == "B" or order[0] == "A"  # both appear in both lists
     assert set(order[:2]) == {"A", "B"}
-    assert order.index("C") > order.index("D") or order.index("D") > order.index("C")  # singletons last
+    assert order.index("C") > order.index("D") or order.index("D") > order.index(
+        "C"
+    )  # singletons last
     assert order[2:] == sorted(order[2:], key=lambda c: -(1 / (60 + {"C": 3, "D": 2}[c])))
     _, score_b, ranks_b = next(t for t in fused if t[0].chunk_id == "B")
     assert math.isclose(score_b, 1 / 61 + 1 / 62) and ranks_b == {"lexical": 2, "semantic": 1}
