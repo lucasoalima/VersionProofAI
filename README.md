@@ -8,14 +8,13 @@ hybrid retrieval, explicit version-applicability metadata, document revision tra
 reproducible evaluation lab that measures whether version-aware retrieval actually reduces
 outdated recommendations compared with conventional RAG.
 
-> **Status: Phase 3 (Answer Generation) complete.** Ingestion, versioned knowledge base,
+> **Status: Phase 4 (Version Intelligence) complete.** Ingestion, versioned knowledge base,
 > lexical + semantic + hybrid retrieval with version constraints and an exclusion list, a
 > grounded answer engine (abstention, conflict surfacing, validated citations; LLM optional),
-> retrieval and answer benchmarks with stored runs, dashboard, Evaluation Lab, tests and CI.
-> Version comparison (Phase 4), the LLM baselines A/B and Ragas (Phase 5) and real Salesforce
-> documentation (Phase 6) are not implemented yet. The
-> UI says so explicitly rather than showing placeholder numbers. See
-> [docs/limitations.md](docs/limitations.md).
+> deterministic version comparison with a release timeline, retrieval and answer benchmarks,
+> dashboard, tests and CI. The LLM baselines A/B, Ragas and a held-out dataset (Phase 5) and
+> real Salesforce documentation (Phase 6) are not implemented yet. The UI says so explicitly
+> rather than showing placeholder numbers. See [docs/limitations.md](docs/limitations.md).
 
 ## 1. The problem
 

@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.comparison.engine import ComparisonEngine
 from app.core.config import settings
 from app.db.session import get_db
 from app.embeddings.indexer import build_embeddings
@@ -384,3 +385,28 @@ def create_answer_run(req: RetrievalBenchmarkRequest, db: Session = Depends(get_
     return _run_out(
         run_answer_benchmark(db, dataset, AnswerEngine(db, retriever, llm), top_k=req.top_k)
     )
+
+
+@router.get("/compare")
+def compare(
+    product: str,
+    earlier: str,
+    later: str,
+    topic: str | None = Query(None, max_length=200),
+    db: Session = Depends(get_db),
+):
+    """Deterministic documentation comparison between two releases (no LLM)."""
+    try:
+        return ComparisonEngine(db).compare(product, earlier, later, topic)
+    except LookupError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except (VersionOrderingError, ValueError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+
+@router.get("/products/{slug}/timeline")
+def timeline(slug: str, db: Session = Depends(get_db)):
+    try:
+        return ComparisonEngine(db).timeline(slug)
+    except LookupError as exc:
+        raise HTTPException(404, str(exc)) from exc

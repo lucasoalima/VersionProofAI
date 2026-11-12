@@ -14,6 +14,7 @@
 - `backend/app/retrieval`  `Retriever` protocol; `base.py` shared SQL; lexical/semantic/hybrid; `service.py` exclusion list
 - `backend/app/embeddings` `EmbeddingProvider`; `hashed` (tests) and `sentence_transformers`
 - `backend/app/evaluation` deterministic metrics; retrieval and answer benchmark runners
+- `backend/app/comparison` `ComparisonEngine` (compare + timeline), statement extraction
 - `backend/app/generation` `LLMProvider`; `AnswerEngine` (see docs/answer-engine.md); prompt builder
 - `backend/app/chunking`   `Chunker` protocol; `HeadingChunker`
 - `backend/app/api`        FastAPI routes; `capabilities()` reflects configured providers
@@ -35,7 +36,8 @@ Implement `DocumentLoader` in `app/ingestion/loaders.py`. Do not touch the pipel
 Remote URLs (Phase 6) must go through an allowlist and SSRF guard; see docs/security.md.
 
 ## Phase status
-Phase 3 done (answer engine, abstention, conflicts, citation validation, answer benchmark).
-Next: Phase 4 — version comparison engine over `DocumentRevision`/`FeatureChange` (deterministic diff
-first), change classification with provenance, timeline view. Then Phase 5: baselines A/B with
-generation, Ragas, held-out dataset.
+Phase 4 done (deterministic comparison engine, change classification with provenance, timeline).
+Next: Phase 5 — baseline A (LLM, no retrieval) and B (unconstrained retrieval + generation) through
+`run_answer_benchmark`, Ragas metrics behind an optional extra, a held-out question split (the
+answer-engine thresholds were tuned on the dev split), report exports, OpenTelemetry spans.
+Then Phase 6: real, permitted Salesforce documentation.

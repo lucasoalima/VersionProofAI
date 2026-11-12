@@ -11,8 +11,9 @@
 - Abstention/verdict thresholds were tuned on the 10-question dev set; no held-out validation.
 - Conflict detection covers numeric disagreement between similarly titled documents only.
 - Extractive answers quote the source; they do not synthesise across documents.
-- Version comparison, feature history, timelines (Phase 4). `Feature`/`FeatureChange` exist in
-  the schema but are unused.
+- Version comparison is pattern-based (English change verbs, sentence-local) and pairs documents
+  by title similarity; `Feature`/`FeatureChange` are not populated (events are computed on read).
+  Only current revisions are compared, not historical revisions of the same document.
 - LLM baselines (A and B with generation), Ragas metrics, citation validity, abstention rate
   (Phase 5). Retrieval-only benchmarks exist and have been run.
 - Real Salesforce documentation (Phase 6). Only the fictional Nimbus CRM corpus exists.
@@ -33,6 +34,6 @@
 - The constrained path issues two queries to build the excluded list; latency roughly doubles.
 
 ## Verified in this environment
-Phase 1–3 tests (74) were executed against PostgreSQL 16.x + pgvector 0.8.0 built from source;
+Phase 1–4 tests (82) were executed against PostgreSQL 16.x + pgvector 0.8.0 built from source;
 the Next.js build was executed with Node 22. Docker Compose and GitHub Actions configurations
 are provided but were not executed here.
