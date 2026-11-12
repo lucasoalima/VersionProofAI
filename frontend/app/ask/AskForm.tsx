@@ -53,8 +53,8 @@ export function AskForm({ products }: { products: Product[] }) {
           <label className="text-sm"><div className="muted mb-1">Retrieval mode</div>
             <select className="w-full rounded-md border border-zinc-300 bg-transparent p-2 dark:border-zinc-700" value={mode} onChange={e => setMode(e.target.value)}>
               <option value="lexical">lexical (PostgreSQL FTS)</option>
-              <option value="semantic">semantic (Phase 2)</option>
-              <option value="hybrid">hybrid RRF (Phase 2)</option>
+              <option value="semantic">semantic (pgvector cosine)</option>
+              <option value="hybrid">hybrid (RRF)</option>
             </select></label>
           <label className="flex items-end gap-2 pb-2 text-sm"><input type="checkbox" checked={enforce} onChange={e => setEnforce(e.target.checked)} /> Enforce version as constraint</label>
         </div>
@@ -77,6 +77,13 @@ export function AskForm({ products }: { products: Product[] }) {
           </div>
           {res.results.map(r => <EvidenceCard key={r.chunk_id} e={r} />)}
           {res.results.length === 0 && <p className="muted">No matching evidence. Nothing in the knowledge base satisfies the query under the current constraints.</p>}
+          {res.excluded.length > 0 && (
+            <div className="space-y-2 border-t border-dashed border-rose-300 pt-4 dark:border-rose-800">
+              <h3 className="text-sm font-medium">Relevant but not applicable to {res.target_version}</h3>
+              <p className="muted text-xs">These sources match the question but are verified for other releases. They explain what exists elsewhere; they are never recommendations for the target version.</p>
+              {res.excluded.map(r => <EvidenceCard key={r.chunk_id} e={r} />)}
+            </div>
+          )}
         </section>
       )}
     </div>

@@ -1,11 +1,15 @@
 # Limitations (honest list, updated per phase)
 
 ## Not implemented yet
-- Semantic and hybrid retrieval, reranking (Phase 2). The API returns 501 for these modes.
+- A real embedding model was not exercised in the development environment (no model download
+  possible); semantic/hybrid were validated with the deterministic `hashed-bow-v1` provider.
+- No cross-encoder reranker implementation yet (protocol only).
+- No approximate vector index (deliberate; see retrieval-design.md).
 - Answer generation, citations, abstention (Phase 3). The Ask page shows evidence only.
 - Version comparison, feature history, timelines (Phase 4). `Feature`/`FeatureChange` exist in
   the schema but are unused.
-- Evaluation runs, metrics, exports (Phase 5). The dataset is registered; nothing has been run.
+- LLM baselines (A and B with generation), Ragas metrics, citation validity, abstention rate
+  (Phase 5). Retrieval-only benchmarks exist and have been run.
 - Real Salesforce documentation (Phase 6). Only the fictional Nimbus CRM corpus exists.
 - Authentication on administrative endpoints.
 - Asynchronous/background ingestion.
@@ -19,8 +23,11 @@
 - The seasonal ordering assumes Winter < Spring < Summer within a label year and three releases
   per year; products with patch releases need the `explicit` scheme.
 - Only the current revision of each document is searchable.
+- Retrieval never returns an empty list for a nonsense question in semantic/hybrid mode
+  (cosine always ranks something); abstention requires a relevance threshold (Phase 3).
+- The constrained path issues two queries to build the excluded list; latency roughly doubles.
 
 ## Verified in this environment
-Phase 1 tests (46) were executed against PostgreSQL 16.x + pgvector 0.8.0 built from source;
+Phase 1–2 tests (59) were executed against PostgreSQL 16.x + pgvector 0.8.0 built from source;
 the Next.js build was executed with Node 22. Docker Compose and GitHub Actions configurations
 are provided but were not executed here.

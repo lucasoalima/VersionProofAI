@@ -10,7 +10,7 @@ configure_logging()
 app = FastAPI(
     title="VersionProof AI",
     version="0.1.0",
-    description="Version-aware documentation retrieval. Phase 1: ingestion + lexical retrieval.",
+    description="Version-aware documentation retrieval. Phase 2: ingestion + lexical, semantic and hybrid (RRF) retrieval + retrieval benchmarks.",
 )
 app.add_middleware(
     CORSMiddleware,

@@ -8,11 +8,13 @@ hybrid retrieval, explicit version-applicability metadata, document revision tra
 reproducible evaluation lab that measures whether version-aware retrieval actually reduces
 outdated recommendations compared with conventional RAG.
 
-> **Status: Phase 1 (Foundation) complete.** Ingestion, versioned knowledge base, deterministic
-> lexical retrieval with version constraints, dashboard, tests and CI. Semantic/hybrid retrieval
-> (Phase 2), grounded answer generation (Phase 3), version comparison (Phase 4), the evaluation
-> lab (Phase 5) and real Salesforce documentation (Phase 6) are not implemented yet. The UI says
-> so explicitly rather than showing placeholder numbers. See [docs/limitations.md](docs/limitations.md).
+> **Status: Phase 2 (Retrieval) complete.** Ingestion, versioned knowledge base, lexical +
+> semantic (pgvector) + hybrid (RRF) retrieval with version constraints and an explicit
+> exclusion list, retrieval-only benchmarks with stored runs, dashboard, Evaluation Lab, tests
+> and CI. Grounded answer generation (Phase 3), version comparison (Phase 4), the LLM
+> baselines (Phase 5) and real Salesforce documentation (Phase 6) are not implemented yet. The
+> UI says so explicitly rather than showing placeholder numbers. See
+> [docs/limitations.md](docs/limitations.md).
 
 ## 1. The problem
 
@@ -35,12 +37,12 @@ holds, and a 2025 page can describe a feature that did not exist in the release 
 ```mermaid
 flowchart LR
   Q[Question + product + target version] --> L[Lexical FTS]
-  Q --> S[Semantic pgvector<br/>Phase 2]
-  L --> F[Reciprocal Rank Fusion<br/>Phase 2]
+  Q --> S[Semantic pgvector]
+  L --> F[Reciprocal Rank Fusion]
   S --> F
   F --> C{Applicability<br/>constraint}
   C -- verified & in range --> E[Evidence: applies]
-  C -- verified & out of range --> X[Excluded]
+  C -- verified & out of range --> X[Excluded list<br/>explains, never recommends]
   C -- unknown / inferred --> U[Evidence: flagged unknown/inferred]
   E --> A[Grounded answer + citations<br/>Phase 3]
   U --> A
@@ -96,15 +98,36 @@ Re-ingesting unchanged content creates no new revision; changed content creates 
 
 ## 6. Executing evaluation benchmarks
 
-Not yet available (Phase 5). The synthetic evaluation dataset
-(`data/evaluation/synthetic_v1.json`) is already registered by `scripts/seed.py`; the three
-baselines (no retrieval / traditional RAG / VersionProof) and the metrics are described in
-[docs/evaluation-methodology.md](docs/evaluation-methodology.md).
+Retrieval-only benchmarks (no LLM) run from the Evaluation Lab page, the API
+(`POST /api/evaluation/retrieval-runs`) or the CLI:
+
+```bash
+cd backend && python scripts/seed.py                       # registers data/evaluation/synthetic_v1.json
+EMBEDDING_PROVIDER=hashed python scripts/benchmark_retrieval.py   # lexical/semantic/hybrid × constrained/unconstrained
+```
+
+`EMBEDDING_PROVIDER=sentence_transformers` (with `pip install -e ".[embeddings]"`) uses a real
+model; `hashed` is a deterministic bag-of-words stand-in for offline tests and is labelled as
+such in every run. Every run stores its configuration, dataset version, model id, timestamps,
+aggregate metrics and per-question results; JSON and CSV exports are one click away.
 
 ## 7. Interpreting benchmark results
 
-See [docs/evaluation-methodology.md](docs/evaluation-methodology.md). The dashboard only shows
-metrics from recorded `EvaluationRun` rows; it never displays illustrative numbers.
+Measured on the synthetic corpus, hybrid retrieval, k=5, `hashed-bow-v1` embeddings
+(so the absolute numbers say nothing about a real embedding model — the *contrast* is the point):
+
+| | Recall@5 | nDCG@5 | Outdated source surfaced | Applicability accuracy |
+|---|---|---|---|---|
+| hybrid, no version constraint (traditional RAG) | 1.00 | 0.88 | **100 %** of outdated-trap questions | 0.70 |
+| hybrid, version constraint (VersionProof) | 0.83 | 0.85 | **0 %** | 0.90 |
+
+The constraint eliminates outdated sources from the recommendation set at the cost of recall
+on questions whose correct answer is "this does not exist in your version" — which is why the
+excluded list exists: the supporting document is still found, labelled *not applicable*, and
+kept out of the recommendations. The remaining applicability miss is the not-in-KB question;
+retrieval always returns *something*, and deciding to abstain is Phase 3's job. Full
+definitions in [docs/evaluation-methodology.md](docs/evaluation-methodology.md). The dashboard
+only shows metrics from recorded `EvaluationRun` rows; it never displays illustrative numbers.
 
 ## 8. What the system cannot reliably determine
 

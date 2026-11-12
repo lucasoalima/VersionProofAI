@@ -44,9 +44,36 @@ Every result returns: title, source URL, applicability range (labels), applicabi
 provenance, chunk id, revision id, score, rank, trust level, publication date, strategy name and
 diagnostics. This contract is shared by all retrievers so Phase 2/3 can fuse and cite uniformly.
 
-## Phase 2 (planned)
-- `EmbeddingProvider` protocol; default `sentence-transformers/all-MiniLM-L6-v2` (384-d) to match
-  the `vector(384)` column; exact `<=>` cosine search first, HNSW only after measurement.
-- Hybrid: Reciprocal Rank Fusion `score = Σ 1/(k + rank_i)`, k=60, over the two ranked lists.
-- Optional cross-encoder reranking behind a `Reranker` protocol.
-- Version constraint applied identically to all strategies.
+## Phase 2: semantic and hybrid retrieval
+
+### Embeddings
+`EmbeddingProvider` protocol (`embed(texts) -> vectors`, `model_id`, `dimensions`). Providers:
+`sentence_transformers` (default model `all-MiniLM-L6-v2`, 384-d, normalised) and `hashed`
+(`hashed-bow-v1`: a deterministic hashed bag-of-words + character 3-grams used for tests and
+offline work; it measures lexical overlap, not meaning, and is labelled as such on every run).
+`build_embeddings()` is idempotent per `model_id`; chunks embedded by a different model are
+re-embedded, and `SemanticRetriever` only considers chunks whose `embedding_model` matches the
+active provider, so two vector spaces are never mixed.
+
+### Semantic search
+Exact cosine nearest-neighbour (`embedding <=> query`) with a sequential scan. No HNSW/IVFFlat
+index yet: on the synthetic corpus p50 latency is single-digit milliseconds, and an approximate
+index would trade recall for nothing. The decision is revisited with measurements on a real
+corpus.
+
+### Hybrid search
+Reciprocal Rank Fusion: `score(d) = Σ_i 1/(60 + rank_i(d))` over the lexical and semantic
+lists, each asked for `3 × top_k` candidates. Diagnostics carry `component_ranks` per result.
+An optional `Reranker` protocol re-orders the fused list and never adds candidates.
+
+### Shared constraint
+All three strategies build their SQL through `retrieval/base.py`, so category, date, trust and
+version filters are applied identically. Fusion therefore cannot resurrect an excluded revision.
+
+### The exclusion list
+Excluding verified-not-applicable revisions is right for recommendations and wrong for
+explanations: "can I use `@AsyncTrigger` on Winter '25?" needs the Spring '25 document to say
+*no, introduced later*. `retrieval/service.py` therefore returns `results` (constrained) plus
+`excluded` (up to 3 relevant hits verified NOT applicable to the target), computed by a second,
+unconstrained pass. The two lists never merge; the API and the evaluation runner carry both.
+Cost: the constrained path runs two queries (p50 roughly doubles on the synthetic corpus).

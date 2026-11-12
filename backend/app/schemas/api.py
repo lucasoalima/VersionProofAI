@@ -122,6 +122,8 @@ class SearchResponse(BaseModel):
     mode: str
     enforce_version: bool
     results: list[EvidenceOut]
+    # Relevant but verified-not-applicable hits, kept separate so they can explain, never recommend.
+    excluded: list[EvidenceOut]
     retrieval_latency_ms: float
     notices: list[str]
 

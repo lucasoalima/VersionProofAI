@@ -40,8 +40,9 @@ flowchart TB
 | Chunking | `chunking.interfaces.Chunker` | `HeadingChunker` (deterministic, size-capped) |
 | Version ordering | `versioning.ordering.VersionOrdering` | `semver`, `salesforce_seasonal`, `explicit` |
 | Applicability | `versioning.applicability.resolve` | verified / inferred / unknown |
-| Retrieval | `retrieval.interfaces.Retriever` | `LexicalRetriever` (PostgreSQL FTS) |
-| Embeddings | *(Phase 2)* provider protocol | `EMBEDDING_PROVIDER=none` |
+| Retrieval | `retrieval.interfaces.Retriever` | `LexicalRetriever`, `SemanticRetriever`, `HybridRetriever` (RRF) + exclusion list |
+| Embeddings | `embeddings.interfaces.EmbeddingProvider` | `hashed` (offline), `sentence_transformers` |
+| Evaluation | `evaluation.metrics` + `retrieval_runner` | retrieval-only runs stored as `EvaluationRun` |
 | Generation | *(Phase 3)* provider protocol | `LLM_PROVIDER=none` |
 
 ## Request flow: `/api/search`

@@ -11,7 +11,9 @@
 ## Layout
 - `backend/app/ingestion`  loaders → `RawDocument` → `IngestionPipeline` (revision dedup)
 - `backend/app/versioning` `VersionOrdering` strategies, `applicability.resolve`
-- `backend/app/retrieval`  `Retriever` protocol; `LexicalRetriever`; `tokens.py`
+- `backend/app/retrieval`  `Retriever` protocol; `base.py` shared SQL; lexical/semantic/hybrid; `service.py` exclusion list
+- `backend/app/embeddings` `EmbeddingProvider`; `hashed` (tests) and `sentence_transformers`
+- `backend/app/evaluation` deterministic metrics + retrieval benchmark runner
 - `backend/app/chunking`   `Chunker` protocol; `HeadingChunker`
 - `backend/app/api`        FastAPI routes; `capabilities()` reflects configured providers
 - `data/synthetic`         fixtures; `data/evaluation` datasets
@@ -32,4 +34,6 @@ Implement `DocumentLoader` in `app/ingestion/loaders.py`. Do not touch the pipel
 Remote URLs (Phase 6) must go through an allowlist and SSRF guard; see docs/security.md.
 
 ## Phase status
-Phase 1 done. Next: Phase 2 (embedding provider interface, pgvector search, RRF hybrid).
+Phase 2 done (semantic + hybrid + retrieval benchmarks + exclusion list). Next: Phase 3 — `LLMProvider`
+protocol, grounded answer engine with structured response, citation validation against chunk ids,
+abstention (relevance threshold + evidence sufficiency), conflict surfacing; must stay optional.

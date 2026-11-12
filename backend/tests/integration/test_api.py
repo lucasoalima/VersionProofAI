@@ -70,3 +70,19 @@ def test_search_unknown_product_and_version(client):
         ).status_code
         == 422
     )
+
+
+def test_semantic_and_hybrid_via_api_with_hashed_provider(client, monkeypatch):
+    from app.core.config import settings
+
+    client.post("/api/ingestion/local", json={"path": "synthetic"})
+    monkeypatch.setattr(settings, "embedding_provider", "hashed")
+    b = client.post("/api/embeddings/build").json()
+    assert b["model_id"] == "hashed-bow-v1" and b["embedded"] > 0
+    for mode in ("semantic", "hybrid"):
+        r = client.post("/api/search", json={"query": "NIMBUS_LIMIT_EXCEEDED_0427", "product": "nimbus-crm", "target_version": "Winter '25", "mode": mode})
+        assert r.status_code == 200, r.text
+        assert r.json()["results"][0]["strategy"] == mode
+    ds = client.get("/api/evaluation/datasets").json()
+    assert ds == []  # seed script not run inside tests
+    assert client.get("/api/health").json()["capabilities"]["hybrid_retrieval"] is True
