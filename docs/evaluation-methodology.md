@@ -196,3 +196,12 @@ mentions `agent test run` was taken as evidence that `agent test run-eval` exist
   release notes, and is a heuristic, not verified applicability.
 - C's p50 latency on this corpus is about 4x B's (51 ms vs 13 ms): exclusion pass plus per-term
   document-frequency queries. Not optimised.
+
+### Retrieval mode on the real set (measured 2026-11-13)
+The tables above use hybrid retrieval. With **lexical retrieval only**, C still recommends an
+outdated source on 1 of 7 version traps (0.14; B: 0.29) and its supported-answer rate drops to
+0.78: for "is `org login device` still available?" on 2.121.7 the removal note is not among the
+top-5 lexical results, so the engine answers from the earlier deprecation note. The constraint
+cannot help when the right document is never retrieved. Hybrid is therefore the default in the UI
+and in Docker (`EMBEDDING_PROVIDER=hashed`). This was found while taking README screenshots, not
+by the benchmark defaults, which is itself a lesson: every reported configuration should be run.

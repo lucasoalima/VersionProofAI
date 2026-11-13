@@ -30,6 +30,9 @@
 - Authentication on administrative endpoints.
 - Asynchronous/background ingestion.
 
+- Lexical-only retrieval misses the correct release note for at least one real question and then
+  answers from an outdated one (see evaluation-methodology.md). Use hybrid.
+
 ## Inherent to the approach
 - Applicability is only as good as the metadata. Documents without verified release ranges are
   reported `unknown`; the system cannot repair missing metadata.
@@ -45,5 +48,6 @@
 
 ## Verified in this environment
 Phase 1–6 tests (102) were executed against PostgreSQL 16.x + pgvector 0.8.0 built from source;
-the Next.js build was executed with Node 22. Docker Compose and GitHub Actions configurations
-are provided but were not executed here.
+the Next.js build was executed with Node 22. GitHub Actions and Docker Compose have since been
+run successfully by the repository owner. The UI was exercised with a headless browser to
+produce the README screenshots.

@@ -5,7 +5,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: versionproof
-    ports: ["5432:5432"]
+    ports: ["5433:5432"]  # host port 5433 avoids clashing with a local PostgreSQL
     volumes: ["pgdata:/var/lib/postgresql/data"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -17,7 +17,9 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/versionproof
       INGESTION_ROOT: /data
-      EMBEDDING_PROVIDER: none
+      # 'hashed' is a dependency-free bag-of-words embedding so semantic/hybrid work out of the box.
+      # Use sentence_transformers for a real model (see README).
+      EMBEDDING_PROVIDER: hashed
       LLM_PROVIDER: none
     volumes: ["./data:/data:ro"]
     ports: ["8000:8000"]

@@ -46,7 +46,7 @@ export default async function DashboardPage() {
               <li key={k} className="flex justify-between"><span>{k.replace(/_/g, " ")}</span><Badge value={v ? "enabled" : "not configured"} /></li>
             ))}
           </ul>
-          <p className="muted mt-3 text-xs">Semantic/hybrid retrieval and answer generation require EMBEDDING_PROVIDER / LLM_PROVIDER. Phase 1 runs entirely without them.</p>
+          <p className="muted mt-3 text-xs">Semantic and hybrid retrieval need EMBEDDING_PROVIDER; LLM-written answers need LLM_PROVIDER. Without an LLM, answers are extractive.</p>
         </div>
         <div className="card">
           <h2 className="mb-3 font-medium">Recent ingestion jobs</h2>

@@ -7,7 +7,7 @@ export function AskForm({ products }: { products: Product[] }) {
   const [product, setProduct] = useState(products[0]?.slug ?? "");
   const [releases, setReleases] = useState<string[]>([]);
   const [version, setVersion] = useState("");
-  const [mode, setMode] = useState("lexical");
+  const [mode, setMode] = useState("hybrid");
     const [query, setQuery] = useState("");
   const [res, setRes] = useState<Answer | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -51,9 +51,9 @@ export function AskForm({ products }: { products: Product[] }) {
             </select></label>
           <label className="text-sm"><div className="muted mb-1">Retrieval mode</div>
             <select className="w-full rounded-md border border-zinc-300 bg-transparent p-2 dark:border-zinc-700" value={mode} onChange={e => setMode(e.target.value)}>
+              <option value="hybrid">hybrid (RRF, recommended)</option>
               <option value="lexical">lexical (PostgreSQL FTS)</option>
               <option value="semantic">semantic (pgvector cosine)</option>
-              <option value="hybrid">hybrid (RRF)</option>
             </select></label>
           <div className="muted flex items-end pb-2 text-xs">Version is always enforced as a constraint here. Unconstrained retrieval is available in the Evaluation Lab as the traditional-RAG baseline.</div>
         </div>
@@ -73,7 +73,7 @@ export function AskForm({ products }: { products: Product[] }) {
               <span className="muted text-xs">{String(res.diagnostics.end_to_end_latency_ms)} ms · coverage {String(res.diagnostics.coverage_results)}</span>
             </div>
             <p className="whitespace-pre-wrap text-sm leading-relaxed">{res.answer}</p>
-            {res.generation_mode !== "llm" && <p className="muted mt-2 text-xs">Extractive answer: text quoted from the best-covering source, no language model involved.</p>}
+            {res.generation_mode === "extractive" && <p className="muted mt-2 text-xs">Extractive answer: text quoted from the best-covering source, no language model involved.</p>}
             {res.citations.length > 0 && <p className="muted mt-2 text-xs">Cited: {res.evidence.filter(e => res.citations.includes(e.chunk_id)).map(e => `#${e.rank} ${e.title}`).join(" · ")}</p>}
           </article>
           {res.warnings.map(n => <div key={n} className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">{n}</div>)}
