@@ -134,4 +134,16 @@ class PlainTextLoader:
         return [_build(meta, path.read_text(encoding="utf-8"), {"source_type": "text"}, "text")]
 
 
-DEFAULT_LOADERS = [JsonFixtureLoader(), MarkdownLoader(), PlainTextLoader()]
+def default_loaders() -> list:
+    from app.ingestion.cli_release_notes import SalesforceCliReleaseNotesLoader
+
+    # Source-specific loaders come first: the first loader that supports a path wins.
+    return [
+        SalesforceCliReleaseNotesLoader(),
+        JsonFixtureLoader(),
+        MarkdownLoader(),
+        PlainTextLoader(),
+    ]
+
+
+DEFAULT_LOADERS = default_loaders()

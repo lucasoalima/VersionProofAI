@@ -10,7 +10,7 @@ from __future__ import annotations
 from sqlalchemy.orm import Session
 
 from app.embeddings.interfaces import EmbeddingProvider
-from app.models import DocumentChunk
+from app.models import Document, DocumentChunk
 from app.retrieval.base import base_statement, load_product, row_to_evidence, target_sequence
 from app.retrieval.interfaces import Evidence, RetrievalFilters
 
@@ -32,7 +32,7 @@ class SemanticRetriever:
             base_statement(similarity, product, filters, target_seq)
             .where(DocumentChunk.embedding.is_not(None))
             .where(DocumentChunk.embedding_model == self.provider.model_id)
-            .order_by(distance)
+            .order_by(distance, Document.title, DocumentChunk.id)  # deterministic tie-break
             .limit(top_k)
         )
         rows = list(self.db.execute(stmt))

@@ -1,0 +1,8 @@
+{
+  "url": "https://raw.githubusercontent.com/forcedotcom/cli/main/releasenotes/README.md",
+  "fetched_at": "2026-11-12T23:33:55+00:00",
+  "sha256": "3b97a85fd865fc17409b61a429e1b79f916439f14b0aae91920e3253ea4b2d38",
+  "bytes": 349110,
+  "license": "Apache-2.0",
+  "note": "Salesforce CLI release notes (forcedotcom/cli). The CLI itself fetches them from this path."
+}

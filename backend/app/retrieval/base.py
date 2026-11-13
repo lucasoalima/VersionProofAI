@@ -125,5 +125,10 @@ def row_to_evidence(
         published_at=rev.published_at.isoformat() if rev.published_at else None,
         trust_level=row.trust_level.value,
         strategy=strategy,
-        diagnostics={**diagnostics, "revision_number": rev.revision_number},
+        diagnostics={
+            **diagnostics,
+            "revision_number": rev.revision_number,
+            "content_format": rev.content_format,
+            "effective_from_sequence": row.from_seq,
+        },
     )

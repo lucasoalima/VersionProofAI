@@ -20,7 +20,13 @@
   Only current revisions are compared, not historical revisions of the same document.
 - LLM baselines (A and B with generation), Ragas metrics, citation validity, abstention rate
   (Phase 5). Retrieval-only benchmarks exist and have been run.
-- Real Salesforce documentation (Phase 6). Only the fictional Nimbus CRM corpus exists.
+- Real documentation is limited to one source (Salesforce CLI release notes). Platform release
+  notes and product docs are not ingested (website terms; see docs/sources.md).
+- No real held-out question set: the 11 real questions became a dev set after the first run.
+- Release notes are deltas: applicability ranges are open-ended and supersession is approximated by
+  "most recent applicable release first", a heuristic.
+- The engine has corpus-shape rules (changelog handling, ubiquitous-term threshold of 25% with a
+  100-chunk minimum) chosen by judgement, not learned or validated broadly.
 - Authentication on administrative endpoints.
 - Asynchronous/background ingestion.
 
@@ -38,6 +44,6 @@
 - The constrained path issues two queries to build the excluded list; latency roughly doubles.
 
 ## Verified in this environment
-Phase 1–5 tests (86) were executed against PostgreSQL 16.x + pgvector 0.8.0 built from source;
+Phase 1–6 tests (102) were executed against PostgreSQL 16.x + pgvector 0.8.0 built from source;
 the Next.js build was executed with Node 22. Docker Compose and GitHub Actions configurations
 are provided but were not executed here.

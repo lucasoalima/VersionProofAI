@@ -1,0 +1,3752 @@
+# Salesforce CLI Release Notes
+
+Here are the new and changed features in recent updates of Salesforce CLI.
+
+We publish a new stable version of Salesforce CLI on Wednesdays. At the same time we also publish a release candidate that contains changes that will likely be in next week's stable release. We also publish nightly releases every night. Run `sf version` to display the version installed on your computer. 
+
+> **IMPORTANT**: Are you still using `sfdx` (v7)?  If so, we recommend that you move to `sf` (v2). It's easy: simply uninstall `sfdx` and then install `sf`. See the new [Move from `sfdx` (v7) to `sf` (v2)](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_move_to_sf_v2.htm) section of the Setup Guide for details, including how to update your continuous integration (CI) scripts. We've also updated the entire Setup Guide to assume you're using `sf` (v2) and the `sf`-style CLI commands and configuration. **`sfdx` (v7) will receive no updates.**
+
+If you installed Salesforce CLI using the installers or TAR files, run `sf update stable` to update to the latest available stable version. Run `sf update stable-rc` to update to this week's release candidate and `sf update nightly` to update to the most recent nightly. 
+
+If you installed Salesforce CLI using `npm`, run `npm install @salesforce/cli@latest --global` to install the latest stable version. Run `npm install @salesforce/cli@latest-rc --global` to install the release candidate and `npm install @salesforce/cli@nightly --global` to install the recent nightly.
+
+For all installation methods, see [this document](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_install_cli.htm#sfdx_setup_install_cli_olderversions) to install an old Salesforce CLI release.
+
+If you use [autocomplete](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_dev_cli_autocomplete.htm), run `sf autocomplete --refresh-cache` after you update Salesforce CLI to ensure that autocomplete works correctly on any new commands.
+
+Report and read about issues [here](https://github.com/forcedotcom/cli/issues). Join the discussion about new features we're considering [here](https://github.com/forcedotcom/cli/discussions). 
+
+Looking for the release notes for previous Salesforce CLI releases?  See [`sfdx` (v7)](./sfdx/README.md) and [`sf` (v1)](./sf/README.md).
+
+Additional documentation:
+
+* [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference.htm)
+* [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_intro.htm)
+* [Salesforce CLI Plugin Developer Guide](https://github.com/salesforcecli/cli/wiki/Quick-Introduction-to-Developing-sf-Plugins)
+* [Salesforce CLI Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
+
+## 2.159.7 (November 11, 2026) [stable-rc]
+
+These changes are in the Salesforce CLI release candidate. We plan to include these changes in next week's official release. This list isn't final and is subject to change.
+
+------------
+
+* FIX: Deploying a project now includes components in package directories reached through symbolic links. (GitHub Issue [#3653](https://github.com/forcedotcom/cli/issues/3653), source-tracking PR [897](https://github.com/forcedotcom/source-tracking/pull/897), plugin-deploy-retrieve PR [1697](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1697))
+
+## 2.158.7 (November 4, 2026) [stable]
+
+> These changes are in the latest stable Salesforce CLI release.
+
+* CHANGE: The deprecated `force user password generate`, `force user permset assign`, and `force user permsetlicense assign` commands now warn that they'll be removed on March 1, 2027. Use their `org` replacements. For example:
+
+    ```bash
+    sf org generate password --target-org my-scratch-org
+    sf org assign permset --name MyPermissionSet --target-org my-scratch-org
+    sf org assign permsetlicense --name MyPermissionSetLicense --target-org my-scratch-org
+    ```
+
+    (plugin-user PR [1557](https://github.com/salesforcecli/plugin-user/pull/1557))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * `DebugLevel`
+    * `NtfcnDefinition`
+
+## 2.157.8 (November 4, 2026)
+
+* FIX: Deploying a profile whose metadata is split across multiple source files now combines the files correctly, preserving entries such as layout assignments. (GitHub Issue [#3196](https://github.com/forcedotcom/cli/issues/3196), source-deploy-retrieve PR [1854](https://github.com/forcedotcom/source-deploy-retrieve/pull/1854))
+
+* FIX: Retrieving custom fields with a namespace wildcard such as `CustomField:npsp__*` now includes matching fields on standard objects. (GitHub Issue [#3052](https://github.com/forcedotcom/cli/issues/3052), source-deploy-retrieve PR [1852](https://github.com/forcedotcom/source-deploy-retrieve/pull/1852))
+
+* FIX: `sf package version create` now respects the project's `org-capitalize-record-types` configuration and no longer displays the default warning when the setting is explicitly configured. (GitHub Issue [#3663](https://github.com/forcedotcom/cli/issues/3663), packaging PR [948](https://github.com/forcedotcom/packaging/pull/948))
+
+* FIX: Configuration and authentication changes made by a running CLI process after your computer wakes from sleep are now saved correctly, including refreshed access tokens. (sfdx-core PR [1360](https://github.com/forcedotcom/sfdx-core/pull/1360))
+
+## 2.156.8 (October 28, 2026)
+
+* CHANGE: The `SF_TEMP_SHOW_SECRETS` environment variable workaround is now removed. Access tokens, SFDX auth URLs, and passwords are permanently redacted from standard and `--json` output, even if the variable is set. To view a secret, use the dedicated `sf org auth show-*` commands. For example:
+
+    ```bash
+    # Instead of setting SF_TEMP_SHOW_SECRETS=true, use the dedicated command
+    sf org auth show-access-token --target-org my-org
+    ```
+
+    (GitHub Issue [#3560](https://github.com/forcedotcom/cli/issues/3560), plugin-auth PR [1560](https://github.com/salesforcecli/plugin-auth/pull/1560), plugin-org PR [1798](https://github.com/salesforcecli/plugin-org/pull/1798), plugin-user PR [1543](https://github.com/salesforcecli/plugin-user/pull/1543))
+
+* FIX: The `ignoreManifest` option in `loadOptions` is now respected by `execute()` in oclif/core. (oclif/core Issue [#1533](https://github.com/oclif/core/issues/1533), oclif/core PR [1658](https://github.com/oclif/core/pull/1658))
+
+* FIX: The zip file count for `project deploy start` now includes folder entries, which count toward the Metadata API's 10,000-entry limit. The warning about approaching the limit now appears when it should. With the `--verbose` flag, the count label is now `Entries:` instead of `Files:`. (GitHub Issue [#3655](https://github.com/forcedotcom/cli/issues/3655), source-deploy-retrieve PR [1844](https://github.com/forcedotcom/source-deploy-retrieve/pull/1844), plugin-deploy-retrieve PR [1657](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1657))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * `ExtlClntAppAttestConfigurablePolicies`
+    * `ExtlClntAppAttestSettings`
+    * `GenOpPlanEligibilityConfig`
+
+## 2.155.8 (October 21, 2026)
+
+* FIX: Deleting an EmailTemplate in a nested folder is now recorded by source tracking, so subsequent deploys no longer resend the deletion. ([Issue #3659](https://github.com/forcedotcom/cli/issues/3659), [PR #1846](https://github.com/forcedotcom/source-deploy-retrieve/pull/1846))
+
+* FIX: Source-tracked retrieves now correctly resolve Experience Cloud NavigationMenu components when the SourceMember name differs from the Metadata API component name. ([Issue #3660](https://github.com/forcedotcom/cli/issues/3660), [PR #885](https://github.com/salesforcecli/source-tracking/pull/885), [PR #1668](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1668))
+
+* FIX: `sf package uninstall --wait` and `sf package uninstall report` now show the actual uninstall failure details instead of a `MALFORMED_QUERY` error. ([Issue #3664](https://github.com/forcedotcom/cli/issues/3664), [PR #945](https://github.com/salesforcecli/packaging/pull/945))
+
+## 2.154.4 (October 14, 2026)
+
+* NEW: See which Apex classes in your org are invalid or have compilation warnings with the new `apex get compile-status` command. For example:
+
+    ```bash
+    sf apex get compile-status --target-org my-org
+    ```
+
+    (plugin-apex PR [977](https://github.com/salesforcecli/plugin-apex/pull/977))
+
+## 2.153.5 (October 7, 2026)
+
+* NEW: Manage Apex debug log trace flags in your org with these new `apex trace` commands:
+
+    * `apex trace create` : Create a trace flag for a user, Apex class, or Apex trigger.
+    * `apex trace delete` : Delete a trace flag in your org.
+    * `apex trace list` : List trace flags in your org.
+
+     A trace flag sets the debug log level and duration for a specific entity, so you capture the logs you need without changing org-wide settings.  After creating the trace flag, perform the activity you want to debug and then use the `apex log` commands to get the debug logs. For example:
+  
+    ```bash
+    # Create a trace flag for a user with a custom duration and log type
+    sf apex trace create --traced-entity-id 005xx000001Sv6DAAS --debug-level SFDC_DevConsole --duration 60 --log-type USER_DEBUG --target-org my-org
+
+	# List all trace flags in the org
+    sf apex trace list --target-org my-org
+
+    # Delete a trace flag by ID
+    sf apex trace delete --trace-flag-id 7tfxx0000000001AAA --target-org my-org
+    ```
+
+    (plugin-apex PR [970](https://github.com/salesforcecli/plugin-apex/pull/970), plugin-apex PR [973](https://github.com/salesforcecli/plugin-apex/pull/973))
+
+* CHANGE: Salesforce CLI no longer suggests the `SF_TEMP_SHOW_SECRETS` environment variable as a workaround for viewing redacted secrets, and now announces that this workaround will be removed on October 28, 2026. Commands such as `org display user` and `org list users` now point you to the `sf org auth show-*` commands instead. The `SF_TEMP_SHOW_SECRETS=true` workaround still works until the removal date, so existing CI jobs won't break. For example:
+
+    ```bash
+    # Instead of setting SF_TEMP_SHOW_SECRETS=true, use the dedicated command
+    sf org auth show-access-token --target-org my-org
+    ```
+
+    See [this announcement](https://github.com/forcedotcom/cli/issues/3658) for more information.
+  
+    (GitHub Issue [#3560](https://github.com/forcedotcom/cli/issues/3560), plugin-user PR [1527](https://github.com/salesforcecli/plugin-user/pull/1527), plugin-org PR [1782](https://github.com/salesforcecli/plugin-org/pull/1782), plugin-auth PR [1550](https://github.com/salesforcecli/plugin-auth/pull/1550))
+
+* FIX: Logging in with `sf org login web` on Linux no longer intermittently fails due to a race condition when opening the browser. (plugin-auth PR [1549](https://github.com/salesforcecli/plugin-auth/pull/1549))
+
+## 2.152.14 (September 30, 2026)
+
+* NEW: The `apex run` command has two new flags for controlling the debug log level when you execute anonymous Apex. Use `--debug-level` to set a predefined level (`NONE`, `DEBUGONLY`, `DB`, `PROFILING`, `CALLOUT`, or `DETAIL`), or `--category-level` for fine-grained, per-category control (the two flags are mutually exclusive). For example:
+
+    ```bash
+    # Set a predefined debug log level
+    sf apex run --file test.apex --debug-level DETAIL
+
+    # Or set individual category levels (repeatable)
+    sf apex run --file test.apex --category-level Apex_code=FINEST --category-level Db=FINE
+    ```
+
+    (plugin-apex PR [967](https://github.com/salesforcecli/plugin-apex/pull/967), salesforcedx-apex PR [684](https://github.com/forcedotcom/salesforcedx-apex/pull/684))
+
+* CHANGE: We removed the Hyperforce/JWT gate that blocked `sf org create user` on Hyperforce orgs when the Dev Hub used JWT authentication. The underlying platform issue is now resolved, so this command works in that scenario. For example:
+
+    ```bash
+    # Now succeeds on a Hyperforce scratch org authenticated with JWT (previously blocked)
+    sf org create user --definition-file config/user-def.json --target-org my-scratch-org
+    ```
+
+    (plugin-user PR [1509](https://github.com/salesforcecli/plugin-user/pull/1509))
+
+* FIX: The `sf org open` command no longer exits before the browser finishes launching, which caused intermittent failures, especially on Windows and in the VS Code integrated terminal. (GitHub Issue [#3646](https://github.com/forcedotcom/cli/issues/3646), plugin-org PR [1775](https://github.com/salesforcecli/plugin-org/pull/1775))
+
+* FIX: We fixed a broken `sf-trust` bin path in `@salesforce/plugin-trust` that pointed at an unpublished `bin/dev` file, which silently skipped the bin link and broke `npm install`. It now points at the published `bin/run.js`. (GitHub Issue [#3644](https://github.com/forcedotcom/cli/issues/3644), plugin-trust PR [1347](https://github.com/salesforcecli/plugin-trust/pull/1347))
+
+* FIX: We addressed an issue where the published `npm-shrinkwrap.json` pinned a version of `npm` that bundled a vulnerable version of `tar`. We bumped the pinned `npm` version to pull in a patched `tar`. (GitHub Issue [#3642](https://github.com/forcedotcom/cli/issues/3642), plugin-trust PR [1347](https://github.com/salesforcecli/plugin-trust/pull/1347))
+
+* FIX: Salesforce DX projects now support the ReferralIntakeConfiguration [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json).
+ 
+## 2.151.7 (Sept 23, 2026)
+
+* NEW: When you run project deploy start, any notification attached to the deployment now appears in both the JSON and the human-readable table output; previously, notifications were included only in the JSON output. Notifications are informational, non-blocking, deploy-level advisories represented by the DeployNotification metadata type—for example, ApexApiVersionRetirement. There's no new flag to enable this behavior; the human-readable output includes notifications by default. For example:
+
+    ```bash
+    sf project deploy start --metadata ApexClass:MyRetiringApiClass --target-org my-org
+    ```
+
+    (plugin-deploy-retrieve PR [1630](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1630), source-deploy-retrieve PR [1825](https://github.com/forcedotcom/source-deploy-retrieve/pull/1825))
+
+* NEW: Salesforce CLI now supports Refresh Token Rotation (RTR). When your connected app has RTR enabled, the CLI persists the server-rotated refresh token and handles concurrent token refreshes safely, so simultaneous commands no longer fail with "Token request is already being processed". No new flags are required; the behavior is automatic. (sfdx-core PR [1342](https://github.com/forcedotcom/sfdx-core/pull/1342))
+
+* FIX, with NEW feature: We significantly sped up `sf org login jwt` for users with many cached org authorizations. The post-login scratch-org identification check now exits early on the first match, scans auth files in a single pass, and short-circuits sandbox lookups by URL. You can also skip the check entirely in CI/CD by setting the new `SF_SKIP_SCRATCH_ORG_CHECK` environment variable. (GitHub Issue [#3626](https://github.com/forcedotcom/cli/issues/3626), sfdx-core PR [1336](https://github.com/forcedotcom/sfdx-core/pull/1336))
+
+* FIX: The `plugins install`, `plugins uninstall`, and `plugins update` commands no longer fail on Windows with a misleading `<package> does not exist in the registry` error when Node.js is installed at the default path containing a space (such as `C:\Program Files\nodejs\node.exe`). (GitHub Issue [#1387](https://github.com/oclif/plugin-plugins/issues/1387), plugin-plugins PR [1388](https://github.com/oclif/plugin-plugins/pull/1388))
+
+* FIX: The `project retrieve preview` command no longer reports hundreds of unrelated, false-positive metadata diffs after you edit only the CSS resource of an Aura component through the Setup UI or Developer Console. A long-lived process (such as the VS Code Salesforce Extension) holding a stale in-memory source-tracking cache could overwrite the CLI's correctly synced revision data in `maxRevision.json`. (GitHub Issue [#3612](https://github.com/forcedotcom/cli/issues/3612), source-tracking PR [877](https://github.com/forcedotcom/source-tracking/pull/877))
+
+* FIX: The `project deploy start` and `project retrieve start` commands now correctly handle `AiAgentDefinitionVersion` metadata, which uses `#` as a version separator in its fullName (such as `MyAgent#1`). Previously, the `#` character was incorrectly interpreted as a key delimiter, which caused deploy messages to be unmapped and retrieves to fail. (source-deploy-retrieve PR [1826](https://github.com/forcedotcom/source-deploy-retrieve/pull/1826))
+
+* FIX: The `plugins install`, `plugins link`, and other commands that spawn child processes no longer fail with `ENOENT` when Salesforce CLI was installed from a standalone tarball on Unix. The fix ensures the CLI uses the bundled Node.js binary rather than searching `PATH` for a system-level `node`. (GitHub Issue [#1293](https://github.com/oclif/plugin-plugins/issues/1293), plugin-plugins PR [1383](https://github.com/oclif/plugin-plugins/pull/1383))
+
+## Sept 9 and 16, 2026
+
+Due to Dreamforce, we aren't releasing a new stable version on these dates. If you're attending Dreamforce, stop by Moscone West and say hello!
+
+## 2.150.6 (Sept 2, 2026)
+
+* FIX: The`project retrieve start --metadata` and `project deploy start --metadata` commands no longer crash with `ENOTDIR` when a non-component file (such as `README.md`) is in the `lwc/` directory, even when the file was matched by a `.forceignore` rule. (GitHub Issue [#3627](https://github.com/forcedotcom/cli/issues/3627), source-deploy-retrieve PR [1823](https://github.com/forcedotcom/source-deploy-retrieve/pull/1823))
+
+* FIX: A decomposed permission set (converted using `project convert source-behavior --behavior decomposePermissionSetBeta2`) no longer has a child fragment incorrectly resolved as the parent component, causing a `ConversionError` during source-to-Metadata API conversion.
+
+  Many thanks to [Maximilien Huet](https://github.com/MaxHuet) for contributing this fix. Nous adorons et espérons en voir davantage!  (GitHub Issue [#3621](https://github.com/forcedotcom/cli/issues/3621), source-deploy-retrieve PR [1817](https://github.com/forcedotcom/source-deploy-retrieve/pull/1817))
+
+* FIX: Long-running commands, such `data import tree --plan` on a very large plan, no longer crash in certain situations.  (GitHub Issue [#3622](https://github.com/forcedotcom/cli/issues/3622), jsforce PR [1824](https://github.com/jsforce/jsforce/pull/1824))
+
+## 2.149.9 (Aug 26, 2026)
+
+* NEW: Use the new `--root-type-with-dependencies` flag of the `project retrieve start` command to specify the metadata type for which you also want to retrieve all dependent components. Currently the flag accepts only `Bot` and `AiAgentDefinitionVersion` as valid values.  In this example, the command retrieves the metadata source files in the `force-app` directory; if any of the retrieved metadata is of type `Bot`, the command also retrieves its dependent components, such as `GenAiPlannerBundle`, `GenAiPlugin`, and `GenAiFunction:
+
+    ```bash
+   sf project retrieve start --source-dir force-app --root-type-with-dependencies Bot
+    ```
+
+    (plugin-deploy-retrieve PR [1626](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1626))
+
+* NEW: Skip the local filesystem scan when you synchronize (deploy or retrieve) your DX project with a source-tracking-enabled org by setting the new `SF_SOURCE_TRACKING_ASSUME_SYNCED` environment variable to `true.` This variable is useful when you know that your org is fully synchronized with your DX project, such as when you're using an org that's been pre-seeded with your project's metadata. Skipping the source-tracking scan that normally happens when you deploy or retrieve can save a lot of time—60+ minutes for very large projects.
+
+    **Warning**: This advanced feature is intended only for users who understand the risks. If you use it when your org and DX project aren't actually synchronized, they can get further out of sync. (plugin-deploy-retrieve PR [1628](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1628))
+
+* FIX: Salesforce CLI no longer incorrectly reports a scratch org definition validation warning (`features.N: Invalid input`) for the `ServiceCloudVoicePartnerTelephony` feature. This feature is now correctly categorized as a pattern feature, such as `ServiceCloudVoicePartnerTelephony:3`, rather than a simple feature. (GitHub Issue [#3617](https://github.com/forcedotcom/cli/issues/3617), sfdx-core PR [1323](https://github.com/forcedotcom/sfdx-core/pull/1323))
+
+* FIX: The `data bulk export` command now works correctly in a CI/CD environment when running behind a company firewall or web proxy. (GitHub Issue [#3620](https://github.com/forcedotcom/cli/issues/3620), plugin-data PR [#1507](https://github.com/salesforcecli/plugin-data/pull/1507))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * `AiAgentDefinition`
+    * `AiAgentDefinitionVersion`
+
+
+## 2.148.3 (August 19, 2026)
+
+* NEW: Use natural language prompts to quickly build Salesforce apps and agents with the new [Salesforce Development plugin for Claude Code](https://claude.com/plugins/salesforce-development). The plugin detects your DX project environment and provides Salesforce-specific skills and org context through hosted MCP servers. You get AI-powered assistance to build, update, and maintain apps efficiently and quickly.
+
+    First install the [prerequisite software](https://github.com/forcedotcom/sf-skills/tree/main/plugins/builder/salesforce-development#quick-start) on your computer.  If you're a regular Salesforce CLI user you're probably all set!
+
+    Then install the plugin and ensure it's activated by opening Claude Code and running these commands:
+
+    ```
+    /plugin install salesforce-development@claude-plugins-official
+    /reload-plugins
+    ```
+
+     Run this command to get the Salesforce Development Welcome page that displays useful information about your environment and tips on what to do next:
+  
+     ```
+     /salesforce-development:welcome
+     ```
+
+     Then enter some prompts; if you're unsure what to do, just ask!
+    
+     * _Create a project._
+     * _Authorize my org._
+     * _Let's build something on Salesforce!_
+     * _What do I do now?_
+ 
+     Claude Code explains what it did, and offers suggestions for the next steps.
+
+     If you're an experienced Salesforce developer, switch to your DX project and enter natural language prompts to continue building your app, such as:
+
+     * _Create an Apex service class to handle Account territory assignments._
+     * _Generate a custom object called Project with fields for Name, Status, Due Date, and Owner._
+     * _Deploy the current changes to my sandbox._
+
+     To learn how the plugin is defined, its list of skills, and so on, see this [GitHub repo](https://github.com/forcedotcom/sf-skills/tree/main/plugins/builder/salesforce-development). Use the [issues section](https://github.com/forcedotcom/sf-skills/issues) to enter a bug or suggest a new feature. Happy building!
+
+* NEW: Add a `--skip-assignment-rules` flag to the `data create record` and `data update record` commands to prevent Account, Case, or Lead assignment rules from running when you create or update records. This is useful when you want to preserve record ownership without triggering active assignment rules. For example:
+
+    ```bash
+    # Update a Case without triggering assignment rules
+    sf data update record --sobject Case --record-id 500xx000000abcd --values "Status=Closed" --skip-assignment-rules
+    
+    # Create a Lead without triggering assignment rules
+    sf data create record --sobject Lead --values "LastName=Smith Company=Acme" --skip-assignment-rules
+    ```
+
+    (plugin-data PR [1492](https://github.com/salesforcecli/plugin-data/pull/1492))
+
+* CHANGE: The `org generate password` command now enforces minimum values for password length and complexity. Commands that specify `--length` below 20 or `--complexity` below 3 now fail with a validation error instead of being silently corrected. This completes the deprecation cycle we announced in [April 1, 2026](./README.md#21298-april-1-2026).  For example:
+
+    ```bash
+    # This now fails with a validation error
+    sf org generate password --length 15
+    
+    # Use minimum values instead
+    sf org generate password --length 20 --complexity 3
+    ```
+
+    (plugin-user PR [1490](https://github.com/salesforcecli/plugin-user/pull/1490))
+
+* CHANGE: The `api request rest` and `api request graphql` commands are now generally available (GA) and no longer beta. (plugin-api PR [194](https://github.com/salesforcecli/plugin-api/pull/194))
+
+* FIX: The `@salesforce/core` package type declarations no longer cause TypeScript compilation errors (`TS2694: Namespace 'pino.pino' has no exported member 'TransportSingleOptions'`) when building projects with `skipLibCheck: false`. The emitted `.d.ts` file now correctly imports `TransportSingleOptions` directly from the pino module instead of referencing it through the problematic nested namespace. (GitHub Issue [3618](https://github.com/forcedotcom/cli/issues/3618), sfdx-core PR [1324](https://github.com/forcedotcom/sfdx-core/pull/1324))
+
+## 2.147.7 (August 12, 2026)
+
+* NEW: We added two environment variables to fix an issue where `org create scratch` fails when you authenticate the associated Dev Hub with an external client app via JWT (`org login jwt`). Because external client apps can't be replicated during the signup process, set these environment variables before running `org create scratch`:
+
+    * `SF_SCRATCH_SIGNUP_CONNECTED_APP` - Set to `PlatformCLI` to use the default Salesforce CLI connected app. 
+    * `SF_SCRATCH_SIGNUP_CALLBACK_URL` - Set to the connected app callback URL, such as `http://localhost:1717/OauthRedirect`.
+
+    These two environment variables are a temporary workaround until the external client app replication limitation is fixed, at which point they become no-ops and will be deprecated.
+
+    Thank you for your testing and digging into this issue, [Mark Ramsell](https://github.com/mark-ramsell) and [Jonny Power](https://github.com/JonnyPower)!  This is true community collaboration, and we love it. (GitHub Issue [#3515](https://github.com/forcedotcom/cli/issues/3515), sfdx-core PR [#1315](https://github.com/forcedotcom/sfdx-core/pull/1315))
+
+* CHANGE: Salesforce CLI now requires Node.js version 22 or later. We've dropped support for Node.js 18 and 20, which reached end-of-life. The bundled Node.js runtime in the Salesforce CLI installers is now version 24. For example:
+
+    ```bash
+    # Check your Node version
+    node --version
+    # Should show v22.x.x or v24.x.x
+    ```
+
+    (cli PR [#2851](https://github.com/salesforcecli/cli/pull/2851))
+
+
+## 2.146.3 (August 5, 2026)
+
+* FIX: Source tracking now updates correctly after deploying platform events, big objects, external objects, or custom metadata types. Previously, the CLI would hang and eventually time out with the warning "Polling for N SourceMembers timed out" because the SourceMember table sometimes stores child members without the entity suffix (e.g., `MyEvent.Field__c` instead of `MyEvent__e.Field__c`). (GitHub Issue [#3512](https://github.com/forcedotcom/cli/issues/3512), source-tracking PR [#868](https://github.com/forcedotcom/source-tracking/pull/868))
+
+* FIX: The `sf package version create --branch <branch>` command no longer fails with `NoReleaseVersionFoundForBranchError` when using `LATEST` in dependency version numbers. Dependencies without versions on the specified branch now gracefully fall back to the latest released version instead of causing the command to fail. (GitHub Issue [#3517](https://github.com/forcedotcom/cli/issues/3517), packaging PR [#898](https://github.com/forcedotcom/packaging/pull/898))
+
+## 2.145.6 (July 29, 2026)
+
+* NEW: Scaffold asynchronous Apex classes with built-in best practices with these new values of the `--template` flag of the `template generate apex class` CLI command: `Batchable` and `Queueable`.
+
+    * The `Batchable` template generates a strongly-typed `Database.Batchable<SObject>` with a typed `List<SObject>` scope, inline (compile-checked) SOQL query instead of a dynamic string query, and `Database.RaisesPlatformEvents` so that batch iteration failures surface as platform events.
+    * The `Queueable` template generates a `Queueable` class that implements `Finalizer` and attaches it, ensuring post-job logic runs reliably even after an unhandled exception. The generated code explicitly handles `UNHANDLED_EXCEPTION` cases.
+
+    This example generates a batchable class for processing accounts:
+
+    ```bash
+    sf template generate apex class --name ProcessAccounts --template Batchable
+    ```
+    
+    This example generates a queueable class for sending emails:
+
+    ```
+    sf template generate apex class --name SendEmail --template Queueable
+    ```
+    (salesforcedx-templates PR [#860](https://github.com/forcedotcom/salesforcedx-templates/pull/860))
+
+* FIX: The`auth accesstoken store` command no longer crashes with `Error (13): User force closed the prompt with 13 null` when an access token is piped via stdin and an auth file already exists. The command now reads piped tokens directly from stdin instead of using an interactive prompt. (GitHub Issue [#3573](https://github.com/forcedotcom/cli/issues/3573), plugin-auth PR [#1526](https://github.com/salesforcecli/plugin-auth/pull/1526))
+
+* FIX: Setting `SF_LOG_ROTATION_PERIOD` to a value greater than `1d` (such as `2d` or `7d`) no longer causes Salesforce CLI to crash with an `UnexpectedValueTypeError`. The CLI now falls back to `1d` rotation for unrecognized values and emits a warning. (GitHub Issue [#3580](https://github.com/forcedotcom/cli/issues/3580), sfdx-core PR [#1314](https://github.com/forcedotcom/sfdx-core/pull/1314))
+
+## 2.144.6 (July 22, 2026)
+
+* FIX: When deploying a UIBundle in your Salesforce DX project with `project deploy start` using either `--source-dir <path-to-bundle>` or `--metadata UIBundle:<name>`, and your DX project contains an unrelated sibling UIBundle that hasn't yet been built (doesn't contain the `dist` directory), the deploy no longer fails with the `ExpectedSourceFilesError` error.  (GitHub Issue [#3576](https://github.com/forcedotcom/cli/issues/3576), source-deploy-retrieve PR [#1796](https://github.com/forcedotcom/source-deploy-retrieve/pull/1796))
+
+## 2.143.6 (July 15, 2026)
+
+* FIX: Salesforce DX projects now support the UiWidgetBundle [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json).
+
+## 2.142.7 (July 8, 2026)
+
+* NEW: (Agentforce DX)  Manage MCP server registrations in the API Catalog with these new `agent mcp` commands:
+
+  * `agent mcp asset list` : List the assets (tools, prompts, and resources) for an MCP server in the catalog.
+  * `agent mcp asset replace` : Replace the asset set of an MCP server in the API Catalog.
+  * `agent mcp create` :  Create an MCP server in the API Catalog.
+  * `agent mcp delete` : Delete an MCP server from the API Catalog.
+  * `agent mcp fetch` : Fetch the live assets (tools, prompts, resources) advertised by an MCP server.
+  * `agent mcp get` : Get a single MCP server registered in the API Catalog.
+  * `agent mcp list` : List the MCP servers registered in the API Catalog.
+  * `agent mcp update` : Update an MCP server registered in the API Catalog.
+
+  **NOTE**: The `agent mcp` CLI commands are in developer preview. (plugin-agent PR [#443](https://github.com/salesforcecli/plugin-agent/pull/443), agents PR [#300](https://github.com/forcedotcom/agents/pull/300))
+
+* NEW: (Agentforce DX) Generate a next-generation agent test spec which is based on the AiTestingDefinition metadata type with the new `--test-runner` flag of the `agent generate test-spec` command. (plugin-agent PR [#450](https://github.com/salesforcecli/plugin-agent/pull/450))
+
+* NEW: (Agentforce DX) Pre-populate session variables on a live preview session with the new `--context-variables` flag of the `agent preview` and `agent preview start` commands. (plugin-agent PR [#438](https://github.com/salesforcecli/plugin-agent/pull/438))
+
+* NEW:  (Code Analyzer) Generate and display the abstract syntax tree (AST) that PMD produces when parsing a source file with the new `code-analyzer ast-dump` command. This is useful for understanding how PMD interprets your code and for developing custom PMD rules. The command supports
+  Apex, Visualforce, HTML, XML, and JavaScript files. Example:
+
+  ```bash
+  sf code-analyzer ast-dump --file ./force-app/main/default/classes/MyClass.cls
+  ```
+
+  (code-analyzer PR [#2050](https://github.com/forcedotcom/code-analyzer/pull/2050))
+
+* NEW: Query the dependencies of a package version that is protected by an installation key with the new `--installation-key` flag (short name `-k`) of the `package version displaydependencies` command. For example:
+
+    ```bash
+    sf package version displaydependencies --package 04t.. --installation-key YOUR_KEY --target-dev-hub devhub@example.com
+    ```
+    
+   (GitHub Issue [#3469](https://github.com/forcedotcom/cli/issues/3469), plugin-packaging PR [#1227](https://github.com/salesforcecli/plugin-packaging/pull/1227), packaging PR [#886](https://github.com/forcedotcom/packaging/pull/886))
+
+* FIX: When using source tracking, metadata files that have an ampersand (`&`) in them are now properly updated.  As a result, they're no longer always listed as needing to be deployed or retrieved after a successful deployment or retrieval.  (GitHub Issue [#3504](https://github.com/forcedotcom/cli/issues/3504), source-tracking PR [#862](https://github.com/forcedotcom/source-tracking/pull/862))
+
+* FIX: The `package version create` CLI command, when run with `scopeProfiles: true` in the `sfdx-project.json` file, now generates a correct `package.xml` file with the appropriate profiles. (packaging PR [#887](https://github.com/forcedotcom/packaging/pull/887))
+
+* FIX: Salesforce CLI now works correctly on all supported versions of Node.js. (GitHub Issue [#3586](https://github.com/forcedotcom/cli/issues/3586), jsforce PR [#1807](https://github.com/jsforce/jsforce/pull/1807))
+
+* FIX: We fixed a bug in `@salesforce/core` so that the `isWeb()` check run in the Bun runtime works correctly.  (GitHub Issue [#3535](https://github.com/forcedotcom/cli/issues/3535), sfdx-core PR [#1301](https://github.com/forcedotcom/sfdx-core/pull/1301))
+
+* FIX: Salesforce DX projects now support the IdpConfiguration [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json).
+
+
+## 2.141.6 (July 1, 2026)
+
+* FIX: [String replacement](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_string_replace.htm) on big metadata files now works correctly. (GitHub Issue [#3461](https://github.com/forcedotcom/cli/issues/3461), source-deploy-retrieve PR [#1699](https://github.com/forcedotcom/source-deploy-retrieve/pull/1699))
+
+    Big shoutout to [Bartheleway](https://github.com/Bartheleway) who dove into the Salesforce CLI code and fixed this issue. Our team and community thank you! 
+
+## 2.140.6 (June 24, 2026)
+
+* FIX: We fixed some under-the-hood bugs.
+
+## 2.139.6 (June 17, 2026)
+
+* FIX: Salesforce DX projects now support the HouseholdNamingConfig [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json).
+
+## 2.138.6 (June 10, 2026)
+
+* NEW: (Agentforce DX) Create and manage Agentforce Data Libraries with these new CLI commands: 
+
+    - `agent adl create` : Create an Agentforce Data Library.
+    - `agent adl delete` : Delete an Agentforce Data Library.
+    - `agent adl file add`  : Add files to an existing Agentforce Data Library.
+    - `agent adl file delete` :  Delete a file from an Agentforce Data Library.
+    - `agent adl file list` :  List files in an Agentforce Data Library.
+    - `agent adl get` :  Get details of an Agentforce Data Library.
+    - `agent adl list` :  List Agentforce Data Libraries.
+    - `agent adl status` : Get indexing status of an Agentforce Data Library.
+    - `agent adl update` : Update an Agentforce Data Library.
+    - `agent adl upload` : Upload a file to an SFDRIVE Agentforce Data Library.
+
+	Agentforce Data Libraries enhance the accuracy of AI features like Agentforce Agents by connecting them to your trusted data sources. Data libraries use unstructured or semi-structured data so that they can take large sets of information that exist on the web, in documents, or as large text inputs in fields, and turn that into more useful, searchable information.
+
+   **NOTE**: The `agent adl` commands are in Developer Preview.  (plugin-agent PR [#435](https://github.com/salesforcecli/plugin-agent/pull/435), agents PR [#296](https://github.com/forcedotcom/agents/pull/296))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * CnfgItemTypeIdentFieldMap
+    * CnfgItemTypeIdentRule
+
+## 2.137.6 (June 3, 2026)
+
+* FIX: We fixed some under-the-hood bugs.
+
+## 2.136.8 (May 27, 2026)
+
+* NEW and CHANGED: To improve security, we updated Salesforce CLI to reduce the accidental exposure of sensitive credentials (access tokens, SFDX Auth URLs, and user passwords.) Here's a summary of the changes, but see [forcedotcom/cli/issues/3560](https://github.com/forcedotcom/cli/issues/3560) for additional details, why we made these changes, and the timeline.  
+
+    * We removed sensitive credentials from the output of these CLI commands:
+        - `org display`
+        - `org list --json `
+        - `org create scratch --json`
+        - `org resume scratch --json`        
+        - `org display user [--json]`
+        - `org list users --json`
+        - `org login jwt --json`
+        - `org login web --json`
+        - `org login sfdx-url --json`
+        - `org login access-token --json`
+        - `org list auth --json`
+    * To avoid breaking your existing CI/CD pipelines, we added a temporary environment variable (`SF_TEMP_SHOW_SECRETS`) that overrides the changes to these existing commands.
+
+      Set this variable to `true` to continue seeing the old command output that includes sensitive credentials. IMPORTANT: We will disable this environment variable in the near future, so we highly recommend that you update your CI/CD pipelines soon.
+
+    * We added these CLI commands in case you need to view the sensitive credentials associated with your org:
+       - `org auth show-access-token` : Show the current access token for an org.
+       - `org auth show-sfdx-auth-url` : Show the SFDX Auth URL for an org.
+       - `org auth show-user-password` : Show the stored password for an org's user.
+
+	(plugin-org PR [#1667](https://github.com/salesforcecli/plugin-org/pull/1667))
+
+* NEW: (Agentforce DX VS Code Extension) Search and filter agent traces in VS Code's **Agent Tracer** tab with the new search filter.
+
+    When you run a preview conversation with an agent, many traces are generated. Previously, to search the list of traces, you had to open each one. Now you can use the live search filter to quickly find specific events, messages, or values in the trace history. You can filter by user message, session ID, step type, or any content in the trace data. A counter shows the matched steps.  (vscode-agents PR [#207](https://github.com/forcedotcom/vscode-agents/pull/207))
+
+* NEW: (Agentforce DX VS Code Extension) Resume previous agent preview conversations in VS Code with the new **History** tab (to the right of the existing **Agent Tracer** tab).
+
+    After running preview conversations with an agent (either simulated or live), you can now view all prior sessions and click any one to pick up where you left off. The **History** tab reads sessions saved on disk, so it works with sessions created by both the VS Code extension or Salesforce CLI (such as the `agent preview` command). Each entry shows the session type, first user message, and timestamp. (vscode-agents PR [#205](https://github.com/forcedotcom/vscode-agents/pull/205))
+
+## 2.135.7 (May 20, 2026)
+
+* NEW: (Agentforce DX) Get information about an agent preview conversation by viewing the trace files for a particular session.  When you run an agent preview conversation (either interactive or programmatic), trace files are automatically recorded and saved in your local DX project. These trace files are useful if you want to analyze a preview conversation with an agent to observe, monitor, investigate, and troubleshoot its behavior. You can output a summary of the trace information, details, or raw JSON.  When viewing details, you can drill down into specific dimensions, such as the actions that were executed or how the agent navigated between subagents. Use these three commands:
+
+   * `agent trace read`  :  Read trace files from an agent preview session.
+   * `agent trace delete` : Delete trace files from an agent preview session.
+   * `agent trace list`  :  List the available trace files that were recorded during all agent preview sessions.
+
+   This example displays detailed trace information about the action executions for the specified session ID:
+  
+    ```bash
+    sf agent trace read --session-id <SESSION_ID> --format detail --dimension actions
+    ```
+
+   This example deletes trace files older than 24 hours for a specific agent and doesn't prompt for confirmation:
+
+   ```bash
+   sf agent trace delete --agent My_Agent --older-than 24h --no-prompt
+   ```
+    (plugin-agent PRs [#409](https://github.com/salesforcecli/plugin-agent/pull/409), [#410](https://github.com/salesforcecli/plugin-agent/pull/410), and [#411](https://github.com/salesforcecli/plugin-agent/pull/411))
+    
+* NEW: (Agentforce DX) (Beta) Run rich evaluation tests against an Agentforce agent with the new `agent test run-eval` command. Specify the tests you want to run with one of these inputs to the `--spec` flag:
+
+    * YAML test spec generated by the `agent generate test-spec` CLI command
+    * JSON payload
+
+    This example runs tests using a YAML test spec on the org with alias "my-org":
+
+    ```bash
+    sf agent test run-eval --spec specs/my-agent-testSpec.yaml --target-org my-org
+    ```
+    (plugin-agent PR [#413](https://github.com/salesforcecli/plugin-agent/pull/413), agents PR [#276](https://github.com/forcedotcom/agents/pull/276))
+  
+* NEW: (Agentforce DX) End multiple preview sessions with one command by using the new `--all` flag of `agent preview end`.  Previously you could end only single sessions using a session ID. Used in combination with either `--api-name` or `--authoring-bundle`, the command ends all preview sessions associated with a specific agent.  Use alone, it ends all preview sessions for all known agents.  By default, when you specify the `--all` flag, you're prompted for confirmation before the command ends all sessions; use the new `--no-prompt` flag to skip the prompt. This example ends preview sessions associated with the My_Local_Agent authoring bundle; it uses your default org:
+
+    ```bash
+    sf agent preview end --authoring-bundle My_Local_Agent --all
+    ```
+    (plugin-agent PR [#406](https://github.com/salesforcecli/plugin-agent/pull/406))
+
+* NEW: (Agentforce DX) Choose how much detail you want the `agent publish authoring-bundle` command to output with the new `--concise` and `--verbose` flags. The `--verbose` flag displays detailed output showing all metadata components that were retrieved and deployed during the publish process.  The `--concise` flag shows only the essential information.  For example:
+
+    ```bash
+    sf agent publish authoring-bundle --api-name MyAuthoringbundle --verbose
+    ```
+
+	(plugin-agent PR [#404](https://github.com/salesforcecli/plugin-agent/pull/404))
+
+* FIX: We are now correctly digitally signing all downloadable Salesforce CLI packages and executables. (GitHub Issue [#3547](https://github.com/forcedotcom/cli/issues/3547))
+
+* FIX: (Agentforce DX) The `agent preview` and `agent publish authoring-bundle` commands no longer fail with HTTP 404 errors when user permissions are correct. The fix isolates connections used when calling server APIs, preventing token clobbering during connection refreshes. (plugin-agent PR [#421](https://github.com/salesforcecli/plugin-agent/pull/421), agents PR [#278](https://github.com/forcedotcom/agents/pull/278))
+
+## 2.134.6 (May 13, 2026)
+
+* NEW: Successfully run Apex tests in a scratch org that send emails to users with unverified email domains by setting the `EmailAuthorizationSettings.enableSubstituteFromAddress` field to `true` in your scratch org definition file. With this scratch org feature you can work around the [new Salesforce requirement](https://help.salesforce.com/s/articleView?id=005316090&type=1) that emails sent from Salesforce must have verified email domains.  Here's an example of including this setting in a scratch org definition file.
+
+    ```json
+    {
+      "orgName": "juliet.shackell company",
+      "edition": "Developer",
+      "features": ["EnableSetPasswordInApi"],
+      "settings": {
+        "lightningExperienceSettings": {
+          "enableS1DesktopEnabled": true
+        },
+        "mobileSettings": {
+          "enableS1EncryptedStoragePref2": false
+        },
+        "emailAuthorizationSettings": {
+          "enableSubstituteFromAddress": true
+        },
+      }
+    }
+    ```
+   (GitHub Issue [#3534](https://github.com/forcedotcom/cli/issues/3534), sfdx-core PR [#1282](https://github.com/forcedotcom/sfdx-core/pull/1282))
+
+    
+## 2.133.4 (May 6, 2026)
+
+* NEW: (Agentforce DX) Easily open an agent's authoring bundle in the in-org Agentforce Builder UI from VS Code with the new **AFDX: Open Authoring Bundle in Default Org** command. Run the new command from either the command palette or by right-clicking the agent's `.agent` or metadata file in the VS Code file explorer. If there are multiple versions of the bundle, the command prompts for the one you want to open.
+
+  You can now also use the `org open agent` CLI command to open an agent's authoring bundle in Agentforce Builder by specifying its API name with the new `--authoring-bundle` flag. Use the new `--version` flag to specify a version.
+
+  An agent's authoring bundle files are located in the `aiAuthoringBundle` directory of your DX project's package directory. We also deprecated the `org open authoring-bundle` command. (vscode-agents PR [#183](https://github.com/forcedotcom/vscode-agents/pull/183), plugin-org PR [#1633](https://github.com/salesforcecli/plugin-org/pull/1633))
+
+* NEW: Automatically assign a user role to a new [scratch org user](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_scratch_orgs_create_users.htm) with the new `roleDeveloperName` option of the user definition file. You specify this file when you run the `org create user` command to, yep, create a new user! Set the new option to the developer name (API name) of the role; the value corresponds to `UserRole.DeveloperName` in the org.
+
+    In this sample user definition file, the new user is assigned the `Customer_Support` role:
+
+    ```json
+    {
+        "Username": "tester1@sfdx.org",
+        "LastName": "Hobbs",
+        "Email": "tester1@sfdx.org",
+        "Alias": "tester1",
+        "TimeZoneSidKey": "America/Denver",
+        "LocaleSidKey": "en_US",
+        "EmailEncodingKey": "UTF-8",
+        "LanguageLocaleKey": "en_US",
+        "profileName": "Standard Platform User",
+        "permsets": ["Dreamhouse", "Cloudhouse"],
+        "generatePassword": true,
+        "roleDeveloperName": "Customer_Support"
+    }
+    ```
+
+    Many thanks to [Luca Bassani](https://github.com/baslu93) for contributing this cool new feature. We love it! (plugin-user PR [#1415](https://github.com/salesforcecli/plugin-user/pull/1415))
+
+* NEW: (Agentforce DX) We added more information to the JSON output of the `agent preview` commands. For example, we added:
+
+    * `agentApiName` property to `agent preview start` and `agent preview send`
+    * `sessionId` property to `agent preview send`
+    * `timestamp` and `sessionType` properties to `agent preview start`
+    * `index.json` file to the sessions directory
+
+    (agents library PR [#269](https://github.com/forcedotcom/agents/pull/269), plugin-agent PRs [#400](https://github.com/salesforcecli/plugin-agent/pull/400) and [#399](https://github.com/salesforcecli/plugin-agent/pull/399))
+
+* CHANGE: (Agentforce DX) As of April 2026, agent `topics` in Agent Script files are now called `subagents`. We updated various Agentforce DX files to reflect this change, including:
+
+	* The sample `Local_Info_Agent.agent` file generated in a new project when you run `sf template generate project --name new-project --template agent`.
+ 	* The [sample GitHub repo](https://github.com/forcedotcom/afdx-pro-code-testdrive) used by the [Build an Agent Using Agentforce DX](https://trailhead.salesforce.com/content/learn/projects/create-an-agent-using-pro-code-tools) Trailhead badge.
+  	* The Agent Script file generated by the `agent generate authoring-bundle` command.
+  	* Agentforce DX-related skills in the [skills GitHub repo](https://github.com/forcedotcom/afv-library/tree/main/skills).
+
+* CHANGE: (Agentforce DX) We cleaned up the Agentforce DX VS Code extension UI so it consistently uses the term *Agentforce DX* in headings and grouped settings. (vscode-agents PR [#196](https://github.com/forcedotcom/vscode-agents/pull/196))
+
+* FIX: Table output now correctly handles full-width characters (such as 'ＡＢＣ' or 'ワイド') without the margins misaligning. (GitHub Issue [#3538](https://github.com/forcedotcom/cli/issues/3538), table PR [#289](https://github.com/oclif/table/pull/289))
+
+* FIX: We improved the error message when `org resume sandbox` fails; previously, the original sandbox error that provided the actual issue was replaced with a generic error. (GitHub Issue [#3490](https://github.com/forcedotcom/cli/issues/3490), plugin-org PR [#1646](https://github.com/salesforcecli/plugin-org/pull/1646), sfdx-core PR [#1278](https://github.com/forcedotcom/sfdx-core/pull/1278))
+
+* FIX: When deploying source to an org, any HTML entities in the files are now correctly encoded. (GitHub Issue [#3543](https://github.com/forcedotcom/cli/issues/3543), source-deploy-retrieve PR [#1752](https://github.com/forcedotcom/source-deploy-retrieve/pull/1752))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * AiResponseFormat
+    * AiSurface
+    * AiTestingDefinition
+    * PolicyRuleDefinition
+    * PolicyRuleDefinitionSet
+
+## 2.132.14 (April 29, 2026)
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+    * [DynamicUiCardDefinition](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json)
+    * [AiAgentScorerDefinition](https://github.com/forcedotcom/source-deploy-retrieve/pull/1746)
+
+## 2.131.7 (April 22, 2026)
+
+* CHANGE: The agent script compiler version used by the `agent` commands in `@salesforce/plugin-agent` and the [Agentforce DX VS Code Extension](https://marketplace.visualstudio.com/items?itemName=salesforce.salesforcedx-vscode-agents) was updated to 2.0.0 to support the latest version of the Agent Script language. The v2.0.0 compiler is backward compatible with previous versions.
+
+* CHANGE: All references to `topic` in Agent Script files have been changed to `subagent` to align with industry standards. For example, to define a subagent:
+
+```
+subagent eligibility:
+```
+
+To refer to that subagent:
+
+```
+@subagent.eligibility
+```
+
+For more details refer to the [Agent Script Documentation](https://developer.salesforce.com/docs/ai/agentforce/guide/ascript-lang.html)
+
+## April 15, 2026
+
+Due to [TDX 2026](https://www.salesforce.com/tdx/), we aren't releasing a new stable or stable-rc version on this day. Hope to see you at the conference!
+
+## 2.130.9 (April 8, 2026)
+
+* NEW: We standardized the error codes that `agent` commands throw when they run into issues.  For example, both `agent publish authoring-bundle` and `agent validate authoring-bundle` now throw the same error code if they run into Agent Script compilation errors.  These are the error codes that the `agent` commands might throw:
+
+    |Error Code| Error Text|
+    |--------|-------
+	|`Succeeded (0)`|Preview session ended successfully and traces saved.|
+    |`NotFound (2)`|Agent not found, or no preview session exists for this agent.|
+    |`PreviewEndFailed (4)`|Failed to end the preview session.|
+    |`SessionAmbiguous (5)`|Multiple preview sessions found; specify --session-id to choose one.|
+
+   (plugin-agent PR [#378](https://github.com/salesforcecli/plugin-agent/pull/378))
+
+* CHANGE: When running `agent preview start` to start a programmatic agent preview session using an agent's authoring bundle (`--authoring-bundle` flag), you're now required to specify either simulated or live mode.  Specify simulated mode with the new `--simulate-actions` flag; specify live actions with the existing `--use-live-actions` flag.  Previously, the programmatic agent preview ran in simulated mode by default; to use live mode you had to explicitly specify the `--use-live-actions` flag.
+
+    Published agents, which you specify with the --api-name, always use live actions. (plugin-agent PR [#380](https://github.com/salesforcecli/plugin-agent/pull/380))
+
+* FIX: If the `org assign permset` CLI command encounters multiple errors during a permission set assignment, we now correctly provide all the known details about the errors in the JSON output so you can better diagnose the problem. (GitHub Issue [#3511](https://github.com/forcedotcom/cli/issues/3511), plugin-user PR [#1398](https://github.com/salesforcecli/plugin-user/pull/1398))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * CnfgItemSourceDefinition (replaces CnfgMgmtCiSourceDef)
+    * ExtlClntAppOauthSecuritySettings
+    * UIBundle (replaces WebApplication) 
+
+## 2.129.8 (April 1, 2026)
+
+* NEW: Create a Salesforce DX project that includes a sample agent with the new `agent` template value of the `template generate project` command.  For example:
+
+   ```bash
+   sf template generate project --name my-agent-project --template agent
+   ```
+   The new `agent` template is also listed as an option when you create a project in VS Code with the **SFDX: Create Project** command.
+
+   The generated Salesforce DX project contains a sample agent called `Local Info Agent` inside the `force-app/main/default/aiAuthoringBundles/Local_Info_Agent` authoring bundle. The agent could be embedded in a resort's web site to provide local weather updates, share information about local events, and help guests with facility hours. The agent demonstrates:
+
+   - Three types of subagents (Invocable Apex, Prompt Template, and Flow).
+   - Mutable variables.
+   - Flow control with `available when`.
+   - Deterministic branching with `if/else` in reasoning instructions.
+
+    The DX project also includes other metadata that implement the sample agent, such as Apex classes, a flow, and a prompt template, as well as permission sets and permission set groups.  See the `README.md` file in the root directory of the new DX project for more info.
+  
+   (salesforcedx-templates PR [#753](https://github.com/forcedotcom/salesforcedx-templates/pull/753), plugin-templates PR [#874](https://github.com/salesforcecli/plugin-templates/pull/874))
+
+* NEW: (Generally Available) The commands to preview an agent programmatically, without starting an interactive session, are now generally available. These commands are particularly useful when you want an agent to test your agent.
+
+    - `agent preview start`:     Start a programmatic agent preview session.
+    - `agent preview send`:      Send a message to an existing agent preview session.
+    - `agent preview sessions`:  List all known programmatic agent preview sessions.
+    - `agent preview end`:  End an existing programmatic agent preview session and get trace location.
+  
+     (plugin-agent PR [#367](https://github.com/salesforcecli/plugin-agent/pull/367))
+
+* NEW: We added the [Agentforce DX VS Code Extension](https://marketplace.visualstudio.com/items?itemName=salesforce.salesforcedx-vscode-agents) to this week's release of the Salesforce Extension Pack (v66.3), which is available from either the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=salesforce.salesforcedx-vscode) or the [Open VSX Registry](https://open-vsx.org/extension/salesforce/salesforcedx-vscode).   This change means that if you're setting up Agentforce DX tools for the first time on VS Code, you only need to install the Salesforce extension pack, which includes all the things. Already set up your tools?  Then you don't need to do anything. 
+
+    The Salesforce Extension Pack includes tools for developing on the Salesforce Platform. Use these tools to work with development orgs (scratch orgs, sandboxes, and Developer Edition orgs), Apex, Lightning web components, and SOQL. The extension pack also includes Agentforce Vibes, and now Agentforce DX.  (salesforcedx-vscode PR [#7003](https://github.com/forcedotcom/salesforcedx-vscode/pull/7003))
+
+* NEW: Easily create the default Salesforce user that is used to run an agent in your org with the new `org create agent-user` CLI command.  You specify this user in the agent's Agent Script file using the `default_agent_user` parameter in the [`config` block](https://developer.salesforce.com/docs/ai/agentforce/guide/ascript-blocks.html#config-block).  
+
+  By default, the command generates a user called `Agent User` with a globally unique username.  Use the `--first-name`, `--last-name`, and `--base-username` flags to change these default names. The command also assigns the required profiles and permission sets.  Run `sf org create agent-user --help` for more details. When the command completes, it displays a summary of what it did, including the new agent user's username and ID.
+
+   This example creates an agent user with an auto-generated username but the custom name `Service Agent` in the org with alias `my-org`:
+
+   ```bash
+   sf org create agent-user --first-name Service --last-name Agent --target-org my-org
+   ```
+    (vscode-agents PR [#168](https://github.com/forcedotcom/vscode-agents/pull/168))
+  
+* NEW: When you activate an agent in VS Code with the **AFDX: Activate Agent** command, you're now prompted for the version you want to activate.  (vscode-agents PR [#168](https://github.com/forcedotcom/vscode-agents/pull/168))
+
+* NEW: Specify a custom directory into which the `agent generate template` command generates the `BotTemplate` and `GenAiPlannerBundle` files with the new `--output-dir` flag. If you don't specify this flag, then the files are generated in the default package directory. 
+
+   This example generates an agent template of version 1 of the `My_Awesome_Agent` Bot metadata file into the `my-package` directory:
+
+   ```bash
+   sf agent generate template --agent-file force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1 --source-org my-scratch-org --output-dir my-package
+   ```
+   
+  (plugin-agent PR [#376](https://github.com/salesforcecli/plugin-agent/pull/376))
+
+* NEW: (oclif only) Use the new `multiple: true` support of positional arg definitions to give your commands a type-safe way to accept a variable number of positional arguments.  See [Command Arguments](https://oclif.io/docs/args) for more info. 
+
+    Thank you, [Espen Hovlandsdal](https://github.com/rexxars), for your contribution to oclif!  While Salesforce CLI avoids the usage of positional arguments and varargs, other non-Salesforce developers who build CLIs on oclif are sure to find this new feature useful.  (core PR [#1554](https://github.com/oclif/core/pull/1554))
+
+* CHANGE: For increased security, we changed the behavior of `org generate password` so it always generates passwords of higher complexity.
+
+    Specifically, if you pass the `--complexity` flag a value below 3, the command now ignores that value and instead generates a password of complexity 3, which means a password that includes only lower and upper case letters and numbers. The command also displays a message about this changed behavior.  Starting in Summer '26, the command will fail if you specify a complexity value less than 3. (plugin-user PR [#1389](https://github.com/salesforcecli/plugin-user/pull/1389), 
+
+* FIX: We fixed [this issue](https://help.salesforce.com/s/issue?id=a02Ka00000ji2nu) with the `agent generate template` command caused by packaging local actions and topics. As a result of the fix, you can now correctly generate an agent template, and then package the template in a second-generation managed package, without going through the workaround.
+
+    IMPORTANT: This fix added a new requirement when you run `agent generate template`: you must now use the new `--source-org` flag to specify the username or alias of the namespaced scratch org that contains the agent which the template is based on. For example, this command generates an agent template from version 1 of the `My_Awesome_Agent` Bot metadata file in your DX project; the agent that the new template is based on is in the org with alias "my-scratch-org":
+  
+   ```bash
+   sf agent generate template --agent-file force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1 --source-org my-scratch-org
+    ```
+
+   (plugin-agent PR [#376](https://github.com/salesforcecli/plugin-agent/pull/376))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * CnfgItemAttrDef
+    * CnfgItemAttrPcklstValDef
+    * CnfgItemAttrPicklistDef
+    * CnfgItemAttrSetAttr
+    * CnfgItemAttrSetDef
+    * CnfgItemTypeAttrRelDef
+    * CnfgItemTypeDef
+    * CnfgItemTypeRelationDef
+    * CnfgMgmtRelationTypeDef
+    * CnfgMgmtCiSourceDef
+    * MeetingPlaybookDefinition
+    * TelemetryDefinition
+    * TelemetryDefinitionVersion
+    * TelemetryActionDefinition
+    * TelemetryActionDefStep
+    * TelemetryActnDefStepAttr
+
+## 2.128.5 (March 25, 2026)
+
+* NEW: The Lightning Local Dev CLI commands are now just-in-time (JIT). This means that when you update to this Salesforce CLI release and run a `lightning dev` command, Salesforce CLI checks if the associated [plugin-lightning-dev](https://github.com/salesforcecli/plugin-lightning-dev) is installed. If it's not, Salesforce CLI automatically installs it and then runs your command. These are the CLI commands included in this plugin:
+
+    * `lightning dev app` : Preview a Lightning Experience app locally and in real-time, without deploying it.                                                                                     │
+    * `lightning dev component` : Preview LWC components in isolation.                                                                                                                                   │
+    * `lightning dev site` : Preview an Experience Builder site locally and in real-time, without deploying it.        
+
+	See [Preview Components with Local Dev](https://developer.salesforce.com/docs/platform/lwc/guide/get-started-test-components.html) for information about using the commands.  These new commands will also soon be included in the [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_unified.htm). 
+
+* NEW: Specify the version of an agent you want to activate with the new `--version` flag of `agent activate`. If you run the command without the `--version` flag, the command provides a list of agent versions for you to choose from. The value of `--version` is always a number, corresponding to the `vX` part of the `BotVersion` metadata in your project.
+
+   For example, if you have a `force-app/main/default/bots/My_Agent/v4.botVersion-meta.xml` file in your project, then you activate this agent version in an org with alias `my-org` like this:
+
+    ```bash
+    sf agent activate --api-name My_Agent --version 4 --target-org my-org
+    ```
+
+   You can now also specify JSON output for the `agent activate` and `agent deactivate` commands with the new `--json` flag. (plugin-agent PR [#348](https://github.com/salesforcecli/plugin-agent/pull/348))
+ 
+* CHANGE: For enhanced security, the minimum (and new default) value of the `--length` flag of the `org generate password` CLI command is now 20. If you specify a value less than 20, the command displays a message and uses 20 instead. Starting in Summer '26, the command will fail if you specify a password length less than 20.  The maximum value is still 100. (plugin-user PR [#1372](https://github.com/salesforcecli/plugin-user/pull/1372))
+
+* FIX: The `project retrieve start` command now correctly retrieves specific versions of the `Bot` metadata type (`BotVersion`); previously it would retrieve just the latest version.  This example shows how to retrieve version 3 of the Local_Info_Agent `Bot`:
+
+    ```bash
+    sf project retrieve start --metadata Bot:Local_Info_Agent --metadata BotVersion:Local_Info_Agent.v3
+    ```
+
+    (source-deploy-retrieve PR [#1706](https://github.com/forcedotcom/source-deploy-retrieve/pull/1706))
+  
+* FIX: The `project deploy start` command now works correctly when you use both mechanisms for deleting metadata components at the same time: use a destructive change file (such as `--pre-destructive-changes manifest/destructiveChangesPre.xml`) and remove a different component from the standard manifest file (such as `--manifest manifest/package.xml`).  (source-deploy-retrieve PR [#1690](https://github.com/forcedotcom/source-deploy-retrieve/pull/1690), plugin-deploy-retrieve PR [#1508](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1508))
+
+## 2.127.2 (March 18, 2026)
+
+* FIX: The `data bulk export` CLI command now works correctly even when exporting many records (such as 700K+). (GitHub Issue [#3507](https://github.com/forcedotcom/cli/issues/3507), plugin-data PR [#1388](https://github.com/salesforcecli/plugin-data/pull/1388))
+
+* FIX: You can now successfully retrieve individual `BotVersion` metadata components, such as `sf project retrieve start --metadata BotVersion:MyAgent.v1`.  (GitHub Issue [#3516](https://github.com/forcedotcom/cli/issues/3516), source-deploy-retrieve PR [#1704](https://github.com/forcedotcom/source-deploy-retrieve/pull/1704))
+
+* FIX: You can now correctly deploy and retrieve `SchedulingObjective` metadata components.  (GitHub Issue [#3514](https://github.com/forcedotcom/cli/issues/3514), source-deploy-retrieve PR [#1700](https://github.com/forcedotcom/source-deploy-retrieve/pull/1700))
+
+* FIX: Using `--flags-dir` to [read flag values from a file](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_flag_values_in_files.htm) now correctly works with commands in non-core third-party plugins. (GitHub Issue [#3493](https://github.com/forcedotcom/cli/issues/3493), oclif core PR [#1553](https://github.com/oclif/core/pull/1553), oclif plugin-plugins PR [#1288](https://github.com/oclif/plugin-plugins/pull/1288))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * MktDatalakeSrcKeyQualifier
+    * ProcedurePlanDefinition
+  
+## 2.126.4 (March 11, 2026)
+
+* NEW: The `dev generate flag` command now supports generating flags for commands that use the `src/commands/hello/world/index.ts` file layout in the plugin repo, in addition to `src/commands/hello/world.ts`. The command now also tries to find an existing messages file for adding the new flag's help text.
+
+   Many thanks to [AndrewLPetersonSF](https://github.com/AndrewLPetersonSF) for contributing this useful feature! (plugin-dev PR #533)
+
+* CHANGE: If you specify the `--json` flag for an interactive Agentforce DX command, but not a required flag, the command now correctly stops executing and displays an error. In this context, "interactive" refers to a command that prompts you for values if you don't explicitly specify a required flag. 
+
+   For example, the `--name` flag is required for `agent generate authoring-bundle`. 
+
+    * If you run `sf agent generate authoring-bundle`, then you're prompted for the name of the authoring bundle.
+    * If you run `sf agent generate authoring-bundle --json`, then the command returns an error because in this case you must specify `--name`.
+
+    (plugin-agent PR [#336](https://github.com/salesforcecli/plugin-agent/pull/336))
+
+* FIX: We fixed an issue in how Salesforce CLI recognizes the shell that it's being run from. (oclif GitHub Issue [#1538](https://github.com/oclif/core/issues/1538), oclif core PR [#1548](https://github.com/oclif/core/pull/1548))
+
+## 2.125.1 (March 4, 2026)
+
+* NEW: When generating an authoring bundle with the `agent generate authoring-bundle` Agentforce DX command, use the `--force-overwrite` flag to overwrite the existing authoring bundle if one with the same API name already exists locally. For example:
+
+    ```bash
+    sf agent generate authoring-bundle --no-spec --api-name My_Authoring_Bundle --force-overwrite
+    ```
+    (plugin-agent PR [#327](https://github.com/salesforcecli/plugin-agent/pull/327))
+
+## 2.124.7 (Feb 25, 2026)
+ 
+* NEW: Generate an Experience Cloud site in your DX project with the new `template generate digital-experience site` command. After you pass the command the name of a template (currently only `BuildYourOwnLWR`), the new site name, and an URL path prefix, all the required metadata files are created locally. The metadata files correspond to metadata components such as DigitalExperienceConfig, DigitalExperienceBundle, Network, and CustomSite.
+
+    The `BuildYourOwnLWR` template creates super-fast digital experiences, such as websites, microsites, and portals, using the Lightning Web Components programming model. Powered by Lightning Web Runtime (LWR), this customizable template delivers unparalleled site performance.  For additional details, see this Salesforce Help topic: https://help.salesforce.com/s/articleView?id=experience.rss_build_your_own_lwr.htm.
+
+  Here's an example that generates the metadata files in the `force-app/main/default` directory:
+
+  ```bash
+  sf template generate digital-experience site --template BuildYourOwnLWR --name mysite --url-path-prefix mysite --output-dir force-app/main/default
+  ```
+
+  (plugin-templates PR [#829](https://github.com/salesforcecli/plugin-templates/pull/829))
+
+* NEW: Generate a FlexiPage in your DX project with the new `template generate flexipage` command.  FlexiPages are the metadata types associated with a Lightning page, which represents a customizable screen made up of regions containing Lightning components.  You can generate these types of FlexiPages: `AppPage`, `HomePage`, or `RecordPage`.
+
+   This example generates a `RecordPage` Flexipage for the Account object in the `force-app/main/default/flexipages` directory:
+  ```bash
+  sf template generate flexipage --name Account_Record_Page --template RecordPage --sobject Account --output-dir force-app/main/default/flexipages
+  ```
+  (plugin-templates PR [#833](https://github.com/salesforcecli/plugin-templates/pull/833))
+
+* CHANGE: We reorganized all the commands in [plugin-templates](https://github.com/salesforcecli/plugin-templates) under a top-level topic called `template generate`. As a result, you can now take advantage of autocomplete to list all the available templates to generate things, such as DX projects or Apex classes. 
+
+   But don't worry, we also added aliases to the moved commands, so that the old command names will still work. But they display a deprecation warning that the command name has changed.
+
+   Here are all the affected commands. (plugin-templates PR [#840](https://github.com/salesforcecli/plugin-templates/pull/840), plugin-templates PR [#838](https://github.com/salesforcecli/plugin-templates/pull/838))
+
+  | Old command | New command |
+  | ----------- | ----------- |
+  | apex generate class | template generate apex class |
+  | apex generate trigger | template generate apex trigger |
+  | analytics generate template | template generate analytics template |
+  | lightning generate app | template generate lightning app |
+  | lightning generate component | template generate lightning component |
+  | lightning generate event | template generate lightning event |
+  | lightning generate interface | template generate lightning interface |
+  | lightning generate test | template generate lightning test |
+  | project generate | template generate project |
+  | static-resource generate | template generate static-resource |
+  | visualforce generate component | template generate visualforce component |
+  | visualforce generate page | template generate visualforce page |
+
+* FIX: Salesforce CLI now properly shuts down node processes after sending telemetry events. (GitHub Issues [#3505](https://github.com/forcedotcom/cli/issues/3505) and [#3506](https://github.com/forcedotcom/cli/issues/3506), plugin-telemetry PR [#835](https://github.com/salesforcecli/plugin-telemetry/pull/835))
+
+## 2.123.1 (Feb 18, 2026)
+
+* NEW: **(Generally Available) Build Enterprise-Ready Agents with Agentforce DX and Agent Script**
+
+  After a successful [beta](./README.md#211515-dec-10-2025), we're happy to announce the generally availability of Agentforce DX to build hybrid reasoning Salesforce agents that use Agent Script. These new types of agents have both the predictability that your business demands and the creativity that large language models (LLMs) make possible. Agentforce DX helps pro-code developers build these agents by minimizing context switching, enabling professional DevOps, and simplifying collaboration between low-code and pro-code developers.
+
+  For the list of features we announced in the beta, see [these release notes](https://help.salesforce.com/s/articleView?id=release-notes.rn_tools_afdx_nga_beta.htm&release=260&type=5). Since the beta announcement, we've added or improved the following features:
+  - **Agentforce Vibes Rules for Agent Script**: Agentforce Vibes now includes a global rule for coding Agent Script files. 
+  - **Improved Agent Preview**: Previewing an agent now works the same regardless of how you started the conversation (using an Agent Script file or a published agent.)  Previously you had to configure additional security using a connected app to preview a published agent.
+  - **Programmatic Agent Preview**: (Beta) Preview an agent programmatically, without starting an interactive session, with these four new CLI commands; this feature is particularly useful when you want an agent to test your agent.
+    - `agent preview start`:     Start a programmatic agent preview session.
+    - `agent preview send`:      Send a message to an existing agent preview session.
+    - `agent preview sessions`:  List all known programmatic agent preview sessions.
+    - `agent preview end`:  End an existing programmatic agent preview session and get trace location.
+  - **Enhanced Session Tracer**: Get oodles of useful session trace information with the enhanced Agent Tracer panel in VS Code.  
+  - **Simpler Authoring Bundle Generation**: You're no longer required to generate an agent spec YAML file when generating an authoring bundle. This feature makes it even easier to get started with Agent Script agents.
+
+   The version of the Agentforce DX for VS Code Extension that contains these GA features is 1.7.0; install it from either the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=salesforce.salesforcedx-vscode-agents) or [Open VSX Registry](https://open-vsx.org/extension/salesforce/salesforcedx-vscode-agents).
+
+  See the [Build Agents with Agentforce DX](https://developer.salesforce.com/docs/ai/agentforce/guide/agent-dx.html) section of the _Agentforce Developer Guide_ for details. 
+
+* NEW: Generate a package ZIP file that you can use for debugging or to examine the package contents when you run `package version create` with the new `--generate-pkg-zip` flag.
+
+  This example creates a package version from the contents of the `common` directory and gives it an installation key of `password123` and generates a package ZIP file:
+
+  ```
+  $ sf package version create --path common --installation-key password123 --generate-pkg-zip --target-dev-hub my-dev-hub
+  ```
+    (plugin-packaging PR [#1117](https://github.com/salesforcecli/plugin-packaging/pull/1117))
+
+* FIX: Retrieving DigitalExperienceBundle metadata components now works correctly after you update the Digital Experience site in the org.
+
+    Specifically, let's say you created a page in the Digital Experience site using the in-org builder, and then retrieved it to your DX project with the `project retrieve start` CLI command. You then change the mobile layout in the org, and retrieve the metadata again.  Before this fix, the `mobile.json` file was incorrectly created at the top-level of the page; now it's correctly nested in `mobile/mobile.json`. (source-deploy-retrieve PR [#1680](https://github.com/forcedotcom/source-deploy-retrieve/pull/1680))
+
+* FIX: CLI commands that don't require an org no longer run really slowly in directories in which the `target-org` config variable points to a long-expired scratch org. (GitHub Issue [#3425](https://github.com/forcedotcom/cli/issues/3425), jsforce PR [#1772](https://github.com/jsforce/jsforce/pull/1772))
+
+## 2.122.6 (Feb 11, 2026)
+
+* NEW: Skip retrieving new or changed metadata from your org when you publish an agent's authoring bundle with the new `--skip-retrieve` flag of `agent publish authoring-bundle`.  This feature is useful when you publish the authoring bundle in a CI job and don't need to retrieve the metadata back to your DX project because it already has it; skipping the retrieve can save time. This example shows how to publish an authoring bundle with API name `MyAuthoringBundle` to the org with alias `my-dev-org`, but not retrieve any of the metadata:
+  
+    ```bash
+    sf agent publish authoring-bundle --api-name MyAuthoringbundle --skip-retrieve --target-org my-dev-org
+    ```
+    
+     (plugin-agent PR [#304](https://github.com/salesforcecli/plugin-agent/pull/304), agents PR [#204](https://github.com/forcedotcom/agents/pull/204))
+
+* FIX: When you specify flag values in files via the `--flags-dir` flag, overriding the flags at the command-line now works correctly for all types of flags. Previously, the command would fail if you overrode a flag using its long flag name when it also has a short name.
+
+    Thank you, [Jon Freed](https://github.com/jon-freed), for your contribution. This is your second one in two weeks, you're now quite the expert on `--flags-dir`. Do you have a third one coming up? Ha, no pressure!  But seriously, we love your contribution, thanks again.  (GitHub Issue [#3486](https://github.com/forcedotcom/cli/issues/3486), cli PR [#2554](https://github.com/salesforcecli/cli/pull/2554))
+
+* FIX: The `project deploy start` command now correctly handles an empty `deploy-cache.json` file (an internal file that the CLI uses to manage deployments) rather than throwing a confusing error.  (GitHub Issue [#3387](https://github.com/forcedotcom/cli/issues/3387), sfdx-core PR [#1260](https://github.com/forcedotcom/sfdx-core/pull/1260))
+
+## 2.121.7 (Feb 4, 2026)
+
+* NEW: Open your org right in Agentforce Studio, specifically in the list view that displays all your agents, with the new `org open authoring-bundle` command. This example opens Agentforce Studio in an org with alias `my-org`; the command opens the browser in incognito mode:
+
+     ```bash
+     sf org open authoring-bundle --private --target-org my-org
+     ```
+     
+* CHANGE: Previewing a published agent with the `agent preview` CLI command no longer requires the extra security of a specially-configured connected app. Rather, use the standard way to authorize the org in which the published agent is active (such as with the `org loging web` command) and then you can immediately use `agent preview` to chat with it.  As a result of this change, we've removed the `--client-app` flag from `agent preview` because it's no longer needed. 
+
+    When you run the `agent preview` command without arguments, the list of published agents you can chat with are prepended with the label `(Published)`.  Agents labeled `(Agent Script)` are local to your DX project and the `agent preview` command uses their local Agent Script file in your DX project to preview it.  
+
+* CHANGE: Over the next few weeks we're ending support for these two operating system-specific installers and TAR files:
+
+    * Windows x86
+    * Linux ARM
+ 
+    We are removing the download button for the [Windows x86](https://developer.salesforce.com/tools/salesforcecli) installer from the download page (the Linux ARM TAR file was already removed). We'll keep some [old versions](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_install_cli.htm#sfdx_setup_install_cli_olderversions) for a while, but they too will become unavailable in the future. 
+
+* FIX: Salesforce DX projects now support the WebApplication [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json).
+
+## 2.120.3 (Jan 27, 2026)
+
+* NEW: Improve the usability and maintainability of the [configuration files that contain flag values](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_flag_values_in_files.htm) by adding comments that begin with either `#` or `//`.  For example, let's say that the file `flags/sobject` in your DX project contains the value of the `--sobject` flag of `data create record`.  You can comment the file like this:
+
+    ```bash
+    # Create a record in the Account object
+    Account
+    ```
+
+     Thank you, [Jon Freed](https://github.com/jon-freed), for contributing the code for this excellent new feature. It definitely makes the "flags-dir" feature easier to use and maintain. We love it! (This new feature actually released back in November 2025, so apologies for the tardy announcement.) (cli PR [#2399](https://github.com/salesforcecli/cli/pull/2399))
+
+* FIX: We improved the performance of the `project retrieve start` command. In particular, retrieves of large metatdata components, such as massive static resources, now finish correctly rather than hanging indefinitely. (sfdx-core PR [#1256](https://github.com/forcedotcom/sfdx-core/pull/1256), jsforce PR [#1784](https://github.com/jsforce/jsforce/pull/1784))
+
+* FIX: The `package version` commands now work correctly when specifying `--api-version 60.0` (or lower); previously, some commands returned the `ErrorInvalidIdNoMatchingVersionIdError` error. (GitHub Issue [#3481](https://github.com/forcedotcom/cli/issues/3481), packaging PR [#796](https://github.com/forcedotcom/packaging/pull/796), plugin-packaging PR [#1108](https://github.com/salesforcecli/plugin-packaging/pull/1108))
+
+* FIX: If you create a second sys admin user in a scratch org, and then authorize the scratch org using that second username, then the  `org list` command now correctly lists that org with the second username.  (GitHub Issue [#3439](https://github.com/forcedotcom/cli/issues/3439), plugin-org PR [#1551](https://github.com/salesforcecli/plugin-org/pull/1551))
+
+* FIX: Logging out of multiple orgs with the `org logout --all` command, and deselecting the ones you want to stay logged into, is now working correctly. (GitHub Issue [#3296](https://github.com/forcedotcom/cli/issues/3296), plugin-auth PR [#1437](https://github.com/salesforcecli/plugin-auth/pull/1437), sfdx-core PR [#1255](https://github.com/forcedotcom/sfdx-core/pull/1255))
+
+## 2.119.8 (Jan 20, 2026)
+
+* CHANGE: We removed the `org login device` command from Salesforce CLI, as announced on [August 27, 2025](./README.md#21037-aug-27-2025). 
+
+    We removed the command because it uses the the OAuth 2.0 device flow, which is being blocked by Salesforce. For details see [Prepare for Connected App Usage Restrictions Change](https://help.salesforce.com/s/articleView?id=005132365&type=1&utm_source=techcomms&utm_medium=email&utm_campaign=FY26_Core_4013001).
+
+    Use one of these commands instead of `org login device`:
+  
+    *  [`org login jwt`](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_jwt_flow.htm) to authorize an org in headless environments, such as CI.
+    *  [`org login web`](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_web_flow.htm) to authorize an org using a browser.
+
+* FIX: We fixed a bug that caused deploys and retrieves to hang indefinitely during certain connection errors. (source-deploy-retrieve PR [#1663](https://github.com/forcedotcom/source-deploy-retrieve/pull/1663))
+
+* FIX: Users who have the Manage Dev Sandboxes user permission can now successfully run the `org refresh sandbox` command. (plugin-org PR [#1569](https://github.com/salesforcecli/plugin-org/pull/1569))
+
+* FIX: We fixed all known issues when using Node.js v25 with Salesforce CLI. We still officially support v24, which is the [Active LTS version of Node.js](https://nodejs.org/en/about/previous-releases).
+
+* FIX: When creating a sandbox with the `org create sandbox` command, you can now list the features in the sandbox definition file as either an array (`"features": ["SandboxStorage"]`) or a string (`"features": "['SandboxStorage']"`). (GitHub Issue [#3479](https://github.com/forcedotcom/cli/issues/3479), sfdx-core PR [#1254](https://github.com/forcedotcom/sfdx-core/pull/1254))
+
+* FIX: Salesforce DX projects now support the FlexcardDefinition [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json).
+
+## 2.118.20 (Jan 14, 2026)
+
+* FIX: We fixed some under-the-hood bugs.
+
+## 2.117.7 (Jan 7, 2026)
+
+* NEW: The debug log information outputted by the `--dev-debug` flag now includes the list of files that were ignored during a deployment or retrieval.  This information is useful to debug your `.forceignore` file and understand exactly what's being ignored when you run `project deploy|retrieve start`. (GitHub Issue [#3345](https://github.com/forcedotcom/cli/issues/3345), source-deploy-retrieve PR [#1656](https://github.com/forcedotcom/source-deploy-retrieve/pull/1656))
+
+* UPDATE: Use the existing `package update` command to set the recommended version of a package. When you set a package version as the recommended version, your subscribers see an **Upgrade to Recommended Version** option on the Installed Packages page in their org. Only released package versions can be set as the recommended version. This example sets `PackageA@1.0 as` the recommended version.
+
+    ```bash
+    sf package update --package 0Ho.. --target-dev-hub devhub@example.com --recommended-version-id PackageA@1.0  
+    ```
+
+   Run `package update --help` for more information. NOTE: This feature is available for only Spring '26 orgs (API version 66.0).
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+	* IntegArtifactDef
+	* OnboardingDataObjectGroup
+	* PartyProfileDataObjectValidityDefinition
+
+## December 23 and 30, 2025
+
+Due to the holiday break in the United States, we aren't releasing new stable versions. Happy holidays!
+
+## 2.116.6 (Dec 17, 2025)
+
+* NEW: Specify the number of seconds to poll the org to check for the test status when you run `apex test run` with the new `--poll-interval`.  Previously the poll interval was hard-coded to 1 second. This example shows how to set the poll interval to 5 seconds:
+
+    ```bash
+     sf apex run test --class-names MyClassTest --result-format human --poll-interval 5 --target-org my-org
+    ```
+
+  (GitHub Issue [#3456](https://github.com/forcedotcom/cli/issues/3456), plugin-apex PR [#832](https://github.com/salesforcecli/plugin-apex/pull/832), salesforcedx-apex PR [#597](https://github.com/forcedotcom/salesforcedx-apex/pull/597))
+
+* FIX: If an org is configured to block API connections, running one of the `org login` CLI commands now fails quickly rather than going into a loop until, for example, maximum login requests are reached. (GitHub Issue [#3428](https://github.com/forcedotcom/cli/issues/3428), sfdx-core PR [#1248](https://github.com/forcedotcom/sfdx-core/pull/1248), jsforce PR [#1774](https://github.com/jsforce/jsforce/pull/1774))
+
+* FIX: Salesforce DX projects now support the `StageAssignment` [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json). 
+
+## 2.115.15 (Dec 10, 2025)
+
+* NEW: (Beta) Build complex, deterministic, enterprise-ready agents with Agent Script and Agentforce DX.
+
+    Agentforce DX is the pro-code equivalent of the newly-released [Agentforce Builder](https://help.salesforce.com/s/articleView?id=release-notes.rn_einstein_agent_builder.htm&release=258&type=5) UI that runs in your org. See [Author an Agent with Agentforce DX](https://developer.salesforce.com/docs/einstein/genai/guide/agent-dx-nga-author-agent.html) in the _Agentforce Developer Guide_ for more information.  New features include: 
+
+   * Author agents using [Agent Script](https://developer.salesforce.com/docs/einstein/genai/guide/agent-script.html), the language for building Salesforce agents. Agent Script combines the flexibility of using natural language for code generation with the reliability of programmatic expressions for handling business rules.
+
+   * Easily edit Agent Script files in the VS Code editor with the new [Agent Script VS Code extension](https://marketplace.visualstudio.com/items?itemName=salesforce.agent-script-language-client), which provides standard code editing features: syntax highlighting, visual syntax cues (such as red squiggles for errors), internal validation, and Outline support.
+   
+   * Preview an agent conversation from its Agent Script file and get the behind-the-scenes details of how your agent is working with the updated [Agentforce DX VS Code Extension](https://marketplace.visualstudio.com/items?itemName=salesforce.salesforcedx-vscode-agents) The preview supports two modes: simulated (which mocks data) and live mode (which uses real Apex classes, flows, and other resources).
+ 
+   * Generate, validate, and publish an _authoring bundle_ with these new CLI commands. An authoring bundle is a new metadata type ([AiAuthoringBundle](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_aiauthoringbundle.htm)) that represents an agent that uses Agent Script as its blueprint. 
+        * `agent generate authoring-bundle`: Generate an authoring bundle from an existing agent spec YAML file. 
+        * `agent validate authoring-bundle`: Validate an authoring bundle to ensure its Agent Script file compiles successfully and can be used to publish an agent.
+        * `agent publish authoring-bundle`: Publish an authoring bundle to your org, which results in a new agent or a new version of an existing agent.
+  
+* FIX: You no longer get an error if you run `apex run test` asynchronously, such as with the `--wait 0` flag, and also specify an output format or `--code-coverage`. (GitHub Issue [#2963](https://github.com/forcedotcom/cli/issues/2963), salesforcedx-apex PR [#596](https://github.com/forcedotcom/salesforcedx-apex/pull/596))
+
+* FIX: The `org login web` command, when run with the `--scopes` flag, now correctly requests the specified authentication (OAuth) scopes, rather than always requesting the default scopes (`refresh_token api web`). (plugin-auth PRs [#1420](https://github.com/salesforcecli/plugin-auth/pull/1420) and [#1423](https://github.com/salesforcecli/plugin-auth/pull/1423))
+
+## 2.114.5 (Dec 3, 2025)
+
+* NEW: (Beta) Specify that you want to run only relevant Apex tests when you deploy metadata to your org with the new `RunRelevantTests` value of the `--test-level` flag of the `project deploy start|validate` and `project delete source` commands.
+
+    Salesforce automatically identifies the relevant tests based on an analysis of the deployment payload and the payload dependencies. For fine-grained control, you can also annotate test classes so that they always run in certain conditions. See [@IsTest Annotation](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_annotation_isTest.htm) in the _Apex Developer Guide_. Each class and trigger in the deployment package must be covered by the executed tests for a minimum of 75% code coverage. This coverage is computed for each class and triggers individually and is different than the overall coverage percentage.
+ 
+    **NOTE**: This feature is available only for Spring '26 orgs (API version 66.0). 
+
+    This example deploys source files in the `force-app` package directory to the org with alias `my-scratch` and runs only the Apex tests that are relevant to the actual metadata that's being deployed:
+
+    ```bash
+    sf project deploy start --source-dir force-app --test-level RunRelevantTests --target-org my-scratch
+    ```
+    (plugin-deploy-retrieve PR [#1479](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1479), source-deploy-retrieve PR [#1644](https://github.com/forcedotcom/source-deploy-retrieve/pull/1644))
+
+* FIX: The `project retrieve start` command now correctly fails and outputs an error message if you specify an output directory (with the `--output-dir` flag) that is outside of the Salesforce DX project. (GitHub Issue [#3432](https://github.com/forcedotcom/cli/issues/3432), plugin-deploy-retrieve PR [#1480](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1480))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * AccountPlanObjMeasCalcDef (GitHub Issue [#3395](https://github.com/forcedotcom/cli/issues/3395))
+    * LightningOutApp (GitHub Issue [#3435](https://github.com/forcedotcom/cli/issues/3435))
+    * DataObjectSearchIndexConf (GitHub Issue [#3441](https://github.com/forcedotcom/cli/issues/3441))
+
+## Nov 26, 2025
+
+Due to the Thanksgiving break in the United States, we aren't releasing a new stable version. Happy Thanksgiving!
+
+## 2.113.6 (Nov 19, 2025)
+
+* FIX: We fixed some under-the-hood bugs.
+
+## 2.112.6 (Nov 12, 2025)
+
+**ANNOUNCEMENT OF UPCOMING CHANGES**
+
+* **`plugins link` Command**: (This change impacts Salesforce CLI plugin developers who use `yarn` as their package manager.) Starting March 2026, the `plugins link` command will no longer automatically install dependencies after it links the specified plugin into Salesforce CLI. You will need to run `yarn` manually to install the required dependencies before you run `plugins link`. In this release, the `plugins link` command has been updated to include a reminder about this upcoming change.  This change doesn't impact plugin developers who use `npm` or `pnmp` as their package manager because those types of plugins already don't get dependencies automatically installed when linked.  (oclif plugin-plugins PR [#1230](https://github.com/oclif/plugin-plugins/pull/1230))
+* **Bundled Node.js Version**: Starting February 2026, the Salesforce CLI installer for Windows, macOS, and Linux tarballs will start bundling Node.js v24 (Current LTS) instead of Node.js v22 (Maintenance LTS).  See [this pinned GitHub issue](https://github.com/forcedotcom/cli/issues/3445) for additional information. 
+
+## 2.111.7 (Nov 5, 2025)
+
+* NEW: Retrieve package metadata for a specified package version with the new `package version retrieve` command. Package metadata can be retrieved for only second-generation managed package versions or unlocked packages.
+
+   This example shows how to retrieve package metadata for a converted subscriber package version ID (starts with 04t) into `my-directory/` within your Salesforce DX project directory:
+
+  ```bash
+  sf package version retrieve --package 04tXXX --output-dir my-directory/ --target-dev-hub devhub@example.com
+  ```
+
+* FIX: Salesforce DX projects now support the FlowValueMap [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json).
+ 
+## 2.110.22 (Oct 29, 2025)
+
+* FIX: Using the `SF_MDAPI_TEMP_DIR` environment variable when running `project retrieve start` now generates a correct directory name on Windows. (GitHub Issue [#3416](https://github.com/forcedotcom/cli/issues/3416), plugin-deploy-retrieve PR [#1460](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1460), source-deploy-retrieve PR [#1635](https://github.com/forcedotcom/source-deploy-retrieve/pull/1635))
+
+* FIX: The `org open` and `org open agent` commands now correctly generate frontdoor URLs so you can now successfully use the `--source-file` flag to open the org at a specific builder, such as  or Agentforce Builder or the setup page for Apex classes. (GitHub Discussion [#3427](https://github.com/forcedotcom/cli/discussions/3427), plugin-org PR [#1529](https://github.com/salesforcecli/plugin-org/pull/1529))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * ComputeExtension
+    * DataMapperDefinition
+    * GiftEntryGridTemplate
+    * IntegrationProcdDefinition
+    * McpServerDefinition
+    * OmniscriptDefinition
+
+## 2.109.7 (Oct 22, 2025)
+
+* NEW: If you authorize an org with the `org login web` CLI command, but it runs into an issue during the org login process, the CLI command now times out after 2 minutes rather than hang indefinitely. You can customize the number of milliseconds that the command waits to timeout with the new SF_WEB_OAUTH_SERVER_TIMEOUT environment variable.  The default value is 120000 (2 minutes). This example sets the timeout to 3 minutes:
+
+    ```bash
+    export SF_WEB_OAUTH_SERVER_TIMEOUT=180000
+    ```
+    (sfdx-core PR [#1245](https://github.com/forcedotcom/sfdx-core/pull/1245), sfdx-core PR [#1246](https://github.com/forcedotcom/sfdx-core/pull/1246))
+
+## Oct 8 and 15, 2025
+
+Due to Dreamforce, we aren't releasing a new stable version on these dates. If you're attending Dreamforce, stop by Moscone West and say hello!
+
+## 2.108.6 (Oct 1, 2025)
+
+* FIX: Salesforce DX projects now support the TransactionProcessingType [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json). 
+
+## 2.107.6 (Sept 24, 2025)
+
+* NEW: (Beta) Run tests for multiple Salesforce features, such as Apex classes and Flows, in a single and unified way with these new commands:
+
+    - `logic run test`: Invoke tests for Apex and Flows in an org.
+    - `logic get test`: Get the results of a test run if it timed out.  
+
+    Running the tests together with a single command ensures seamless interoperability between the features.
+
+    Many flags of these new commands mimic the flags for the existing `apex run|get test` and `flow run|get test` commands, such as `--tests`, `--test-level`, `--code-coverage`, `--class-names`, `--output-dir`, and more.  But the new `logic run test` command expands the `--tests` flag so that you can specify _both_ Apex and Flow tests and adds a `--test-category` flag to narrow the type of tests you want to run.  To specify a flow test, use this format: `FlowTesting.<name-of-flow-test>`. Run `sf logic run test --help` for more information about getting the exact name of a Flow test. 
+
+  By default, the `logic run test` command executes asynchronously and returns a test run ID. Then use the `logic get test` command to retrieve the results. If you want to wait for the test run to complete and see the results in the command output, use the `--synchronous` flag.
+
+  This example runs all local Apex and Flow tests in the org with alias `my-scratch` asynchronously:
+
+  ```bash
+  sf logic run test --test-level RunLocalTests --test-category Apex --test-category Flow --target-org my-scratch
+  ```
+
+  The command returns a test run ID which you pass to the `logic get test` command to get the test results:
+
+  ```bash
+  sf logic get test --test-run-id <test-run-id>
+  ```
+  (plugin-apex PR [#792](https://github.com/salesforcecli/plugin-apex/pull/792) and [#795](https://github.com/salesforcecli/plugin-apex/pull/795))
+
+
+* CHANGE: As we noted in the [April 30, 2025](README.md#2869-april-30-2025) release notes, Salesforce CLI now returns an error when you run `org logout` on an org that you haven't authorized; since April the command displayed only a warning. The exit code in this scenario has also changed from 0 to 1. (GitHub Issue [#3247](https://github.com/forcedotcom/cli/issues/3247), plugin-auth PR [#1366](https://github.com/salesforcecli/plugin-auth/pull/1366))
+
+* FIX: We fixed a regression in the `apex run test` command so that it now makes the expected number of API calls. (GitHub Issue [#3380](https://github.com/forcedotcom/cli/issues/3380), salesforcedx-apex PR [#569](https://github.com/forcedotcom/salesforcedx-apex/pull/569))
+
+* FIX: We increased the request timeout period in the JSForce `node-fetch` wrapper to prevent Salesforce CLI commands (such as `org create scratch`) from timing out too quickly. (GitHub Issue [#3354](https://github.com/forcedotcom/cli/issues/3354), jsforce PRs [#1738](https://github.com/jsforce/jsforce/pull/1738) and [#1745](https://github.com/jsforce/jsforce/pull/1745))
+
+* FIX: We fixed the Salesforce CLI telemetry dependencies and now the CLI is using all the correct licenses. (GitHub Issue [#3392](https://github.com/forcedotcom/cli/issues/3392), telemetry PR [#450](https://github.com/forcedotcom/telemetry/pull/450))
+
+* FIX: We updated `apex run test` to align with the changed API response in v65.0, which in turned fixed the TypeError in `apex get test`. (GitHub Issue [#3389](https://github.com/forcedotcom/cli/issues/3389), salesforcedx-apex PR [#568](https://github.com/forcedotcom/salesforcedx-apex/pull/568))
+
+## 2.106.6 (Sept 17, 2025)
+
+* FIX: We fixed a Windows security vulnerability to ensure that the Salesforce CLI installer always executes the correct `cmd.exe` file. (cli PR [#2365](https://github.com/salesforcecli/cli/pull/2365), oclif PR [#1852](https://github.com/oclif/oclif/pull/1852))
+
+## 2.105.6 (Sept 10, 2025)
+
+* ANNOUNCEMENTS:
+    
+	* Starting 8/28/2025, the OAuth 2.0 Device Flow is blocked in the default `Salesforce CLI` connected app. See the [pinned issue](https://github.com/forcedotcom/cli/issues/3368) for more information. 
+	* Starting in December 2025, the `project deploy start` and `project retrieve start` commands will require that the target org use source tracking, unless you specify the metadata you want to deploy or retrieve. If you deploy or retrieve to an org that doesn’t use source tracking, then you must specify the metadata you want to deploy or retrieve. See the [pinned issue](https://github.com/forcedotcom/cli/issues/3375) for more information.
+
+------------
+
+* FIX: We fixed some under-the-hood bugs.
+
+## 2.104.6 (Sept 3, 2025)
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * FieldMappingConfig
+    * FieldMappingConfigItem
+
+## 2.103.7 (Aug 27, 2025)
+
+* NEW: Check out the new release of the [Agentforce DX for VS Code extension](https://marketplace.visualstudio.com/items?itemName=salesforce.salesforcedx-vscode-agents)! You can now chat with an active agent using the new Agent Preview panel to see how the agent responds to your statements, questions, and commands (utterances). This feature is the VS Code equivalent of the `agent preview` CLI command.  And if an agent action that's implemented with an Apex class encounters an error, you can use **Debug Mode** during the chat to automatically invoke the [Apex Replay Debugger](https://developer.salesforce.com/docs/platform/sfvscode-extensions/guide/replay-debugger.html).
+
+    See the [README](https://github.com/forcedotcom/vscode-agents/blob/HEAD/README.md#preview-an-agent-and-debug-the-conversation) for prerequisites and instructions for using this feature. 
+
+* NEW and CHANGED: Last week (in version 2.102.6), we introduced a new feature to display details about an invoked action when running agent tests with the `agent test run|resume|report` CLI commands. These details are in JSON format and displayed in the Generated Data section of the test results. Depending on the action, the JSON can get pretty long. So for simplicity, we no longer output these details _by default_; instead, use the new `--verbose` flag to output the details. This example runs an agent test and specifies that the output should include the generated data:
+
+    ```bash
+    sf agent test run --api-name Resort_Manager_Test --verbose --wait 40
+    ```
+    
+    (plugin-agent PR [#189](https://github.com/salesforcecli/plugin-agent/pull/189))
+
+* CHANGE: We removed the `--async` flag of each of these commands:
+
+    * `data delete bulk`
+    * `data export bulk`
+    * `data import bulk`
+    * `data update bulk`
+    * `data upsert bulk`
+
+    The commands don't need the `--async` flag because they're asynchronous by default. We deprecated the flag back in [April 23, 2025)](./README.md#2857-april-23-2025. (plugin-data PR [#1303](https://github.com/salesforcecli/plugin-data/pull/1303))
+
+* CHANGE: We deprecated the `org login device` command and will remove it from Salesforce CLI in the near future. It's also now hidden, so it won't appear when you run `sf org login -h`. 
+
+    We are taking these actions because the command uses the the OAuth 2.0 device flow, which is being blocked.  For details see [Prepare for Connected App Usage Restrictions Change](https://help.salesforce.com/s/articleView?id=005132365&type=1&utm_source=techcomms&utm_medium=email&utm_campaign=FY26_Core_4013001).
+
+    We recommend that instead of `org login device`, you use one of these other commands:
+  
+    *  [`org login jwt`](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_jwt_flow.htm) to authorize an org in headless environments, such as CI.
+    *  [`org login web`](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_web_flow.htm) to authorize an org using a browser.
+
+* FIX: Salesforce DX projects now support the UiPreviewMessageTabDef [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json). 
+
+## 2.102.6 (Aug 20, 2025)
+
+* NEW: Easily activate or deactivate an agent in your org when using the [VS Code Agentforce DX extension](https://marketplace.visualstudio.com/items?itemName=salesforce.salesforcedx-vscode-agents) by right-clicking on one of the agent's Bot metadata files and clicking **SFDX: Activate Agent** or **SFDX: Deactivate Agent**. The agent's Bot metadata files are in the `bots` folder of your package directory (`force-app` by default).
+
+    Activating an agent makes it immediately available to your users. If you deactivate a currently-active agent, which makes it unavailable to users, you're prompted to confirm. Only one agent version can be active at a time, so if you activate a new version, the old one is deactivated. 
+
+    If you (de)activate an agent from its Bot folder or its main Bot metadata file (such as `Resort_Manager.bot-meta.xml`), the latest agent version is (de)activated. To (de)activate a non-latest version, right-click on its version file, such as `v1.botVersion-meta.xml`. (vscode-agents PR [#55](https://github.com/forcedotcom/vscode-agents/pull/55))
+
+* NEW: When running agent tests with the `agent test run|resume|report` CLI commands or from the VS Code Agent Testing Panel, and a test utterance invoked an action, the test results now include details about the invoked action in JSON format. Details include any Apex classes or Flows that were invoked, any Salesforce objects that were touched, and so on.  (plugin-agent PR [#185](https://github.com/salesforcecli/plugin-agent/pull/185))
+
+* CHANGE: As we announced in [March 2025](https://github.com/forcedotcom/cli/issues/3249), when you now use the `org open` command with the `--json` or `--url-only` flags, the generated URLs in the output will be single-use only. This means that the URLs can be used only one time; subsequent use won’t allow you to log into the org.  The URLs also expire 60 seconds after they are generated. Finally, as a result of this change, we no longer support the `SF_SINGLE_USE_ORG_OPEN_URL` environment variable. (plugin-org PR [#1484](https://github.com/salesforcecli/plugin-org/pull/1484))
+
+* FIX: The CatalogedApiArtifactVerInfo metadata type has been correctly renamed CatalogedApiArtifactVersionInfo in the [metadata registry](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json). (source-deploy-retrieve PR [#1600](https://github.com/forcedotcom/source-deploy-retrieve/pull/1600))
+
+## 2.101.5 (Aug 13, 2025)
+
+* NEW: Easily activate or deactivate an agent in your org with the new `agent activate|deactivate` commands.  Activating an agent makes it immediately available to your users. 
+
+  The two commands use the agent's API name; if you know it, use the `--api-name` flag to specify it. If you don't use the flag, the command lists the agents in your org for you to select. This example shows how to activate an agent with API name `Coral_Cloud_Agent` in your default org:
+
+  ```bash
+  sf agent activate --api-name Coral_Cloud_Agent
+  ```
+
+  This example prompts you to choose an agent to deactivate in the org with alias `my-org`:
+
+  ```bash
+  sf agent deactivate --target-org my-org
+  ```
+
+  (plugin-agent PR [#182](https://github.com/salesforcecli/plugin-agent/pull/182))
+
+* NEW: Add more context to agent tests with the updated `agent generate test-spec` CLI command which now asks if you want to add boilerplate conversation history to each individual test case. The boilerplate is simply a template that you then edit with the specific history of a conversation that can happen before the test case's utterance.
+
+  For example, let's say you're testing a shopping assistant agent, and a test case has the utterance of "When will my purchase arrive?".  To better test this utterance, you can add a conversation history like this:
+
+  ```yaml
+    conversationHistory:
+      - role: user
+        message: I purchased an item last week but it hasn't arrived yet.
+      - role: agent
+        message: What is your order ID?
+        topic: ask_for_order_id
+      - role: user
+        message: It's 123456.
+      - role: agent
+        message: You ordered a Wacky Cat Bobblehead, right?  Great choice.
+        topic: look_up_order
+  ```
+
+  The `agent generate test-spec` command uses the Agentforce Testing API under the covers. For more information, see [Conversation History](https://developer.salesforce.com/docs/einstein/genai/guide/testing-api-build-tests.html#conversation-history). (plugin-agent PR [#181](https://github.com/salesforcecli/plugin-agent/pull/181))
+
+* NEW: Display the dependency graph for an unlocked or 2GP managed package version with the new `package version displaydependencies` CLI command. This example displays the dependencies of the specified package version in the order that the dependencies must be installed (root last):
+
+    ```bash
+    sf package version displaydependencies --package 04t... --edge-direction root-last --target-dev-hub devhub@example.com
+    ```
+
+    Run `sf package version displaydependencies` for additional examples and configuration information. (plugin-packaging PR [#1018](https://github.com/salesforcecli/plugin-packaging/pull/1018))
+
+* CHANGE: We removed  the `@salesforce/sfdx-scanner` plugin from the list of JIT (just in time) plugins. As a result, you must manually install the plugin if you want to use a `scanner` command and the plugin isn't installed in Salesforce CLI.  We removed this plugin from the JIT list because it contains CLI commands for Code Analyzer v4, which being [retired](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/release-notes.md#code-analyzer-v4120-end-of-life). Use [Code Analyzer v5](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/code-analyzer.html) instead. (cli PR [#2322](https://github.com/salesforcecli/cli/pull/2322))
+
+## 2.100.4 (Aug 6, 2025)
+
+* NEW: Add custom evaluations to your agent test spec with the updated `agent generate test-spec` command, which now asks if you want to add one to a specific test case.  
+
+    Custom evaluations test an agent response for specific strings or numbers. If you opt to add a custom evaluation to an agent test case, you'll be prompted for the following information:
+  
+     * Label: A descriptive name of the custom evaluation. 
+     * JSONPath expression: Enables you to automatically point to the data you want to test. For details on how to construct a JSONPath expression, see [Dynamically Reference Generated Data](https://developer.salesforce.com/docs/einstein/genai/guide/testing-api-custom-evaluation-criteria.html#dynamically-reference-generated-data).
+     * Comparison operator: The operator used to compare the expected and actual values returned from the test. Examples are equals, greater than or equal, and so on. 
+     * Expected value: The value you expect after the evaluation is tested.
+  
+   The `agent generate test-spec` command uses the Agentforce Testing API under the covers. Therefore, for more information, see [Add Custom Evaluation Criteria to a Test Case](https://developer.salesforce.com/docs/einstein/genai/guide/testing-api-custom-evaluation-criteria.html#get-started-with-custom-evaluation-criteria). (plugin-agent PR [#177](https://github.com/salesforcecli/plugin-agent/pull/177))
+
+* FIX: You can once again successfully create a scratch org asynchronously (`org create scratch --async`) and then resume its creation (`org resume scratch`).   (GitHub Issue [#3322](https://github.com/forcedotcom/cli/issues/3322), sfdx-core PR [#1207](https://github.com/forcedotcom/sfdx-core/pull/1207), plugin-org PR [#1473](https://github.com/salesforcecli/plugin-org/pull/1473))
+
+* FIX: The `agent generate test-spec` command now works correctly with both the GenAiPlanner (legacy) and GenAiPlannerBundle (new) metadata types, both of which represent agent planners.  (plugin-agent PR [#174](https://github.com/salesforcecli/plugin-agent/pull/174))
+
+* FIX: We updated the npm dependencies in our project templates so that you no longer get an error when you run `project generate` and then `npm install` in the DX project. (GitHub Issue [#3222](https://github.com/forcedotcom/cli/issues/3222), GitHub Issue [#3278](https://github.com/forcedotcom/cli/issues/3278), GitHub Issue [#3295](https://github.com/forcedotcom/cli/issues/3295))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * CatalogedApi
+    * CatalogedApiVersion
+    * CatalogedApiArtfctVerInfo
+    * RuleLibraryDefinition (GitHub Issue [#3099](https://github.com/forcedotcom/cli/issues/3099))
+
+## 2.99.6 (July 30, 2025)
+
+* NEW: We improved the performance of deploys and retrieves. (source-deploy-retrieve PR [#1583](https://github.com/forcedotcom/source-deploy-retrieve/pull/1583), source-deploy-retrieve PR [#1591](https://github.com/forcedotcom/source-deploy-retrieve/pull/1591))
+
+  Many thanks to Jon Freed ((@jon-freed)[https://github.com/jon-freed]), who is actually the "we" in the previous sentence. Jon contributed all the source code, which cleverly cuts back the number of string manipulations and simplifies key lookups, resulting in faster deployments and retrievals. We are delighted with your generous contribution. 
+
+## 2.98.6 (July 23, 2025)
+
+* NEW: We've improved the performance of `project deploy|retrieve start` when used with source tracking.  (source-tracking PRs [#794](https://github.com/forcedotcom/source-tracking/pull/794) and [#732](https://github.com/forcedotcom/source-tracking/pull/732))
+
+   Big thanks to Luke Cotter ([@lukecotter](https://github.com/lukecotter)) who contributed all the code for this awesome performance improvement. Who doesn't love a faster metadata deployment? We really appreciate it, Luke!
+   
+* FIX: You can now successfully deploy a new custom field and updated workflow to your org when using decomposed workflows (beta) in your DX project. (GitHub Issue [#3320](https://github.com/forcedotcom/cli/issues/3320))
+
+* FIX: Salesforce DX projects now support the ExternalStoragePrvdConfig [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json).
+
+## 2.97.6 (July 16, 2025)
+
+* FIX: Running `project deploy start` with the `--dry-run` flag is now working correctly. (GitHub Issue [#3336](https://github.com/forcedotcom/cli/issues/3336), plugin-deploy-retrieve PR [#1395](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1395))
+
+## 2.96.4 (July 9, 2025)
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * ApiNamedQuery
+    * ObjIntegProviderDefMapping
+    * DataConnector
+    * ExtlClntAppCanvasStngs
+ 
+## 2.95.6 (July 3, 2025)
+
+* FIX: Salesforce CLI now displays tables correctly when column size is resolved to 0 in some CI environments. (GitHub issue [#3317](https://github.com/forcedotcom/cli/issues/3317), oclif PR [#167](https://github.com/oclif/table/pull/167)
+
+* FIX: You can now correctly clone a sandbox with Data Storage Upgrades. (GitHub issue [#3293](https://github.com/forcedotcom/cli/issues/3293), sfdx-core PR [#1205](https://github.com/forcedotcom/sfdx-core/pull/1205)
+
+* FIX: The `sf agent generate test-spec` command no longer generates a Yaml file with an empty expectedActions array when the action contains single quotes. (GH issue [#3314](https://github.com/forcedotcom/cli/issues/3314), Agents PR [#115](https://github.com/forcedotcom/agents/pull/115))
+
+* FIX: We fixed a bug in which the string replacement functionality incorrectly emits warning saying the string to replace was not found when processing large files. (GH issue [#3318](https://github.com/forcedotcom/cli/issues/3318), source-deploy-retrieve PR [#1577](https://github.com/forcedotcom/source-deploy-retrieve/pull/1577)) 
+
+## 2.94.6 (June 25, 2025)
+
+* FIX: The `sf project deploy start` command no longers modifies source-tracking info when using the `--dry-run` flag. (GitHub issue [#3243](https://github.com/forcedotcom/cli/issues/3243), plugin-deploy-retrieve PR [#1372](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1372)
+
+* NEW: We’ve added a --code-coverage flag to the package convert command.
+
+   Calculate and store the code coverage percentage by running the packaged Apex tests included in the package version. To promote a package version to released, you must use the --code-coverage flag. The package must also meet the code coverage requirements.
+
+  This example converts the latest managed-released version of the 1GP package with the specified package ID and calculates code coverage; the example uses the default Dev Hub org:
+
+  ```bash
+    sf package convert --package 033... --code-coverage
+  ```
+
+## 2.93.7 (June 18, 2025)
+
+* NEW: Link multiple connected apps in an org to an authenticated user, enabling Salesforce CLI commands to use these connected apps for API-specific requirements, like new OAuth scopes or JWT-based access tokens.
+
+    As a result of this new feature, the authentication flow to use the `agent preview` CLI command to interact with an agent is now much easier. Previously you had to create a new Salesforce username for each Agentforce agent you wanted to interact with, and then specify it with the `--connected-app-user` flag. Now you use the same username you normally authenticate with, then specify the link to the connected app with the new `--client-app` flag. The `agent preview` command is currently the only CLI command that requires this feature.
+
+    Let's see how this works. First, you create the link to a connected app by re-running the `org login web` command and using the `--client-id` flag to specify the connected app's consumer secret (also called _client id_).  You also specify these new flags:
+
+    * `--client-app`: The name of the link to the connected app. You can specify any string you want. 
+    * `--username`: The username of the authenticated user.  This is the username you specified when you originally authorized your org with `org login web`. 
+    * `--scopes`: The OAuth scopes required by the CLI command that is going to use the link. 
+
+    In this example, the resulting link is called `agent-app` which you later use with the command that requires this connected app, such as `agent preview`.  
+
+    ```bash
+    sf org login web --client-app agent-app --username jdoe@example.com --client-id 3MVG9XgkMlongstring --scopes "sfap_api chatbot_api refresh_token api web"
+    ```
+
+    Then use the new `--client-app` flag of the `agent preview` command to specify the link to the connected app.  For example: 
+
+    ```bash
+    sf agent preview --api-name "Resort_Manager" --client-app agent-app --target-org my-org
+    ```
+
+    (sfdx-core PR [#1188](https://github.com/forcedotcom/sfdx-core/pull/1188), plugin-auth PR [#1306](https://github.com/salesforcecli/plugin-auth/pull/1306), plugin-agent PR [#157](https://github.com/salesforcecli/plugin-agent/pull/157))
+
+* NEW: We're happy to announce that the Source Mobility feature is now generally available (GA)!  With this feature you can move source files within your local Salesforce DX project without the source-tracking feature thinking that you've deleted and then recreated a metadata component. 
+
+   A few things to keep in mind:
+
+    * Now that source mobility is GA, the feature is enabled by default. To opt-out of the behavior, set the new SF_DISABLE_SOURCE_MOBILITY environment variable to `true`; the variable is `false` by default.
+    * We removed the old environment variable for opting into the Beta feature (SF_BETA_TRACK_FILE_MOVES).
+    * Source Mobility works with file _moves_, not file _renames_. Renaming a source file is still interpreted as deleting a metadata component and creating a new one with the different name.
+    * Child source files can move only to an identically named parent. For example, a custom field can move between Object folders in different package directories only if both Object folders have the same name.
+
+    Enjoy reorganizing your DX project source files! (source-tracking PR [#778](https://github.com/forcedotcom/source-tracking/pull/778))
+
+* NEW: Simplify your packaging push upgrades by leveraging the four new CLI commands that let you schedule, abort, view details on on a specific package upgrade, or view a list of all push upgrade jobs:
+
+    * `package push-upgrade schedule`: Schedules a push upgrade for an unlocked or second-generation managed package.
+    * `package push-upgrade abort`: Cancels a push upgrade request.
+    * `package push-upgrade list`: Displays the status of all push upgrade requests for a specific package..
+    * `package push-upgrade report`: Displays detailed information for a specific push upgrade request.
+
+    Push upgrades let you upgrade unlocked or second-generation managed packages installed in orgs, without asking customers to install the upgrade themselves.
+
+    This example schedules a push upgrade that initiates at a specified time, and provides a list of org IDs to receive the package upgrade.
+
+    ```bash
+    sf package push-upgrade schedule --package 04txyz --start-time "2024-12-06T21:00:00" --org-list 00DAxx, 00DBx
+    ```
+
+* FIX: Decomposed workflows now play nice with other metadata in your DX project when deploying to an org. (GitHub issue [#3275](https://github.com/forcedotcom/cli/issues/3275), source-deploy-retrieve PR [#1571](https://github.com/forcedotcom/source-deploy-retrieve/pull/1571))
+
+## 2.92.7 (June 11, 2027)
+
+* NEW: The `package convert` command is now generally available. Package migrations let you convert an existing first-generation (1GP) package into a second-generation (2GP) package, and then migrate the 1GP package installed in subscriber orgs to 2GP. This example converts the latest managed-released version of the 1GP package with the specified package ID and gives it the installation key "password123"; the example uses the default Dev Hub org:
+ 
+   ```bash
+   sf package convert --package 033... --installation-key password123
+   ```
+  
+* NEW: The `agent generate template` command is now generally available. Use this command to generate an agent template from an existing agent in your DX project so you can then package the template in a managed package. For example:
+
+    ```bash
+    sf agent generate template --agent-file force-app/main/default/bots/My_Agent/My_Agent.bot-meta.xml --agent-version 1
+    ```
+
+    (plugin-agent PR [#152](https://github.com/salesforcecli/plugin-agent/pull/152))
+
+* CHANGE: We converted the plugin that contains the `agent` commands ([`plugin-agent`](https://github.com/salesforcecli/plugin-agent)) from JIT to core. As a result, starting with this release, new installs of Salesforce CLI automatically include the plugin.  (cli PR [#2254](https://github.com/salesforcecli/cli/pull/2254))
+
+* FIX: Re-retrieving a custom object after adding a custom field using Salesforce UI now works correctly. (GitHub issues [#3300](https://github.com/forcedotcom/cli/issues/3300) and [#3301](https://github.com/forcedotcom/cli/issues/3301), plugin-deploy-retrieve PR [#1568](https://github.com/forcedotcom/source-deploy-retrieve/pull/1568))
+
+## 2.91.6 (June 4, 2025)
+
+* FIX: If you run a command that uses a SOAP API, such as `project deploy start`, and you have configured your connected app or external client app to issue JWT-based access tokens, the command now correctly fails and outputs an error message saying that the SOAP API doesn't support JWT-based access tokens.  (GitHub issue [#3297](https://github.com/forcedotcom/cli/issues/3297), jsforce PR [#1698](https://github.com/jsforce/jsforce/pull/1698))
+
+* FIX: If you set the SF_ORG_METADATA_REST_DEPLOY environment variable or the `org-metadata-rest-deploy` configuration variable to `true`, then org settings in the scratch org definition file are now deployed using the REST API instead of the default SOAP API. (sfdx-core PR [#1192](https://github.com/forcedotcom/sfdx-core/pull/1192))
+
+## 2.90.4 (May 28, 2025)
+
+* NEW: Enable Apex debug logging when you use the `agent preview` CLI command to converse with your agent with the new `--apex-debug` flag. For example:
+
+    ```bash
+    sf agent preview --api-name "Resort_Manager" --target-org my-org --connected-app-user my-agent-user --apex-debug
+    ```
+
+    With this new flag, when any conversation message executes Apex code, a new Apex debug log file is written to the specified output directory, along with the transcript and response JSON files.  See [Debug Apex Code](https://developer.salesforce.com/docs/platform/sfvscode-extensions/guide/apex-debugging.html) in the _Salesforce Extensions for Visual Studio Code_ guide for information about using these debug log files. (plugin-agent PR [#141](https://github.com/salesforcecli/plugin-agent/pull/141))
+  
+* FIX: When you run `project deploy start` with the `--verbose` flag, and also set the CI environment variable to `true`, the command output now includes the `Test Success` section, same as the human-readable output.  (GitHub issue [#3291](https://github.com/forcedotcom/cli/issues/3291), GitHub discussion [#3242](https://github.com/forcedotcom/cli/discussions/3242), plugin-deploy-retrieve PR [#1358](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1358))
+
+* FIX: We updated the directory name of the PricingRecipe metadata type in the [CLI registry](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json) to the correct `pricingRecipe`. (source-deploy-retrieve PR [#1565](https://github.com/forcedotcom/source-deploy-retrieve/pull/1565))
+
+## 2.89.8 (May 21, 2025)
+
+ANNOUNCEMENT: Agentforce DX is now generally available (GA)!  Check out the [Build Agents with Agentforce DX](https://developer.salesforce.com/docs/einstein/genai/guide/agent-dx.html) documentation in the _Agentforce Developer Guide_.  Enjoy!
+
+-----------------
+
+* CHANGE: The `org open agent` command is now generally available; previously it was beta. Also, to maintain consistency across all agent-related commands, we changed the `--name` flag name to `--api-name`. For example, to open the agent with API name `Coral_Cloud_Agent` in your default org using your default browser, run this command:
+
+    ```bash
+    sf org open agent --api-name Coral_Cloud_Agent
+    ```
+
+   (plugin-org PR [#1420](https://github.com/salesforcecli/plugin-org/pull/1420))
+
+* CHANGE: The `agent preview` command is now beta; previously it was developer preview. (plugin-agent PR [#140](https://github.com/salesforcecli/plugin-agent/pull/140))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * DgtAssetMgmtProvider
+    * DgtAssetMgmtPrvdLghtCpnt
+
+    (GitHub issue [#3277](https://github.com/forcedotcom/cli/issues/3277), source-deploy-retrieve PR [#1561](https://github.com/forcedotcom/source-deploy-retrieve/pull/1561))
+
+## 2.88.6 (May 14, 2025)
+
+* CHANGE: We're excited to announce that these `agent` commands are now generally available; previously they were beta.
+
+    * `agent create` : Create an agent in your org using a local agent spec file.
+    * `agent generate agent-spec` : Generate an agent spec, which is a YAML file that captures what an agent can do.
+    * `agent generate test-spec` : Generate an agent test spec, which is a YAML file that lists the test cases for testing a specific agent.
+    * `agent test create` : Create an agent test in your org using a local test spec YAML file.
+    * `agent test list` : List the available agent tests in your org.
+    * `agent test results` : Get the results of a completed agent test run.
+    * `agent test resume` : Resume an agent test that you previously started in your org so you can view the test results.
+    * `agent test run` : Start an agent test in your org.
+
+    The `agent generate template` command is still beta and the `agent preview` command is still developer preview.
+  
+    Also, to maintain consistency across all `agent` comamnds, we changed these flag names:
+
+    * Command `agent create`:
+       * The `--agent-api-name` flag is now `--api-name`.
+       * The `--agent-name` flag is now `--name`.
+    * Command `agent test create`
+       * The `--test-api-name` flag is now `--api-name`.
+
+  For example, to create an agent:
+
+  ```bash
+  sf agent create --name "Resort Manager" --api-name Resort_Manager --spec specs/resortManagerAgent.yaml --target-org my-org
+  ```
+
+  To create an agent test:
+
+  ```bash
+  sf agent test create --spec specs/Resort_Manager-testSpec.yaml --api-name Resort_Manager_Test --force-overwrite --target-org my-org
+  ```
+
+  (plugin-agent PR [#135](https://github.com/salesforcecli/plugin-agent/pull/135))
+
+* FIX: Decomposing a permission set that grants access to multiple objects is now working correctly and as documented. (GitHub issue [#3233](https://github.com/forcedotcom/cli/issues/3233), source-deploy-retrieve PR [#1554](https://github.com/forcedotcom/source-deploy-retrieve/pull/1554))
+
+
+## 2.87.7 (May 7, 2025)
+
+* CHANGE: As we announced on [January 8, 2025](./README.md#2716-january-8-2025), we removed the `--bulk`, `--wait`, and `--async` flags of the `data query` command. We also removed the `data query resume` command.  Use the `data export bulk|resume` commands instead. For example:
+
+    ```bash
+    sf data export bulk --query "SELECT Id, Name, Account.Name FROM Contact" --output-file export-accounts.csv --wait 10 --target-org my-scratch
+    ```
+
+   (plugin-data PR [#1237](https://github.com/salesforcecli/plugin-data/pull/1237))
+
+* FIX: We improved the help for `project retrieve start` by adding an example that shows how to use a wildcard to retrieve metadata components associated with a parent component, in this case list views for the Case standard object. It's not always obvious how to do this. (GitHub issue [#3266](https://github.com/forcedotcom/cli/issues/3266), plugin-deploy-retrieve [#1341](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1341))
+
+## 2.86.9 (April 30, 2025)
+
+* NEW: When refreshing a sandbox org with the `org refresh sandbox` command, you can now use the new `--source-id` or `--source-sandbox-name` flags to change its original source org to a new org. The refreshed sandbox org's metadata is then updated with the new source org's metadata. For example, this command refreshes the sandbox named `devSbx2` by changing its original source org to be a sandbox called `devSbx3`:
+
+    ```bash
+    sf org refresh sandbox --name devSbx2 --source-sandbox-name devSbx3 --target-org prodOrg
+    ```
+
+    The value of `--source-id` and `--source-sandbox-name` must be an existing sandbox. The new source sandbox org, and the refreshed sandbox specified with the `--name` flag, must both be associated with the production org (`--target-org`) that contains the sandbox licenses. You can specify either `--source-id `or `--source-sandbox-name` when refreshing an existing sandbox, but not both.
+
+  We also updated a related issue where specifying the new source sandbox in a sandbox definition file with the `sourceSandboxName` option returned an error when running `org refresh sandbox`. (GitHub issue [#3262](https://github.com/forcedotcom/cli/issues/3262), plugin-auth PR [#1396](https://github.com/salesforcecli/plugin-org/pull/1396))
+
+* NEW: The [Agentforce DX](./README.md#2794-march-12-2025) commands, such as `agent create` and `agent test run` are now just-in-time (JIT). This means that when you update to this Salesforce CLI release and run an `agent` command, Salesforce CLI checks if the associated [plugin-agent](https://github.com/salesforcecli/plugin-agent) is installed. If it's not, Salesforce CLI automatically installs it and then runs your command. (cli PR [#2203](https://github.com/salesforcecli/cli/pull/2203))
+
+* NEW: Run flow tests in your org with these new CLI commands, which are contained in the just-in-time (JIT) [plugin-flow](https://github.com/salesforcecli/plugin-flow) plugin:
+
+    * `flow run test` : Invoke flow tests in an org.   
+    * `flow get test` : Display test results for a specific asynchronous test run.
+
+    For example, this command runs all the tests associated with a flow in the org with alias `scratchOrg`; use the flow definition developer name to identify a flow:
+
+    ```bash
+    sf flow run test --target-org scratchOrg --class-names <flow defintion developer name>
+    ```
+    Run the two commands with the `--help` flag to get more information and examples.
+  
+    The `plugin-flow` plugin isn't included in the core Salesforce CLI; instead, it's installed the first time you run one of its commands.  
+
+* FIX: You can now correctly retrieve DigitalExperienceBundle metadata components with the `project retrieve start` command into a DX project that already contains these components.  Previously you either got an error or they were retrieved into an incorrect directory. (source-deploy-retrieve PR [#1546](https://github.com/forcedotcom/source-deploy-retrieve/pull/1546)
+
+* FIX: Salesforce CLI now displays a warning when you run `org logout` on an org that you haven't authorized; previously it incorrectly displayed a success message.
+
+    **NOTE**: Starting September 2025, the new warning will be converted to an error. As a result, the exit code when you try to log out of an unauthenticated org will change from 0 to 1. (GitHub issue [#3247](https://github.com/forcedotcom/cli/issues/3247), plugin-org PR [#1282](https://github.com/salesforcecli/plugin-auth/pull/1282))
+
+* FIX: Salesforce DX projects now support the WorkflowFlowAutomation [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json). (GitHub issue [#3202](https://github.com/forcedotcom/cli/issues/3202))
+
+## 2.85.7 (April 23, 2025)
+
+* CHANGE: Starting with this release, the `--async` flag of these commands is deprecated because the commands are asynchronous by default:
+
+    * `data delete bulk`
+    * `data export bulk`
+    * `data import bulk`
+    * `data query`
+    * `data update bulk`
+    * `data upset bulk`
+
+    (plugin-data PR [#1222](https://github.com/salesforcecli/plugin-data/pull/1222))
+
+* CHANGE: Over the next few releases we'll be changing our licenses from the [3-Clause BSD License](https://opensource.org/license/bsd-3-clause) to the [Apache License, Version 2.0](https://opensource.org/license/apache-2-0). (dev-scripts PR [#386](https://github.com/forcedotcom/dev-scripts/pull/386))
+
+## 2.84.6 (April 16, 2025)
+
+* NEW: If the `org create scratch` command times out before the scratch org is ready, you run the `org resume scratch` command to poll for completion and see the results. You can now specify how long the command waits before it returns control of the terminal to you with the new `--wait` flag; the output shows the progress of the scratch org create. Previously you had to keep running the `org resume scratch` command until the scratch org was ready. In this example the command waits for 10 minutes before returning control to you:
+
+    ```bash
+    sf org resume scratch --job-id 2SRfakefake000345 --wait 10
+    ```
+
+    (plugin-org PR [#1376](https://github.com/salesforcecli/plugin-org/pull/1376), sfdx-core PR [#1177](https://github.com/forcedotcom/sfdx-core/pull/1177))
+
+* FIX: When used with metadata types that are always in a folder, the `--exclude-metadata` flag of `project generate manifest --from-org` now correctly excludes both the metadata components and their folders. Examples of metadata type that are always in folders include [Document](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_document.htm) and [Report](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_report.htm).  (GitHub issue [#3232](https://github.com/forcedotcom/cli/issues/3232), source-deploy-retrieve PR [#1535](https://github.com/forcedotcom/source-deploy-retrieve/pull/1535))
+
+* FIX: The `plugins discover` CLI command is now working as expected. (GitHub issue [#3238](https://github.com/forcedotcom/cli/issues/3238), plugin-marketplace PR [#457](https://github.com/salesforcecli/plugin-marketplace/pull/457))
+
+* FIX: You can now correctly deploy and retrieve [CustomPermission](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_custompermission.htm) metadata components while also decomposing the custom permissions in the [PermissionSet](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_permissionset.htm) component. (GitHub issue [#3220](https://github.com/forcedotcom/cli/issues/3220), source-deploy-retrieve PR [1534x](https://github.com/forcedotcom/source-deploy-retrieve/pull/1534))
+
+
+## 2.83.7 (April 9, 2025)
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * FieldServiceMobileConfig
+    * GenAiPlannerBundle
+
+## 2.82.6 (April 2, 2025)
+
+* FIX: We improved the displayed error message when a problem occurs while authorizing an org, such as a keychain file has the wrong permissions. (GitHub issue [#3231](https://github.com/forcedotcom/cli/issues/3231), sfdx-core PR [#1175](https://github.com/forcedotcom/sfdx-core/pull/1175))
+
+* FIX: When specifying flag values in a file and using `--flags-dir` to pass the flag values to a command, files that contain multiple lines can now correctly use both LF and CRLF line endings.  (GitHub issue [#3236](https://github.com/forcedotcom/cli/issues/3236), cli PR [#2162](https://github.com/salesforcecli/cli/pull/2162))
+
+## 2.81.9 (March 26, 2025)
+
+* CHANGE: We removed the deprecated `--verbose` flag of `data delete bulk` and `data upsert bulk`; use the `data bulk results` command instead.  In October 2024 we deprecated the flag and added the deprecation warning in the command output. (plugin-data PR [#1206](https://github.com/salesforcecli/plugin-data/pull/1206))
+
+* CHANGE: We no longer include the records that failed after running `data delete|upsert bulk --json` in the JSON output; use the `data bulk results` command to get this information.  We also removed the ability to resume synchronous data operations with the `data delete|upsert resume` commands.  In October 2024 we deprecated both of these features and added the deprecation warning in the command outputs. (plugin-data PR [#1209](https://github.com/salesforcecli/plugin-data/pull/1209))
+
+* CHANGE: When you open an org in a browser with the `org open` command but without `--json` or `--url-only`, Salesforce CLI now generates a single-use frontdoor URL. This URL can be used one time only; subsequent use won't allow you to log into the org. This change makes the access to your org more secure.
+
+    Code Builder users: when you run `org open` without `--json` or `--url-only` in a Code Builder terminal, the URL to open an org in a browser is displayed, rather than a browser automatically starting; this is normal expected behavior. The new change in Code Builder behavior is that the outputted URL is now single-use only and expires in 60 seconds. 
+
+    Starting in August 2025, the generated URLs in the output of `org open --json` or `org open --url-only` will also be single-use only; until then the URLs continue to be multi-use.  A warning is printed if you use the `--json` or `--url-only` flags of `org open` to remind you of the upcoming change.  To immediately force the URLs in _all_ output of `org open` to be single-use, set the new SF_SINGLE_USE_ORG_OPEN_URL environment variable to `true`. For example:
+
+    ```bash
+    export SF_SINGLE_USE_ORG_OPEN_URL=true
+    ```
+
+    (GitHub issue [#2769](https://github.com/forcedotcom/cli/issues/2769), plugin-org PR [#1375](https://github.com/salesforcecli/plugin-org/pull/1375))
+
+* FIX: We improved the error message returned when you run the `apex run test` command but there are no Apex tests in your org; it now clearly states what the problem is. (GitHub issue [#3217](https://github.com/forcedotcom/cli/issues/3217), plugin-apex PR [#706](https://github.com/salesforcecli/plugin-apex/pull/706))
+
+* FIX: We fixed the remaining bugs around the `Maximum call stack size exceeded` error that sometimes occurred when running `project generate manifest --from-org` on an org that has more than 1,000 folder metadata components, such as `ReportFolder` or `DashboardFolder`. (plugin-deploy-retrieve PR [#1314](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1314), source-deploy-retrieve PR [#1526](https://github.com/forcedotcom/source-deploy-retrieve/pull/1526))
+
+## 2.80.12 (March 19, 2025)
+
+* NEW: Easily create a scratch org from a snapshot with the new `--snapshot` flag of `org create scratch`. Snapshots are a point-in-time copy of a scratch org which you create with the `org create snapshot` command. With this new flag, you're no longer required to create a definition file when creating a scratch org from a snapshot.
+
+    For example, let's say you previously created a snapshot called `NightlyBranch`. To create a new scratch org using this snapshot, run this command: 
+
+   ```bash
+   sf org create scratch --alias my-scratch-org --target-dev-hub MyHub --snapshot NightlyBranch --wait 10
+   ```
+   
+  In the example, the `MyHub` Dev Hub org must be associated with the `NightlyBranch` snapshot. We recommend you increase the wait time with the `--wait` flag because creating a scratch org from a snapshot can take a while. (plugin-org PR [#1358](https://github.com/salesforcecli/plugin-org/pull/1358))
+
+
+* FIX: The `project generate manifest --from-org` command now runs successfully on orgs with over 100,000 metadata components. Previously, this command would result in an `Out of Memory` error.
+
+    Additionally, to address issues with large numbers of folder metadata components, such as `EmailTemplateFolder`, we have set the default value of the `SF_LIST_METADATA_BATCH_SIZE` environment variable to `500`. This ensures the command completes correctly even when an org has more than 1,000 folder metadata components. Previously, the command would hang in such cases, even if the total number of components was less than 100,000. (GitHub issue [#3197](https://github.com/forcedotcom/cli/issues/3197), source-deploy-retrieve PR [#1511](https://github.com/forcedotcom/source-deploy-retrieve/pull/1511))
+
+* FIX: The `org login web` command now gracefully returns an error if you use the `--browser` flag to specify a browser that isn't installed on your computer; previously the command would hang indefinitely. (GitHub issue [#1830](https://github.com/forcedotcom/cli/issues/1830), plugin-auth PR [#1260](https://github.com/salesforcecli/plugin-auth/pull/1260))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+  * DataObjectBuildOrgTemplate
+  * InvocableActionExtension
+  * LifeSciConfigCategory
+  * LifeSciConfigRecord
+
+## 2.79.4 (March 12, 2025)
+
+* NEW: (BETA) We’re thrilled to announce the beta release of Agentforce DX, a set of new Salesforce CLI commands and a Visual Studio Code (VS Code) extension that let you create, preview, and test agents directly in a Salesforce DX project. With Agentforce DX you can:
+
+    * **Generate YAML Spec Files**—Use the `agent generate agent-spec|test-spec` CLI commands to generate simple YAML spec files that describe agents and agent tests.
+    * **Create Agents and Agent Tests**—Pass these spec files as inputs to the `agent create` and `agent test create` CLI commands to create agents and agent tests in your development org.
+    * **Run Agent Tests**—Execute agent tests in your org and view the results from either the VS Code testing panel or by running the `agent test run|results|resume|list` CLI commands.
+    * **Interact with Active Agents**—Interact directly with active agents using the `agent preview` CLI command. (Developer Preview)
+
+    The new CLI commands are in the `agent` topic and are part of the [`@salesforce/plugin-agent`](https://github.com/salesforcecli/plugin-agent) plugin.  Install the plugin with this command:
+
+    ```bash
+    sf plugins install agent
+    ```
+
+    Download and install the VS Code Agentforce DX extension from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=salesforce.salesforcedx-vscode-agents) or the [Open VSX Registry](https://open-vsx.org/extension/salesforce/salesforcedx-vscode-agents).
+
+    Here are a few examples of what you can do with Agentforce DX.
+
+    Generate an agent spec file that describes your new agent by providing some properties at the command line and be prompted for others; use your default org:
+
+    ```bash
+    sf agent generate agent-spec --type customer \
+          --role "Field customer complaints and manage employee schedules."  \
+          --output-file specs/resortManagerAgent.yaml
+    ```
+
+    Create the agent in your org by passing in the generated spec file:
+
+    ```bash
+    sf agent create --agent-name "Resort Manager" --spec specs/resortManagerAgent.yaml
+    ```
+
+    Generate an agent test spec for testing this new agent; this command is interactive and prompts you for all the information:
+
+    ```bash
+    sf agent generate test-spec
+    ```
+
+    Create an agent test in your org by passing in the generated test spec file:
+
+    ```bash
+    sf agent test create --spec specs/Resort_Manager-testSpec.yaml
+    ```
+
+    Run the agent test in your org:
+
+    ```bash
+    sf agent test run --api-name Resort_Manager_Test
+    ```
+
+    For more information, see:
+
+    * [_Agentforce Developer Guide_: Agentforce DX](https://developer.salesforce.com/docs/einstein/genai/guide/agent-dx.html)
+    * [_Salesforce CLI Command Reference_: agent Commands](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_agent_commands_unified.htm)
+
+    We hope you enjoy these fun new commands!
+    
+    Known Issue: When generating the list of topics in an agent spec, the LLM sometimes includes dashes or other special characters in the topic names. These characters cause errors when creating an agent with the spec. Workaround: Be sure to use only underscores or alphanumeric characters in the topic names; spaces are fine.
+      
+## March 5, 2025
+
+Due to [TDX 2025](https://www.salesforce.com/tdx/), we aren't releasing a new stable or stable-rc version today. Hope to see you at the conference!
+
+## 2.78.3 (Feb 26, 2025)
+
+* NEW: When you run `project deploy start` with both `--test-level` and `--verbose`, the human-readable output now shows how long each Apex test took to run, in milliseconds. This information was already available in the JSON output. Here's sample output:
+
+    ```bash
+    Test Success [11]
+    ✓ GeocodingServiceTest.blankAddress (159ms)
+    ✓ FileUtilitiesTest.createFileFailsWhenIncorrectBase64Data (263ms)
+    ✓ FileUtilitiesTest.createFileFailsWhenIncorrectFilename (227ms)
+    ✓ FileUtilitiesTest.createFileFailsWhenIncorrectRecordId (481ms)
+    ```
+    (GitHub discussion [#3194](https://github.com/forcedotcom/cli/discussions/3194), plugin-deploy-retrieve [#1286](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1286))
+
+* FIX: The `project retrieve start --output-dir mydir` command now correctly writes single-file metadata components, such as GlobalValueSet, directly to the `mydir` directory; previously the command would incorrectly write them to `mydir/main/default`. (GitHub issue [#3177](https://github.com/forcedotcom/cli/issues/3177), plugin-deploy-retrieve PR [#1289](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1289))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+  * ContentTypeBundle
+  * AnalyticsDashboard
+
+## 2.77.6 (Feb 19, 2025)
+
+* NEW: When generating a manifest with the `project generate manifest` command, you can now use the `--metadata` flag together with `--source-dir` to target specific metadata components in your local package directory.  This new feature is useful when you have multiple package directories or multiple directories within a single package directory and you want to target specific metadata within a source path.
+
+  Similarly, you can also use `--excluded-metadata` with `--source-dir` to target all metadata in your local package directory _except_ the specified components. This example generates a manifest from the metadata components in the `force-app` package directory but excludes StandardValueSet components:
+
+    ```bash
+    sf project generate manifest --excluded-metadata StandardValueSet --source-dir force-app
+    ``` 
+    (plugin-deploy-retrieve PR [#1280](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1280))
+
+* FIX: All commands that run Apex tests, such as `project deploy start`, now correctly display the test failures in both human output and when run in continuous integration (CI) jobs. (plugin-deploy-retrieve PR [#1284](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1284))
+
+* FIX: DigitalExperience metadata components are now retrieved into multiple package directories as expected in all scenarios. (source-deploy-retrieve PR [#1496](https://github.com/forcedotcom/source-deploy-retrieve/pull/1496))
+
+* FIX: Salesforce DX projects now correctly support the existing GenAiFunction bundle [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json). (GitHub issue [#3204](https://github.com/forcedotcom/cli/issues/3204), source-deploy-retrieve PR [1499](https://github.com/forcedotcom/source-deploy-retrieve/pull/1499))
+
+* FIX: Salesforce DX projects now support the AnnotationExtensionSet [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json).
+
+## 2.76.7 (Feb 12, 2025)
+
+* FIX: Piping the output of a Salesforce CLI command that produces very wide tables is now working correctly. (GitHub issue [#3206](https://github.com/forcedotcom/cli/issues/3206), oclif PR [#93](https://github.com/oclif/table/pull/93))
+
+## 2.75.5 (Feb 5, 2025)
+
+* NEW: (Beta) You can now decompose the [ExternalServiceRegistration](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_externalserviceregistration.htm) metadata component into two source files when you retrieve it to your Salesforce DX project, rather than retrieve a single monolithic metadata API format XML file. When you deploy to your org, the two files are re-converted into the one metadata API XML file.  For example, let's say the name of your ExternalServiceRegistration metadata component `BankService`. The two source files after decomposition are:
+
+  * `BankService.yaml` : A YAML file that contains the contents of the `schema` field. If the field's content is in JSON format in your org, it's always converted to YAML format when retrieved to your DX project.
+  * `BankService.externalServiceRegistration-meta.xml` : A standard metadata API XML file that contains all the fields _except_ `schema`.  
+
+  Decomposing ExternalServiceRegistration metadata components is optional, so you must explicitly specify the behavior by running this command:
+  
+    ```bash
+    sf project convert source-behavior --behavior decomposeExternalServiceRegistrationBeta
+    ```
+   When the `project convert source-behavior` command finishes, your `sfdx-project.json` file is updated to always decompose ExternalServiceRegistration components. The existing source files in your local package directories are converted into the new decomposed format and you can deploy and retrieve your metadata as usual. To preview what the command does without making any changes, specify the `--dry-run` flag.
+
+  See [Start Decomposing the Optional Metadata Types (Beta)](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_decomposed_md_types.htm) for more information.  The documentation will soon be updated with details about how ExternalServiceRegistration components are decomposed. (source-deploy-retrieve PR [#1493](https://github.com/forcedotcom/source-deploy-retrieve/pull/1493), plugin-deploy-retrieve PR [#1275](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1275))
+  
+* CHANGE: On January 31, 2025, Salesforce will retire Salesforce Functions, also known as Salesforce Elastic Services. See [Salesforce Functions Retirement](https://devcenter.heroku.com/articles/salesforce-functions-retirement) for more information. As a result, Salesforce CLI no longer JIT-installs the Salesforce Functions plugins (`plugin-env` and `plugin-functions`) and the Salesforce Functions commands, such as `run function start` aren't available by default.  If you need these commands, you must install the [`plugins-functions`](https://github.com/salesforcecli/plugin-functions) and [`plugins-env`](https://github.com/salesforcecli/plugin-env) plugins manually using the `plugins install` command. 
+
+    We'll also soon remove the associated Salesforce Functions commands from the current version of the [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_functions_commands_unified.htm). If you need online reference information about the Salesforce Functions commands, see the [Winter '25 Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.252.0.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_functions_commands_unified.htm). (cli PR [#2093](https://github.com/salesforcecli/cli/pull/2093))
+
+* FIX: The `force data bulk upsert` command now works correctly when upserting 10K+ records synchronously (specify the `--wait` flag) and using Node.js v22 or greater. (GitHub issue [#3180](https://github.com/forcedotcom/cli/issues/3180), plugin-data PR [#1172](https://github.com/salesforcecli/plugin-data/pull/1172))
+
+* FIX: Salesforce DX projects now support the LightningTypeBundle [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json).
+
+## 2.74.6 (Jan 29, 2025)
+
+* FIX: The `api request rest` command now correctly refreshes the access token if it has expired. (GitHub issue [#3176](https://github.com/forcedotcom/cli/issues/3176), sfdx-core PR [#1163](https://github.com/forcedotcom/sfdx-core/pull/1163), plugin-api PR [#62](https://github.com/salesforcecli/plugin-api/pull/62))
+
+* FIX: If you run the `org create scratch` command with the `--json` flag, and the creation of the scratch org times out, its job ID is now included in the JSON output of the CLI command.  (plugin-org PR [#1317](https://github.com/salesforcecli/plugin-org/pull/1317))
+
+* FIX: If you installed Salesforce CLI on Windows using the installer, you no longer get the message that starts `(node:9801) [DEP0040] DeprecationWarning: The punycode module is deprecated.` when you run any CLI command.  (GitHub issue [#3161](https://github.com/forcedotcom/cli/issues/3161), oclif PR [#1672](https://github.com/oclif/oclif/pull/1672))
+
+## 2.73.9 (Jan 22, 2025)
+
+* NEW: Ensure that your code adheres to best practices with these Code Analyzer v5 (Beta) commands in the just-in-time (JIT) `code-analyzer` plugin:
+
+    * `code-analyzer config` :  Display the current state of configuration for Code Analyzer.
+    * `code-analyzer rules` : List the rules that are available to analyze your code.
+    * `code-analyzer run`  :  Analyze your code with a selection of rules to ensure good coding practices.
+
+   The `code-analyzer` plugin isn't included in the core Salesforce CLI; instead, it's now installed the first time you run one of its commands. 
+
+   The Code Analyzer v4 commands, such as `scanner run`, are also JIT and continue to work the same as before. Because the v4 and v5 commands are in separate CLI topics and plugins, they don't interfere with each other. We will stop JIT'ing the v4 `scanner` commands in the future, after the `code-analyzer` commands are generally available. 
+  
+    See the [Salesforce Code Analzyer v5 (Beta)](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/code-analyzer.html) documentation for more information about how to use these new v5 commands to identify problems earlier in your development process. 
+
+* FIX: When you opt to [decompose sharing rules](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_decomposed_md_types.htm), you can now deploy its children (such as SharingCriteriaRule) individually, rather than having to deploy the entire [SharingRules](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_sharingrules.htm) component with all its children. (source-deploy-retrieve PR [#1482](https://github.com/forcedotcom/source-deploy-retrieve/pull/1482))
+
+* FIX: When you start decomposing permission sets by running the `project convert source-behavior --behavior decomposePermissionSetBeta2` command and retrieving the permission set from the org, and the permission set contains custom permissions, the corresponding XML file (`PermSetName.customPermissions-meta.xml`) is now valid. (GitHub issue [#3165](https://github.com/forcedotcom/cli/issues/3165), source-deploy-retrieve PR [#1483](https://github.com/forcedotcom/source-deploy-retrieve/pull/1483))
+
+* FIX: You can now correctly retrieve metadata components whose types have non-unique suffixes. For example, both `RestrictionRule` and `ModerationRule` have the `.rule` suffix.  (GitHub issue [#3168](https://github.com/forcedotcom/cli/issues/3168), source-deploy-retrieve PR [#1480](https://github.com/forcedotcom/source-deploy-retrieve/pull/1480))
+
+* FIX: The `project deploy start` command now correctly returns an error when you specify a manifest with a typo for the `--manifest` flag and also specify the `--post|pre-destructive-changes` flags. (source-deploy-retrieve PR [#1481](https://github.com/forcedotcom/source-deploy-retrieve/pull/1481))
+
+* FIX: Non-admin scratch org users can now successfully run `org display` when they specify their username for `--target-org`. (plugin-org PR [#1481](https://github.com/forcedotcom/source-deploy-retrieve/pull/1481))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+  * AnalyticsVisualization
+  * AnalyticsVizViewDef
+  * AnalyticsWorkspace
+
+## 2.72.21 (Jan 15, 2025)
+
+* NEW: When generating a manifest from the metadata components in an org by running the `project generate manifest --from-org` command, you can now specify the metadata components you **don't** want to include with the new `--excluded-metadata` flag. For example, this command generates a manifest of all the metadata components except StandardValueSet from the org with alias `my-org`:
+
+    ```bash
+    sf project generate manifest --from-org my-org --excluded-metadata StandardValueSet
+    ```
+    Use the existing `--metadata` flag with `--from-org` to specify the metadata components that you want to include in your manifest. For example:
+
+    ```bash
+    sf project generate manifest --from-org my-org --metadata ApexClass --metadata CustomObject
+    ```
+    **Tip**: If your list of included or excluded metadata components is long, consider using `--flags-dir` to [specify the components in a file](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_flag_values_in_files.htm) rather than at the command-line. 
+
+    The `project generate manifest` command makes many concurrent API calls to discover the metadata that exists when generating a manifest from an org. To limit the number of concurrent requests, use the new SF_LIST_METADATA_BATCH_SIZE environment variable and set it to a size that works best for your org and environment. For example, to limit the number of concurrent API calls to 20:
+
+  ```bash
+  export SF_LIST_METADATA_BATCH_SIZE=20
+  ```
+  If you experience timeouts or inconsistent manifest contents, then setting this environment variable can improve accuracy. However, the command takes longer to run because it sends fewer requests at a time.
+
+  (plugin-deploy-retrieve PR [#1247](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1247), source-deploy-retrieve PR [#1469](https://github.com/forcedotcom/source-deploy-retrieve/pull/1469))
+
+* CHANGE: As we announced on [July 10, 2024](./README.md#2497-july-10-2024), we removed these two hidden commands:
+  * `data import legacy tree` 
+  * `data export legacy tree`
+
+   Use `data import|export tree` instead. (plugin-data PR [#1116](https://github.com/salesforcecli/plugin-data/pull/1116))
+
+* FIX: The WorkFlowAction child metadata type of Workflow is now correctly decomposed into its own subdirectory in your DX project when you opt to [decompose workflows](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_decomposed_md_types.htm). Additionally, you can now deploy children of the [Workflow](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_workflow.htm) metadata type (such as WorkFlowAction) individually, rather than having to deploy the entire Workflow with all its children. 
+
+   Many thanks to [Matt Carvin](https://github.com/mcarvin8) for finding the bug, and then contributing the fix! We love your awesome initiative. (GitHub issue [#2563](https://github.com/forcedotcom/cli/issues/2563), source-deploy-retrieve PR [#1467](https://github.com/forcedotcom/source-deploy-retrieve/pull/1467))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+  * AiEvaluationDefinition
+  * AiEvaluationTestSet
+  * WorkflowFlowAction
+
+## 2.71.6 (January 8, 2025)
+
+* CHANGE: Starting this release, the `--bulk`, `--wait`, and `--async` flags of the `data query` command are deprecated. The `data query resume` command is also deprecated because it works with only the `data query` command in bulk mode. All these deprecated flags and command will be removed from Salesforce CLI on April 25, 2025, or later. Use the `data export bulk|resume` commands instead. For example:
+
+    ```bash
+    sf data export bulk --query "SELECT Id, Name, Account.Name FROM Contact" --output-file export-accounts.csv --wait 10 --target-org my-scratch
+    ```
+
+    (plugin-data PR [#1134](https://github.com/salesforcecli/plugin-data/pull/1134))
+
+* FIX: We changed the running output of `project deploy start` to show test failures right away. As a result, you don’t need to wait for the entire deploy to finish before you decide how to handle the test failures. (GitHub issue [#3104](https://github.com/forcedotcom/cli/issues/3104), plugin-deploy-retrieve PR [#1215](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1215))
+
+* FIX: The `data bulk` commands, when importing from a CSV file, default to the COMMA delimiter if they can't find the delimiter used in the CSV file. (plugin-data PR [#1151](https://github.com/salesforcecli/plugin-data/pull/1151))
+
+* FIX: The `data import tree` command no longer fails when importing over 2K records. (GitHub [comment](https://github.com/forcedotcom/cli/issues/2738#issuecomment-2375750110), plugin-data PR [#1146](https://github.com/salesforcecli/plugin-data/pull/1146))
+
+## December 25, 2024 AND January 1, 2025
+
+Due to the holiday break, we aren't releasing a new stable version these two weeks. Happy holidays!
+
+## 2.70.7 (December 18, 2024)
+
+* NEW: Write the output of an executed SOQL query to a file with the new `--output-file` flag of the `data query` command. This new flag works only with CSV (comma-separated values) and JSON output, so you must use it in combination with `--result-format csv|json`. This example executes a SOQL query in an org with alias `my-scratch` and writes the JSON results to a file called `query-output.json`:
+
+    ```bash
+    sf data query --query "SELECT Id, Name, Account.Name FROM Contact" --output-file query-output.json --result-format json --target-org my-scratch
+    ```
+
+    (plugin-data PR [#1135](https://github.com/salesforcecli/plugin-data/pull/1135))
+
+* FIX: The `org refresh|resume sandbox` commands no longer output the erroneous error `INSUFFICIENT_ACCESS: use of the Metadata API requires a user with the ModifyAllData or ModifyMetadata permissions​` after they finish executing. The error was incorrect because users who refresh or resume sandboxes don't need those permissions.  The refresh and resume of the sandbox always finished correctly, despite that error. (GitHub issue [#3048](https://github.com/forcedotcom/cli/issues/3048), plugin-org PR [#1276](https://github.com/salesforcecli/plugin-org/pull/1276))
+
+* FIX: The `data export bulk` command no longer fails when exporting a very large dataset, such as millions of records, to a JSON-formatted output file. (GitHub issue [#3138](https://github.com/forcedotcom/cli/issues/3138), plugin-data PR [#1140](https://github.com/salesforcecli/plugin-data/pull/1140))
+
+## 2.69.14 (December 11, 2024)
+
+* NEW: Specify the line endings used in the comma-separated values (CSV) file when you run the `data delete|upsert bulk` commands with the new `--line-ending` flag. The default value on Windows is `CRLF`; on macOS and Linux it's `LF`. Similarly, specify the column delimiters in the CSV file when you run `data upsert bulk` with the new `--column-delimiter` flag; possible values include `BACKQUOTE`, `CARET`, and more. For example:
+
+    ```bash
+    sf data upsert bulk --sobject Contact --file contacts.csv --external-id Id --line-ending LF --column-delimiter CARET
+    ```
+
+    (GitHub discussion #[2947](https://github.com/forcedotcom/cli/discussions/2947), plugin-data PR [#1110](https://github.com/salesforcecli/plugin-data/pull/1110))
+
+* FIX: Salesforce CLI no longer outputs the message that starts `(node:9801) [DEP0040] DeprecationWarning: The `punycode` module is deprecated.` when you're using Node.js v22 or greater and you run any CLI command.  (GitHub issue [#2535](https://github.com/forcedotcom/cli/issues/2535), salesforce/cli PR [#1971](https://github.com/salesforcecli/cli/pull/1971))
+
+## 2.68.6 (December 4, 2024)
+
+* NEW: (BETA) Open an agent in the Agent Builder UI with the new `open org agent` command.  Use the `--name` flag to open an agent using its API name.  For example:
+
+    ```bash
+    sf open org agent --name Coral_Cloud_Agent
+    ```
+
+  To find the agent's API name, go to Setup in your org and navigate to the agent's details page.  (plugin-org PR [#1264](https://github.com/salesforcecli/plugin-org/pull/1264))
+
+* FIX: We improved the table output when `project deploy start` fails due to an metadata validation error.  We now provide the name of the metadata type that's causing the error in the `Type` column. (GitHub issue [#3110](https://github.com/forcedotcom/cli/issues/3110), plugin-deploy-retrieve PR [#1217](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1217))
+
+* FIX: If you set your `target-org` configuration variable to a sandbox, and then run `org delete scratch` without specifying the `--target-org` flag, the command now returns an error. Previously the command would delete the sandbox. (GitHub issue [#3058](https://github.com/forcedotcom/cli/issues/3058), plugin-org PR [#1257](https://github.com/salesforcecli/plugin-org/pull/1257))
+
+## Nov 27, 2024
+
+Due to the Thanksgiving break in the United States, we aren't releasing a new stable version. Happy Thanksgiving!
+
+## 2.67.7 (November 20, 2024)
+
+* FIX: We updated the `--help` of `apex test run` to say that users who run the command must have the View All Data system permission. (plugin-apex PR [#630](https://github.com/salesforcecli/plugin-apex/pull/630))
+
+## 2.66.7 (November 13, 2024)
+
+* NEW: Bulk update many records of a Salesforce object from a comma-separated values (CSV) file with the new `data update bulk` command.
+
+   All the records in the CSV file must be for the same Salesforce object and the first column of every line must be an ID of the record you want to update. The CSV file can contain only existing records; if a record in the file doesn't currently exist in the Salesforce object, the command fails. Use the `--sobject` flag to specify the Salesforce object. See [Prepare Data to Ingest](https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/datafiles_prepare_data.htm) in the "Bulk API 2.0 and Bulk API Developer Guide" for details about creating the CSV file.
+
+    For example, this command updates Account records from the `accounts.csv` file in an org with alias "my-scratch":
+    ```bash
+    sf data update bulk --file accounts.csv --sobject Account --wait 10 --target-org my-scratch
+    ```
+   Bulk updates can take a while, depending on how many records are in the CSV file. If the command times out after the specified wait time (10 minutes in our example), it displays a job ID that you then pass to the new `data update resume` command to see the status and results of the original update. For example:
+
+    ```bash
+    sf data update resume --job-id 750xx000fake005sAAA
+    ```
+    (plugin-data PR [#1098](https://github.com/salesforcecli/plugin-data/pull/1098))
+
+
+* NEW: Get the results of a previously run and completed bulk ingest (import, update, upsert, or delete) job with the new `data bulk results` command. The command works for jobs executed with Bulk API 2.0, such as a CLI command like `data import bulk` or an external tool like Data Loader, as long as the job provides a job ID. Pass the job ID to `data bulk results` to retrieve the results.
+
+    The command displays information such as the job status, the ingest operation, updated Salesforce object, how many records were processed, and how many failed or succeeded. Finally, the output displays the names of the generated CSV-formatted files that contain the specific results for each ingested record. For example:
+
+    ```bash
+    sf data bulk results --job-id 7507i000fake341G --target-org my-scratch
+    ```
+    (GitHub discussion [#2387](https://github.com/forcedotcom/cli/discussions/2387), plugin-data PR [#1097](https://github.com/salesforcecli/plugin-data/pull/1097))
+
+* NEW: Specify the ID of the sandbox you want to clone with the new `--source-id` flag of the `org create sandbox` command. We also added a similar new option `sourceId` to the sandbox definition file.  As always, the flag takes precendence if you specify both. This example shows how to clone an existing sandbox with ID `00Dxygfake` and name the new sandbox `NewClonedSandbox`; the org with the sandbox license has the alias `prodOrg`: 
+
+    ```bash
+    sf org create sandbox --source-id 00Dxygfake --name NewClonedSandbox --target-org prodOrg --alias MyDevSandbox --set-default
+    ```
+
+    For consistency, we also changed the name of the existing `--clone` flag of `org create sandbox` to `--source-sandbox-name`. Don't worry, we aliased the old `--clone` flag name to `--source-sandbox-name`, although we highly recommend you update your scripts to use the new flag name as soon as possible. 
+
+    (plugin-org PR [#1237](https://github.com/salesforcecli/plugin-org/pull/1237))
+  
+* NEW: Customize how the new [table-formatted command output](README.md#2646-october-30-2024) looks like with these new environment variables:
+
+    * `SF_NO_TABLE_STYLE`: Removes all table stylings, such as borders and colors.
+    * `SF_TABLE_OVERFLOW`: Specifies how to handle text in table output that is too wide for its column, such as by wrapping or truncating.
+    * `SF_TABLE_BORDER_STYLE`: Specifies how to display the borders of table output, such as whether the table has an outline or vertical lines between columns.
+
+    See [Salesforce CLI Environment Variables](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_dev_cli_env_variables.htm) for the possible and default values.
+
+* NEW: Specify the column deliminator used in the CSV file when running `data import bulk` with the new `--column-delimiter` flag. If you don't specify `--column-delimiter`, Salesforce CLI determines the delimiter used in the CSV file automatically. Run `sf data import bulk -h` to see the list of possible values. (plugin-data PR [#1098](https://github.com/salesforcecli/plugin-data/pull/1098))
+
+* CHANGE: We upgraded the version of Node.js bundled in the Salesforce CLI operating system-specific installers, TAR files, and Docker images to v22. We always bundle the Active LTS version of Node.js in tandem with its [release schedule](https://github.com/nodejs/release?tab=readme-ov-file#release-schedule), and v22 went LTS on October 29, 2024.
+
+* FIX: When deploying or retrieving metadata, Salesforce CLI no longer attempts to resolve an XML file in the package directory that isn't part of a source component. As a result, you can include XML files in your package directory that aren't related to org metadata, add them to your `.forceignore` file, and deploys and retrieves will work as expected.  (source-deploy-retrieve PR [#1452](https://github.com/forcedotcom/source-deploy-retrieve/pull/1452))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * AppFrameworkTemplateBundle
+    * ChoiceList
+    * ConvIntelligenceSignalRule
+    * PublicKeyCertificate
+    * PublicKeyCertificateSet
+
+ 
+## 2.65.8 (November 6, 2024)
+
+* NEW: We updated these commands to use [multi-stage output](README.md#2639-october-23-2024), so while they are running they now display the stage they're currently on, the elapsed time, and more:
+
+     * `project delete source`
+     * `project deploy start`
+     * `project deploy resume`
+     * `project deploy validate`
+     * `project deploy report`
+     * `project retrieve start`
+
+   Also, as a result of [this GitHub feedback](https://github.com/forcedotcom/cli/issues/3079), we changed how this multi-stage output displays in a continuous integration (CI) environment. Specifically:
+
+   * The command polls for status updates every 5 seconds by default. You can change this interval with the new `SF_CI_UPDATE_FREQUENCY_MS` environment variable.  For example, to poll every 10 seconds, set `SF_CI_UPDATE_FREQUENCY_MS=10000`. This environment variable works only in a CI environment.
+   * Status messages, such as `Components: 21/30 (70%)` which shows how many components have been deployed to the org, are displayed only when information changes.
+   * If 5 minutes goes by without an update, then the last status message is displayed again. You can change this interval with the new `SF_CI_HEARTBEAT_FREQUENCY_MS` environment variable.  For example, to specify 10 minutes, set `SF_CI_HEARTBEAT_FREQUENCY_MS=600000`. This environment variable works only in a CI environment.
+
+    (oclif multi-stage-output PR [#52](https://github.com/oclif/multi-stage-output/pull/52))
+
+* CHANGE: As we [announced back in July 2024](https://github.com/forcedotcom/cli/issues/2974), we removed these deprecated commands from this release of Salesforce CLI:
+
+    * `force:mdapi:convert`
+    * `force:mdapi:deploy`
+    * `force:mdapi:deploy:cancel`
+    * `force:mdapi:deploy:report`
+    * `force:mdapi:describemetadata`
+    * `force:mdapi:listmetadata`
+    * `force:mdapi:retrieve`
+    * `force:mdapi:retrieve:report`
+    * `force:source:convert`
+    * `force:source:delete`
+    * `force:source:deploy`
+    * `force:source:deploy:cancel`
+    * `force:source:deploy:report`
+    * `force:source:ignored:list`
+    * `force:source:manifest:create`
+    * `force:source:open`
+    * `force:source:pull`
+    * `force:source:push`
+    * `force:source:retrieve`
+    * `force:source:status`
+    * `force:source:tracking:clear`
+    * `force:source:tracking:reset`
+ 
+    If you haven't yet migrated to the new `sf` commands, see the [Migration Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_migrate.htm) for details. In particular:
+  
+    * [Map the old `sfdx` commands to their new `sf` equivalents.](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_old_new_command_mapping.htm)
+    * [Read details and examples for migrating the `force:mdapi:*` and `force:source:*` commands.](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_mig_deploy_retrieve.htm)
+    * [Read details and examples for migrating the `force:org:*` commands.](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_mig_org.htm)
+  
+   Finally, if you're not ready to migrate, see [this pinned issue](https://github.com/forcedotcom/cli/issues/2974) for workarounds. (source-deploy-retrieve PR [#1446](https://github.com/forcedotcom/source-deploy-retrieve/pull/1446), plugin-deploy-retrieve PR [#1197](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1197), cli PR [#1962](https://github.com/salesforcecli/cli/pull/1962), plugin-org PR [#1244](https://github.com/salesforcecli/plugin-org/pull/1244))
+
+* FIX: If you run `data export tree` to export records from a Salesforce object that has a RecordType field, and you specify `RecordType.Name` in the SOQL query, you can now import that data using `data import tree` into a new org and the RecordType IDs and Names are correctly resolved.  (GitHub discussion [#2753](https://github.com/forcedotcom/cli/discussions/2753), plugin-data PR [#1102](https://github.com/salesforcecli/plugin-data/pull/1102))
+
+## 2.64.6 (October 30, 2024)
+
+* NEW: Import a large number of records into a Salesforce object from a comma-separated values (CSV) file with the new `data import bulk` command. All the records in the CSV file must be for the same Salesforce object; see [Prepare Data to Ingest](https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/datafiles_prepare_data.htm) in the "Bulk API 2.0 and Bulk API Developer Guide" for details about creating the CSV file. Use the `--sobject` flag to specify the Salesforce object. 
+
+    For example, this command imports Account records from the `accounts.csv` file into an org with alias "my-scratch":
+
+    ```bash
+    sf data import bulk --file accounts.csv --sobject Account --wait 10 --target-org my-scratch
+    ```
+
+   Bulk imports can take a while, depending on how many records are in the CSV file. If the command times out after the specified wait time (10 minutes in our example), it displays a job ID that you then pass to the new `data import resume` command to see the status and results of the original export. For example:
+
+    ```bash
+    sf data import resume --job-id 750XXX00fake1222
+    ```
+    (GitHub issue [#2254](https://github.com/forcedotcom/cli/issues/2254) and discussion [#2339](https://github.com/forcedotcom/cli/discussions/2339), plugin-data PR [#1091](https://github.com/salesforcecli/plugin-data/pull/1091))
+
+* NEW: Easily export records from a junction object and its parent objects by specifying multiple `--query` flags of the `data export tree` command; previously you could specify only one `--query` flag.
+
+    A [junction object](https://help.salesforce.com/s/articleView?id=sf.relationships_manytomany.htm&type=5) is a custom Salesforce object with two master-detail relationships which you use to model a “many-to-many” relationship between two objects. We recommend that you also specify `--plan` when you run the export. After the export completes, you have a set of sObject tree files and a plan definition file to easily import the records of the junction object and its parent objects into a new org and preserve the many-to-many relationships.
+
+    For example, the AccountContactRelation and AccountContactRole junction objects represents two many-to-many relationships between Contacts and Accounts. To export records from the two junction objects, along with associated Contact and Account records, and preserve the relationships, you could run something like this:
+
+    ```bash
+    sf data export tree --plan --output-dir junction \
+        --query "select AccountId, ContactId from AccountContactRole" \
+        --query "Select ID, AccountId, FirstName, LastName from Contact" \
+        --query "select ID, ContactId, AccountId from AccountContactRelation" \
+        --query "select ID, Name from Account where Name != 'Sample Account for Entitlements'"
+    ```
+    (plugin-data PR [#1092](https://github.com/salesforcecli/plugin-data/pull/1092))
+
+* CHANGE: oclif now uses [ink](https://www.npmjs.com/package/ink) to display tables in human-readable output, making the tables more visually appealing and easier to read. Here's the new [oclif table](https://github.com/oclif/table) GitHub repo. Over the next few releases we'll update the Salesforce CLI commands that display table output to use this new feature.
+
+    For example, in this release we updated [plugin-limits](https://github.com/salesforcecli/plugin-limits/pull/1026) which contains the command `org list limits`. The old output looked like this: 
+
+   ```bash
+   sf org list limits --target-org my-scratch
+   Name                                        Remaining Max       
+   ─────────────────────────────────────────── ───────── ───────── 
+   AnalyticsExternalDataSizeMB                 40960     40960     
+   CdpAiInferenceApiMonthlyLimit               500000000 500000000 
+   ConcurrentAsyncGetReportInstances           200       200       
+   ConcurrentEinsteinDataInsightsStoryCreation 5         5         
+   ...
+   ```
+
+   The new output looks like this:
+
+   ```bash
+   sf org list limits --target-org my-scratch
+   ┌─────────────────────────────────────────────┬───────────┬───────────┐
+   │ Name                                        │ Remaining │ Max       │
+   ├─────────────────────────────────────────────┼───────────┼───────────┤
+   │ AnalyticsExternalDataSizeMB                 │ 40960     │ 40960     │
+   │ CdpAiInferenceApiMonthlyLimit               │ 500000000 │ 500000000 │
+   │ ConcurrentAsyncGetReportInstances           │ 200       │ 200       │
+   │ ConcurrentEinsteinDataInsightsStoryCreation │ 5         │ 5         │
+   ...
+   ```
+
+   Much prettier! 
+
+## 2.63.9 (October 23, 2024)
+
+* NEW: Get a behind-the-scenes look at what happens when you execute certain CLI commands with the new multi-stage output feature. For example, when you execute `org create scratch`, you now see this output while the command is executing:
+
+    ```bash
+    $ sf org create scratch --edition developer --alias my-scratch-org
+    
+      ────────────── Creating Scratch Org ──────────────
+
+      ✔ Prepare Request 37ms
+      ✔ Send Request 14.61s
+      ◯ Wait For Org - Skipped
+      ✔ Available 5ms
+      ⢿ Authenticate 1.46s
+      ◼ Deploy Settings
+      ◼ Done
+
+      Request Id: 2SRWs000002aOttOAE
+      OrgId: 00DOv00000C6RbJ
+      Username: test-p4bh29a7jcvc@example.com
+      Alias: my-scratch-org
+      Elapsed Time: 16.21s
+     ```
+
+     Checkmarks let you know when each stage completes and how long it took, with the total elapsed time counter at the bottom. Pretty cool, huh.  These commands have been updated to use this new output:
+
+     * `org create scratch`
+     * `org resume scratch`
+
+    (plugin-org PR [#1203](https://github.com/salesforcecli/plugin-org/pull/1203), oclif [multi-stage-output](https://github.com/oclif/multi-stage-output))
+
+* NEW: Open a local metadata file in its associated builder in your org, such as Agent Builder, with the improved `--source-file` flag of `org open`.
+
+    Let's say, for example, that you completed the Trailhead [Quick Start: Build Your First Agent with Agentforce](https://trailhead.salesforce.com/content/learn/projects/quick-start-build-your-first-agent-with-agentforce). The Coral Cloud Agent that you built was so cool that you decided to retrieve its associated metadata to a local DX project. To then quickly open the agent back up in Agent Builder, simply run this CLI command:
+
+     ```bash
+     sf org open --source-file force-app/main/default/bots/Coral_Cloud_Agent/Coral_Cloud_Agent.bot-meta.xml --target-org <your-org>
+     ```
+
+     You can also use the `--source-file` flag to open local metadata in Flow Builder, Apex Classes Setup page, and more. (plugin-org PR [#1230](https://github.com/salesforcecli/plugin-org/pull/1230))
+
+* NEW: We now display the Lightning deploy URL, in addition to the deploy ID, when you run any of the `project deploy` commands with the `--verbose` flag. For example, when you run `project deploy start --verbose`, you now see a Deploy URL entry in the output:
+
+    ```bash
+    ...
+    Status: Succeeded
+    Deploy ID: 0AfRKfake00WH0A3
+    Target Org: test-ztqm4gogmflt@example.com
+    Deploy URL: https://customer-fake.scratch.my.salesforce.com/lightning/setup/DeployStatus/page?address=%2Fchangemgmt%2Fmonitlotsofstuff.apexp
+    ...
+    ```
+    Many thanks to [Matt Carvin](https://github.com/mcarvin8) for contributing this useful new feature. It was your first contribution, but we sure hope it won't be your last! 
+    
+* FIX: The `sf plugins --json` command no longer fails in certain circumstances with a `TypeError`. (GitHub issue [#3051](https://github.com/forcedotcom/cli/issues/3051), oclif core PR [#1216](https://github.com/oclif/core/pull/1216))
+
+## 2.62.6 (October 16, 2024)
+
+* NEW: Export a large number of records from an org with the new `data export bulk` command. Use a SOQL query to select the fields and records that you want to export, and specify whether you want to write to a CSV- or JSON-formatted file.  For example, this command exports the `Id`, `Name`, and `Account.Name` fields of the Contact object into a JSON-formatted file:
+
+    ```bash
+    sf data export bulk --query "SELECT Id, Name, Account.Name FROM Contact" --output-file export-accounts.json --result-format json --wait 10 --target-org my-scratch
+    ```
+
+    Bulk exports can take a while, so if the command times out after the specified wait time (10 minutes in our example), it displays a job ID that you then pass to the new `data export resume` command to see the status and results of the original export. For example:
+
+    ```bash
+    sf data export resume --job-id 750XXX00fake1222
+    ```
+
+    IMPORTANT: The `data export bulk` command uses Bulk API 2.0, which is optimized to handle very large sets of data asynchronously. However, the API limits the type of SOQL queries you can run. For example, you can't use aggregate functions such as `count()`. For the complete list of limitations, see the
+  "SOQL Considerations" section at the end of [this page](https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/queries.htm). (plugin-data PR [#1035](https://github.com/salesforcecli/plugin-data/pull/1035))
+
+* NEW: Salesforce CLI now warns you when you deploy metadata with the `project deploy start` command and either the total size of the metadata or the number of metadata files is over 80% of the [Metadata API limits](https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_metadata.htm). You can change this threshold by setting the new `SF_DEPLOY_SIZE_THRESHOLD` environment variable to a number between 1 and 100. For example, if you set `SF_DEPLOY_SIZE_THRESHOLD=70`, you get the warning when you try to deploy metadata that's over 70% of the limit.
+
+    Salesforce CLI always attempts to deploy the metadata when you run the `project deploy start` command, even if it determines that the size or file count might be over the limit. (source-deploy-retrieve PR [#1435](https://github.com/forcedotcom/source-deploy-retrieve/pull/1435))
+
+* NEW: Store the values for the HTTP request (header, body, etc) in a file when you run the `api request rest` command with the new `--file` flag. The command allows you to make an authenticated HTTP request using the Salesforce REST API. This flag is useful if you want to put the request information in a single JSON-formatted file rather than specify all the sections using flags, such as `--header`, `--body`, and so on. For example:
+
+    ```bash
+    sf api request rest --file ./myHttpRequest.json
+    ```
+
+    Run `sf api request rest --help` and read the long description for the `--file` flag for information on how to create the file.  (plugin-api PR [#14](https://github.com/salesforcecli/plugin-api/pull/14))
+
+* NEW: Easily see which Salesforce CLI versions you previously downloaded with the new Download column in the `sf update --available` output. To see the Location column, you must now use the new `--verbose` flag along with the `--available` flag. We also made some minor formatting tweaks to the table output. (oclif plugin-plugins [#980](https://github.com/oclif/plugin-plugins/pull/980), plugin-update [#932](https://github.com/oclif/plugin-update/pull/932), plugin-commands [#763](https://github.com/oclif/plugin-commands/pull/763))
+
+* FIX: The `force lightning lwc test run` command now correctly returns a non-zero exit code if a Lightning Web Component Jest test fails. (GitHub issue [#2991](https://github.com/forcedotcom/cli/issues/2991), plugin-lwc-test PR [#193](https://github.com/salesforcecli/plugin-lwc-test/pull/193))
+
+* FIX: The Apex Code Coverage percentages displayed in the output of `sf project deploy start --test-level <value> --coverage-formatters <value>` now match the percentages in the code coverage reports, such as `coverage-summary.json`.  (GitHub issue [#3030](https://github.com/forcedotcom/cli/issues/3030), plugin-deploy-retrieve [#1175](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1175))
+
+* FIX: (This fix is mostly interesting to `oclif` users, such as Salesforce CLI plugin developers). When you generate a `README.md` file for your plugin using `oclif readme`, flags that have the `noCacheDefault: false` option no longer display any locally set configuration variable values, similar to how `--help` works. (GitHub issue [#3041](https://github.com/forcedotcom/cli/issues/3041), oclif core PR [#1212](https://github.com/oclif/core/pull/1212), oclif oclif PR [#1566](https://github.com/oclif/oclif/pull/1566))
+
+* FIX: The `project retrieve start --package-name` command now correctly retrieves packages that contain custom objects. (GitHub issue [#2977](https://github.com/forcedotcom/cli/issues/2977), source-deploy-retrieve PR [#1431](https://github.com/forcedotcom/source-deploy-retrieve/pull/1431))
+
+## 2.61.8 (October 9, 2024)
+
+* NEW: Download and install Salesforce CLI on Windows ARM64 computers with our new `sf-arm64.exe` installer. We're in the process of updating the [download page](https://developer.salesforce.com/tools/salesforcecli) with this new option, but in the meantime you can download the `stable` executable [here](https://developer.salesforce.com/media/salesforce-cli/sf/channels/stable/sf-arm64.exe). (oclif PR [#1559](https://github.com/oclif/oclif/pull/1559))
+
+* NEW: When you create a sandbox with the `org create sandbox` command, you can now specify the public group of Salesforce users that can access the sandbox by including either the `activationUserGroupId` or `activationUserGroupName` option (but not both) in the sandbox definition file. This example specifies that the Salesforce public user group with name `ExpertUsers` can access the sandbox after it's created:
+
+    ```
+    {
+       "sandboxName": "dev1",
+       "licenseType": "Developer",
+       "activationUserGroupName": "ExpertUsers"
+    }
+    ```
+    You can also now specify the name of the Apex class that runs after each copy of the sandbox with the new `apexClassName` option.  Previously you could specify it only with an ID (`apexClassId`). (plugin-org PR [#1221](https://github.com/salesforcecli/plugin-org/pull/1221))
+
+* NEW: Get detailed coverage results about an asynchronous test run by specifying the new `--detailed-coverage` flag of the `apex get test` command. Similar to how the `apex run test` command works, you must specify human-readable result format (the default) when you use the `--detailed-coverage`  flag. For example:
+
+    ```bash
+    sf apex get test --test-run-id <ID> --code-coverage --detailed-coverage --result-format human
+    ```
+
+    (plugin-apex PR [#597](https://github.com/salesforcecli/plugin-apex/pull/597))
+
+* FIX: We fixed a source tracking issue with some metadata types, such as EmailTemplateFolder. (GitHub issue [#2902](https://github.com/forcedotcom/cli/issues/2902), source-tracking PR [#679](https://github.com/forcedotcom/source-tracking/pull/679))
+
+* FIX: Salesforce DX projects now support the ExtlClntAppSamlConfigurablePolicies [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json). 
+
+## 2.60.13 (October 2, 2024)
+
+* CHANGE: We shipped `decomposePermissionSetBeta` back in [April](README.md#2368-april-10-2024), asked you to [vote on a new design of the feature](https://github.com/forcedotcom/cli/discussions/2993) (thank you), and we now have a winner! We went with option 2 (focused decomposition); see details [here](https://github.com/forcedotcom/cli/discussions/2993#discussioncomment-10431670). 
+    
+   We now have a new source behavior value: `decomposePermissionSetBeta2`. If you haven't played with source decomposition at all yet, you can try it by running `sf project convert source-behavior --behavior decomposePermissionSetBeta2`. You can also use this command if you previously updated your project to use the original `decomposePermissionSetBeta` flavor, but you now want to try out the new stuff.  Enjoy! (source-deploy-retrieve PR [#1412](https://github.com/forcedotcom/source-deploy-retrieve/pull/1412))
+
+* FIX: Deploying a sharing rule by specifying one of its child metadata types (such as `project deploy start --metadata SharingCriteriaRule:Account.Test_Rule1`) now works correctly. (source-deploy-retrieve PR [#1419](https://github.com/forcedotcom/source-deploy-retrieve/pull/1419))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * ExtlClntAppPushSettings
+    * ExtlClntAppPushConfigurablePolicies
+
+## 2.59.6 (September 25, 2024)
+
+* FIX: We fixed some under-the-hood bugs. 
+
+## 2.58.7 (September 11, 2024)
+
+* FIX: Salesforce CLI now supports these environment variables: `SF_DISABLE_SOURCE_MEMBER_POLLING` and `SF_SOURCE_MEMBER_POLLING_TIMEOUT`.  Previously only their `SFDX_` equivalents were supported. (GitHub [comment](https://github.com/forcedotcom/cli/issues/2974#issuecomment-2322907656), source-tracking PR [#668](https://github.com/forcedotcom/source-tracking/pull/668))
+
+## 2.57.7 (September 4, 2024)
+
+* NEW: The `project deploy start` command now reports the zip size and zip file count when using the `--verbose` flag. (GitHub Discussion [#2942](https://github.com/forcedotcom/cli/discussions/2942), plugin-deploy-retrieve PR [#1138](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1138))
+
+* NEW: We've improved the `doctor` command so it now checks whether you are setting proxy env vars correctly (plugin-info PR [#848](https://github.com/salesforcecli/plugin-info/pull/848))
+
+* NEW: Try the new BETA `api request graphql` command to send GraphQL requests to your org! (plugin-api PR [#6](https://github.com/salesforcecli/plugin-api/pull/6))
+
+    - `sf api request graphql --body "query accounts { uiapi { query { Account { edges { node { Id \n Name { value } } } } } } }"`
+    - `cat body.txt | sf api request graphql --body -`
+    - Stream results to a file with the `--stream-to-file` flag
+    - Run `sf api request graphql --help` to see more examples
+
+* FIX: String Replacement logic will explicitly skip binary files even if they are included in the glob pattern. (source-deploy-retrieve PR [#1405](https://github.com/forcedotcom/source-deploy-retrieve/pull/1405))
+
+## 2.56.7 (August 28, 2024)
+
+* NEW: Try the new BETA `api request rest` command to send REST calls to your org! ([plugin-api repo](https://github.com/salesforcecli/plugin-api))
+
+    - `sf api request rest sobjects/account/<ID> --method PATCH --body "{\"Name\": \"Updated\"}"`
+    - `sf api request rest sobjects/account/<ID> --method PATCH --body body.txt`
+    - `cat body.txt | sf api request rest sobjects/account --body -`
+    - Stream results to a file with the `--stream-to-file` flag
+    - Run `sf api request rest --help` to see more examples
+
+* NEW: The `apex run test` and `apex get test` commands now have a new `--concise` flag.
+
+    Setting this flag for `apex run test` or `apex get test` will suppress passing test results and the code coverage table. Only failing tests and the summary table will be displayed. (plugin-apex PR [#504](https://github.com/salesforcecli/plugin-apex/pull/504), GitHub Issue [#243](https://github.com/forcedotcom/salesforcedx-apex/issues/243), GitHub Discussion [#2872](https://github.com/forcedotcom/cli/discussions/2872))
+
+    Many thanks to [Kyle Capehart](https://github.com/k-capehart) for contributing this useful new flag!
+
+* NEW: The `sf project convert source-behavior` command will now warn if you have uncommitted work before doing project modifications. Note that this command puts components in a newly created `main/default` folder in each package directory. You might need to re-organize them into your preferred structure. (plugin-deploy-retrieve PR [#1130](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1130))
+
+* CHANGE: We shipped `decomposeCustomLabelsBeta`, got [feedback](https://github.com/forcedotcom/cli/issues/2840) (thank you!), and decided to change how it behaves. You can see the design proposal [here](https://github.com/forcedotcom/cli/discussions/2948). It removes an extra folder layer that other decomposition strategies needed and supports more flexible folder structures.
+    
+    Now there's `decomposeCustomLabeltsBeta2`. If you haven't used it yet, you can try it via `sf project convert source-behavior --behavior decomposeCustomLabelsBeta2`. This works if your project isn't using a preset OR if you started using the original flavor of `decomposeCustomLabeltsBeta`. Please keep the feedback coming! (source-deploy-retrieve PR [#1392](https://github.com/forcedotcom/source-deploy-retrieve/pull/1392))
+
+* CHANGE: You can now run these packaging commands outside of a Salesforce DX project:
+
+    * `package delete`
+    * `package update`
+    * `package version delete`
+    * `package version displayancestry`
+    * `package version list`
+    * `package version promote`
+    * `package version report`
+
+    (plugin-packaging PR [#771](https://github.com/salesforcecli/plugin-packaging/pull/771), packaging PR [#638](https://github.com/forcedotcom/packaging/pull/638))
+
+* FIX: Salesforce DX projects now support the GenAiFunction [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json) (source-deploy-retrieve PR [#1404](https://github.com/forcedotcom/source-deploy-retrieve/pull/1404), plugin-deploy-retrieve PR [#1137](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1137))
+
+* FIX: Support for 21 new  (source-deploy-retrieve PR [#1398](https://github.com/forcedotcom/source-deploy-retrieve/pull/1398))
+  * AssessmentConfiguration
+  * ContextUseCaseMapping
+  * ContractType
+  * DocumentTemplate
+  * EmployeeDataSyncProfile
+  * ExternalAuthIdentityProvider
+  * ExternalDataTranObject
+  * ExternalDocStorageConfig
+  * GenAiPlugin
+  * LearningAchievementConfig
+  * MktDataConnection
+  * MktDataConnectionSrcParam
+  * PortalDelegablePermissionSet
+  * ProductAttrDisplayConfig
+  * ProductSpecificationRecType
+  * ProductSpecificationType
+  * RecAlrtDataSrcExpSetDef
+  * ReferencedDashboard
+  * RelatedRecordAssocCriteria
+  * VirtualVisitConfig
+  * WaveAnalyticAssetCollection
+
+
+
+## 2.55.6 (August 21, 2024)
+
+* NEW: Execute a SOSL text-based search query in your org with the new `data search` command. Similar to how the `data query` command works with SOQL queries, you can specify the SOSL query at the command line with the `--query` flag or read the query from a file with the `--file` flag. This example executes the specified SOSL query in an org with alias `my-scratch`:
+
+    ```bash
+    sf data search --query "FIND {Anna Jones} IN Name Fields RETURNING Contact (Name, Phone)" --target-org my-scratch
+    ```
+
+    (plugin-data PR [#1025](https://github.com/salesforcecli/plugin-data/pull/1025))
+
+* FIX: When parsing a scratch org definition file, Salesforce CLI now removes the `$schema` property (if it exists at the top of the JSON file) to prevent getting an invalid JSON error.  (sfdx-core PR [#1113](https://github.com/forcedotcom/sfdx-core/pull/1113))
+
+    Thank you, [Alan Jaouen](https://github.com/alanjaouen), for noticing the problem and then contributing the fix! We love it. 
+
+* FIX: We now wait for config files to be unlocked before we read them. This improvement fixes issues like parallel command executions that cause file reads to return empty. (GitHub issue [#2965](https://github.com/forcedotcom/cli/issues/2965), sfdx-core PR [#1116](https://github.com/forcedotcom/sfdx-core/pull/1116))
+
+* FIX: We updated the help and output of the `--package-name` flag of `project retrieve start` to clarify that the results are for reference only and shouldn't be used in your development work. (GitHub issue [#2931](https://github.com/forcedotcom/cli/issues/2931), plugin-deploy-retrieve [#1124](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1124))
+
+* FIX: Salesforce DX projects now support the UiFormatSpecificationSet [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json).
+
+## 2.54.6 (August 14, 2024)
+
+* NEW: Salesforce CLI now automatically regenerates the autocomplete cache after you install or uninstall a plugin to ensure that the autocomplete feature is always using the latest set of CLI command and flag names. (plugin-autocomplete PR [#753](https://github.com/oclif/plugin-autocomplete/pull/753), oclif plugin-plugins PR [#932](https://github.com/oclif/plugin-plugins/pull/932))
+
+    What's autocomplete, you ask? It's a way to automatically "complete" a partially-typed command or flag name by pressing the `<TAB>` key when using Salesforce CLI at the terminal or command window. It's a super-useful feature, so check out [the documentation](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_dev_cli_autocomplete.htm) to learn how to configure and use it!
+
+* FIX: The `project deploy start` command now correctly handles deployments of changed custom fields, even when the parent object hasn't changed. (source-deploy-retrieve PR [#1375](https://github.com/forcedotcom/source-deploy-retrieve/pull/1375))
+
+* FIX: The `project deploy start` command now correctly handles deployments of objects whose source files are spread across multiple folders in your project. (GitHub issue [#2230](https://github.com/forcedotcom/cli/issues/2230), source-deploy-retrieve PR [#1381](https://github.com/forcedotcom/source-deploy-retrieve/pull/1381))
+
+* FIX: Salesforce CLI now constructs valid URLs when gathering results from an execution of the `data query --bulk --query <query>` command.  (GitHub issue [#2968](https://github.com/forcedotcom/cli/issues/2968), jsforce PR [#1550](https://github.com/jsforce/jsforce/pull/1550))
+
+## 2.53.6 (August 7, 2024)
+
+* NEW: If you misspell a metadata type when using the `--metadata` flag of one of the `project` commands, such as `project deploy start`, we now prompt you with similar valid options. We also provide other troubleshooting resources. Go ahead, make a typo and see what the command suggests! (source-deploy-retrieve PR [#1374](https://github.com/forcedotcom/source-deploy-retrieve/pull/1374))
+
+* NEW: Review what the `dev generate command|plugin` commands will do, without actually changing anything on your computer, with the new `--dry-run` flag. Instead, the command displays the files it will update or create and the commands it will run when you don't specify `--dry-run`.  For example:
+
+    ```bash
+    $ sf dev generate command --name init --dry-run
+    [DRY RUN] Updating package.json
+    [DRY RUN] Creating src/commands/init.ts
+    [DRY RUN] Creating messages/init.md
+    [DRY RUN] Creating test/commands/init.nut.ts
+    [DRY RUN] Creating test/commands/init.test.ts
+    [DRY RUN] yarn format
+    [DRY RUN] yarn lint -- --fix
+    [DRY RUN] yarn compile
+    ```
+
+    (plugin-dev PR [#519](https://github.com/salesforcecli/plugin-dev/pull/519))
+
+* CHANGE: We've deprecated using the `--wait` flag of the `data query` command without `--bulk`. We plan to remove the usage in a future release. You can safely stop using `--wait` in this case, because it never affected the command without `--bulk` anyway. (plugin-data PR [#1002](https://github.com/salesforcecli/plugin-data/pull/1002))
+
+* FIX: The `sf update` command now works correctly on computers running proxies. (plugin-update PR [#880](https://github.com/oclif/plugin-update/pull/880))
+
+* FIX: If a flag value contains a comma in its name, you can now escape it with a `\` character so that Salesforce CLI doesn't think it's a delimiter. For example: `project source convert --source-dir dirwith\,comma`.
+
+    Also, as part of this fix, we now print a warning when you use the old format of specifying multiple flag values with a comma (`--flag value1,value2`). Instead you should specify the flag multiple times (`--flag value1 --flag value2`). (GitHub issue [#2928]https://github.com/forcedotcom/cli/issues/2928), oclif PR [#1148](https://github.com/oclif/core/pull/1148))
+
+## 2.52.6 (July 31, 2024)
+
+* NEW: Salesforce CLI now supports the lowercase versions of the proxy environment variables: `http_proxy` and `https_proxy`. Lower-case env variables take precedence over their uppercase equivalents (`HTTP_PROXY` and `HTTPS_PROXY`). (jsforce PR [#1534](https://github.com/jsforce/jsforce/pull/1534))
+
+* CHANGE: You're no longer required to run these commands inside of a Salesforce DX project:
+    * `package installed list`
+    * `package list`
+    * `package1 version create`
+
+    (GitHub discussion [#2932](https://github.com/forcedotcom/cli/discussions/2932), plugin-packaging PR [#733](https://github.com/salesforcecli/plugin-packaging/pull/733))
+
+* CHANGE: The standard (non-JSON) output of the `org list metadata` and `org list metadata-types` commands are now in table format. (plugin-org PR [#1141](https://github.com/salesforcecli/plugin-org/pull/1141))
+
+* FIX: The `project convert mdapi` command now correctly puts the converted files into the full `--output-dir` directory, if the flag is specified. (plugin-deploy-retrieve PR [#1091](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1091))
+
+* FIX: Salesforce CLI now correctly accepts and prefers SF_AUDIENCE_URL (rather than SFDX_AUDIENCE_URL) and SF_DOMAIN_RETRY (rather than SFDX_DOMAIN_RETRY). (sfdx-core PR [#1104](https://github.com/forcedotcom/sfdx-core/pull/1104))
+
+* FIX: We've improved the errors that result from certain executions of `project deploy` commands that are supposed to fail, such as executing `project deploy quick` and passing it an invalid job ID. (GitHub issue [#2962](https://github.com/forcedotcom/cli/issues/2962), sfdx-core PR [#1108](https://github.com/forcedotcom/sfdx-core/pull/1108))
+
+* FIX: Let's say you have two sets of source files associated with two different objects in a package directory. Both sets of files also include the `All.listView-meta.xml` file and the ListView's XML is exactly the same.  The [Source Mobility (beta)](./README.md#2448-jun-5-2024) feature now correctly detects that moving both sets of files to a new package directory isn't an actual source change that needs to be tracked. (GitHub issue [#2945](https://github.com/forcedotcom/cli/issues/2945), source-tracking PR [#631](https://github.com/forcedotcom/source-tracking/pull/631))
+
+## 2.51.6 (July 24, 2024)
+
+* CHANGE: We deprecated the CMTRecordManagedDeletion scratch org feature because it's no longer necessary. The scratch org feature allows you to remove custom metadata type records from a second-generation managed package. But as of the Spring '24 Salesforce release, the feature is now available to all independent software vendors (ISVs). See the [Spring '24 release notes](https://help.salesforce.com/s/articleView?id=release-notes.rn_packaging_remove_cmt_records.htm&release=248&type=5) for more information about the new feature.  (sfdx-core PR [#1102](https://github.com/forcedotcom/sfdx-core/pull/1102))
+
+* FIX: Deploying, retrieving, or converting projects that contain multiple custom label files no longer result in `JavaScript heap out of memory` errors. (GitHub issue [#2939](https://github.com/forcedotcom/cli/issues/2939), source-deploy-retrieve PR [#1368](https://github.com/forcedotcom/source-deploy-retrieve/pull/1368))
+
+* FIX:  We've improved the error message returned when `project deploy start --json` encounters a test failure as it's validating the deployment. ((GitHub issue [#2952](https://github.com/forcedotcom/cli/issues/2952), plugin-deploy-retrieve [#1085](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1085))
+
+## 2.50.6 (July 17, 2024)
+
+* NEW: By default, Salesforce CLI uses 128-bit encryption to encrypt its internal files, such as the authorization files associated with the orgs you’ve logged into. For increased security, you can now enable 256-bit encryption. Check out [these docs](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_enable_256_bit_encryption.htm) for instructions. (GitHub issue [#1861](https://github.com/forcedotcom/cli/issues/1861), sfdx-core PR [#810](https://github.com/forcedotcom/sfdx-core/pull/810))
+
+* FIX: Plugins (ex: sfdx-scanner) using an old version of our libraries would cause an error.  We're now preventing that error.  (GitHub issue [#2935](https://github.com/forcedotcom/cli/issues/2935), sfdx-core PR [#1098](https://github.com/forcedotcom/sfdx-core/pull/1098))
+
+* FIX: `sf project deploy start` with `--coverage-formatters` now prints the correct location for the coverage files in its output. (GitHub issue [#2816](https://github.com/forcedotcom/cli/issues/2816), plugin-deploy-retrieve PR [#973](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/973)).  We actually fixed this in April but forgot to put it in the release notes.
+
+* FIX: Recently created packages take some time to become available to all orgs.  If you use `sf package install` to install that's not available yet, you get an error.  The error now explains that it might work but not yet. (GitHub issue [#2921](https://github.com/forcedotcom/cli/issues/2921), packaging library PR [#600](https://github.com/forcedotcom/packaging/pull/600/))
+
+## 2.49.7 (July 10, 2024)
+
+* NEW and FIX: (This new and fixed issue is interesting mostly to Salesforce CLI plugin developers.) The JSDoc for the [`SfProject`](https://forcedotcom.github.io/sfdx-core/classes/sfProject.SfProject.html) and [`SfProjectJson`](https://forcedotcom.github.io/sfdx-core/classes/sfProject.SfProjectJson.html) classes in the `@salesforce/core` library now align with the code, and we cleaned up the examples.  While we were messing around in there anyway, we added these two useful methods: `SfProject.getPluginConfiguration` and `SfProject.setPLuginConfiguration`.  Check 'em out! (sfdx-core PR [#1094](https://github.com/forcedotcom/sfdx-core/pull/1094))
+
+* CHANGE: After a [successful beta period](https://github.com/forcedotcom/cli/issues/2738), the `data import|export beta tree` commands are now generally available.  Specifically:
+
+     * We moved the new functionality in `data import beta tree` to the "official" `data import tree` command. We moved the functionality from the old `data import tree` to `data import legacy tree`.  Similarly...
+     * We moved the new functionality in `data export beta tree` to the "official" `data export tree` command. We moved the functionality from the old `data export tree` to `data export legacy tree`.
+
+     What does this mean in practice?  As of this release, when you execute `data import tree`, for example, you get the _new_ functionality that was in beta until now. If you run into any issues and you want to return to the old functionality, use the `data import legacy tree` command. Same with `data export tree`. However, note that we plan to remove these `legacy` commands in November, 2024.
+
+     Read about the changes we added to these new commands, including two breaking changes to `data import tree`, in [this issue](https://github.com/forcedotcom/cli/issues/2738) that we've pinned since February 2024. (plugin-data PR [#975](https://github.com/salesforcecli/plugin-data/pull/975)). 
+
+* CHANGE: These scratch org snapshot commands are now generally available; they were previously in beta. (plugin-signups PR [#629](https://github.com/salesforcecli/plugin-signups/pull/629))
+
+    * `org create snapshot`
+    * `org delete snapshot`
+    * `org get snapshot`
+    * `org list snapshot`
+
+* FIX: You can now correctly deploy and retrieve the DecisionMatrixDefinition, DecisionMatrixDefinitionVersion, and ExpressionSetDefinitionVersion . (GitHub issue [#2823](https://github.com/forcedotcom/cli/issues/2823), source-deploy-retrieve PR [#1357](https://github.com/forcedotcom/source-deploy-retrieve/pull/1357))
+
+* FIX: You can now correctly deploy and retrieve the ExperienceResource, DigitalExperienceBundle, and DigitalExperience . (GitHub issue [#2634](https://github.com/forcedotcom/cli/issues/2634), source-tracking PR [#621](https://github.com/forcedotcom/source-tracking/pull/621))
+
+* FIX: You can now use the `--purge-on-delete` and `--metadata-dir` flags of the `project deploy start` command together to hard delete components whose local source files are in metadata-format. "Hard delete" means the component is immediately eligible for deletion in the org rather than being stored in the Recycle Bin. The directory pointed to by `--metadata-dir` must contain at least one of the destructive manifest files (`destructiveChangesPre.xml` or `destructiveChangesPost.xml`) or you get an error. (GitHub issue [#2909](https://github.com/forcedotcom/cli/issues/2909), plugin-deploy-retrieve [#1069](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1069))
+
+* FIX: The `org list` command no longer displays incorrect information for a scratch org when its ID (when you ignore case) matches the ID of other ScratchOrgInfo records in the Dev Hub org. (plugin-org PR [#1119](https://github.com/salesforcecli/plugin-org/pull/1119))
+
+* FIX: We improved the error message when a deploy, retrieve, or convert fails because of a problem with the source file, such as an incorrect XML element or missing parent XML file. (source-deploy-retrieve PR [#1355](https://github.com/forcedotcom/source-deploy-retrieve/pull/1355))
+
+## 2.48.6 (July 3, 2024)
+
+* NEW: Filter the list of package versions that are returned from the `package version list` command based on the source-control branch that the package versions are based on. (GitHub issue [#1530](https://github.com/forcedotcom/cli/issues/1530), plugin-packaging PR [#690](https://github.com/salesforcecli/plugin-packaging/pull/690), packaging PR [#594](https://github.com/forcedotcom/packaging/pull/594))
+
+    This example lists package versions that are based on the `featureA` branch in your default Dev Hub org:
+
+    ```
+    sf package version list --branch featureA
+    ```
+    
+* CHANGE: The colorization of the log output when you run `apex get log` and `apex tail log` is now the same; previously the commands used different color schemes, which was a tad confusing. (plugin-apex PR [#484](https://github.com/salesforcecli/plugin-apex/pull/484))
+
+* CHANGE: The deprecation warning for the sfdx-style `force:org:create`, `force:org:delete`, `force:mdapi:*`, and `force:source:*` commands now include the date when they will be removed: November 6, 2024. (plugin-org PR [#1118](https://github.com/salesforcecli/plugin-org/pull/1118))
+
+* CHANGE: You can now include keys that start with an upper-case letter inside of the `plugins` property of `sfdx-project.json` file. Almost all keys in the file must start with a lower-case letter (camelCase). We made this change because we previously made an exception for keys inside the `packageAlias` property, and sometimes it's useful to use these same key names in the `plugin` section too. We continue to enforce camelCase naming for all other `sfdx-project.json` keys. ([Trailblazer Community bug report](https://trailhead.salesforce.com/trailblazer-community/feed/0D53A00003wzhsn), sfdx-core PR [#1093](https://github.com/forcedotcom/sfdx-core/pull/1093))
+
+* FIX: We fixed a bug where different major versions of sfdx-core in use simultaneously would cause a TypeError (github issue [#2935](https://github.com/forcedotcom/cli/issues/2935), sfdx-core PR [#1098](https://github.com/forcedotcom/sfdx-core/pull/1098)).
+ 
+* FIX: We fixed a bug in which the first install of a JIT plugin would sometimes fail with the error `ModuleLoadError: [MODULE_NOT_FOUND]`. (oclif PR [#1124](https://github.com/oclif/core/pull/1124))
+
+* FIX: Salesforce CLI now correctly handles situations such as expired passwords or required multi-factor authentication when it detects that a session has expired. (jsforce issues [#1291](https://github.com/jsforce/jsforce/issues/1291), [#1308](https://github.com/jsforce/jsforce/issues/1308), and [#1411](https://github.com/jsforce/jsforce/issues/1411); sfdx-core PR [#1095](https://github.com/forcedotcom/sfdx-core/pull/1095), jsforce PR [#1517](https://github.com/jsforce/jsforce/pull/1517))
+
+## 2.47.6 (June 26, 2024)
+
+* NEW: Permanently delete records in your org via the Bulk API 2.0 with the new `--hard-delete` flag of the `data delete bulk` command. When you specify this flag, the records become immediately eligible for deletion, which means you no longer need to manually clean them from the Recycle Bin. For example, permanently delete account records from your default org using the IDs listed in the specified CSV file:
+
+    ```
+    sf data delete bulk --sobject Account --file files/delete.csv --hard-delete
+    ```
+
+    Users must have the "Bulk API Hard Delete" system permission to use the `--hard-delete` flag.  This permission is disabled by default and can be enabled only by a system administrator. (GitHub discussion [#2904](https://github.com/forcedotcom/cli/discussions/2904), plugin-data PR [#959](https://github.com/salesforcecli/plugin-data/pull/959))
+
+* FIX: The `force data bulk delete|status|upsert` commands now stop polling for the bulk job state in the org, and then stop executing and throw an error, if the job is aborted for some reason. These commands use Bulk API 1.0; the `data bulk` commands that use Bulk API 2.0 already work this way. (GitHub jsforce issue [#765](https://github.com/jsforce/jsforce/issues/765), jsforce PR [#1481](https://github.com/jsforce/jsforce/pull/1481))
+
+* FIX: We've improved the warning message when retrieving custom fields using wildcards. (GitHub issue [#1366](https://github.com/forcedotcom/cli/issues/1366), plugin-deploy-retrieve [#1052](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1052))
+
+* FIX: If a scratch org creation fails, after the org has created (such as it fails to deploy the settings), the command returns exit code 68 (like all other partial success outcomes).  It will save the auth so you can debug the settings deploy error or delete the scratch org. (GitHub issue [#202](https://github.com/forcedotcom/cli/issues/202), sfdx-core [#1086](https://github.com/forcedotcom/sfdx-core/pull/1086))
+
+* FIX: Salesforce DX projects now support the StageDefinition [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json).
+
+    Salesforce DX projects no longer support using the ExpressionSetDefinitionVersion metadata type directly. Use its parent (ExpressionSetDefinition) instead.
+
+## 2.46.6 (June 19, 2024)
+
+* NEW: We now publish all artifacts associated with a Salesforce CLI release in the [salesforce/cli](https://github.com/salesforcecli/cli/releases) GitHub repository. The release artifacts include the operating system-specific installers, such as the Windows `*.exe` executable, and all TAR files for the Linux, Windows, and macOS installs.
+
+    To download a particular artifact, go to the [Releases](https://github.com/salesforcecli/cli/releases) page, click on the release (such as [2.45.6](https://github.com/salesforcecli/cli/releases/tag/2.45.6)), open **Assets**, and then click on the artifact.  (github-workflows PR [#107](https://github.com/salesforcecli/github-workflows/pull/107))
+
+    The links to download the Salesforce CLI installation packages, executables, and TAR files that are documented in the [Salesforce CLI Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_install_cli.htm) continue to work as before. 
+
+* NEW: Salesforce CLI now prompts you with potential alternatives when you misstype a username or alias when running an `org login` command. (sfdx-core PR [#1079](https://github.com/forcedotcom/sfdx-core/pull/1079))
+
+* CHANGE: We've improved the filesystem structure of the output when you set the SF_MDAPI_TEMP_DIR environment variable and then run `project deploy start` or `project retrieve start`. These changes make it easier to debug any issues when deploying or retrieving. The changes to the output include:
+
+    * A top-level directory whose name includes the timestamp of the operation and whether the output is a result of a deploy or a retrieve.
+    * For retrieves, the output includes both formats of the retrieved files, in their own directories (`metadata` and `source`). The `metadata` directory includes the downloaded `.ZIP` file and the unzipped metadata format files; the `source` directory contains the converted files in source format. Both directories include the `package.xml` file.
+    * For deploys, the output includes only the metadata format of the deployed files in the `metadata` directory, along with a `package.xml` file.
+
+    (source-deploy-retrieve PR [#1331](https://github.com/forcedotcom/source-deploy-retrieve/pull/1331))
+
+* FIX: Source Mobility (BETA): If you move a local file to a new location in your project, and then edit the file before running `project deploy start|preview` or `project retrieve start|preview`, Salesforce CLI now correctly handles both the file move and the update. (source-tracking [#601](https://github.com/forcedotcom/source-tracking/pull/601))
+
+* FIX: Source Mobility (BETA): You can now move source files in very large projects (over 8GB with over 1700 files) and successfully deploy without getting an out of memory error. (GitHub issue [#2880](https://github.com/forcedotcom/cli/issues/2880), source-tracking PR [#591](https://github.com/forcedotcom/source-tracking/pull/591))
+
+* FIX: When retrieving a CustomField from the org, `project retrieve start` now preserves the content of the field's CustomObject source file. We partly fixed this bug [back in May](./README.md#2418-may-15-2024), but this time around we think we fixed it all. (GitHub issue [#2865](https://github.com/forcedotcom/cli/issues/2865), source-deploy-retrieve PR [#1338](https://github.com/forcedotcom/source-deploy-retrieve/pull/1338))
+
+## 2.45.6 (June 12, 2024)
+
+* NEW: We now warn you if you set an alias that includes a space, which we don't recommend. If you decide to stick with the spaces, then you must use double quotes around it, such as:
+
+    ```bash
+    sf project deploy start --target-org "my scratch"
+    ```
+    (plugin-settings PR [#625](https://github.com/salesforcecli/plugin-settings/pull/625))
+  
+* FIX: We now correctly display an error if you try to convert source files that are already in metadata format to the same format.   (source-deploy-retrieve PR [#1329](https://github.com/forcedotcom/source-deploy-retrieve/pull/1329))
+
+* FIX: The JSON response, when running the `org sandbox create|refresh|resume` commands with the `--json` flag, now includes the sandbox username if the sandbox is in a completed state and has been authenticated. This update makes the JSON output consistent with the human-readable output. (GitHub issue [#2879](https://github.com/forcedotcom/cli/issues/2879), plugin-org PR [#1068](https://github.com/salesforcecli/plugin-org/pull/1068))
+
+* FIX: We improved the error message when you run `package install` on a package that was created with an installation key, but you either don't provide the key when installing it, or the key is incorrect. (GitHub issue [#2882](https://github.com/forcedotcom/cli/issues/2882), packaging PR [#580](https://github.com/forcedotcom/packaging/pull/580))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+    
+    * EnblProgramTaskSubCategory
+    * LearningItemType
+
+## 2.44.8 (Jun 5, 2024)
+
+* NEW: (Beta) Enable a behavior of your project source files with the new `project convert source-behavior` command. For example, to update your project so it starts decomposing permission sets, run this command:
+
+    ```bash
+    $ sf project convert source-behavior --behavior decomposePermissionSetBeta
+    ```
+
+   When the command finishes, your `sfdx-project.json` file is updated to always decompose permission sets, and the existing permission set files in your local package directories are converted into the new decomposed format. You run this command only once for a given behavior change. Use the `--dry-run` flag to preview what would be changed; sample files are created in a `DRY-RUN-RESULTS` directory.
+
+   Here are the current possible values for the `--behavior` flag:
+
+    * `decomposePermissionSetBeta` — Decompose the [PermissionSet](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_permissionset.htm) metadata type.
+    * `decomposeCustomLabelsBeta` — Decompose the [CustomLabels](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_customlabels.htm) metadata type.
+    * `decomposeWorkflowBeta` — Decompose the [WorkFlow](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_workflow.htm) metadata type.
+    * `decomposeSharingRulesBeta` — Decompose the [SharingRules](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_sharingrules.htm) metadata type
+
+  This command replaces the manual steps we documented in the [April 10, 2024](./README.md#2368-april-10-2024) release notes for converting your project to decompose the additional four metadata types. Because the behaviors are beta, the values for the `--behavior` flag include the word `Beta`.  When a particular behavior becomes generally available (GA), we'll remove the `Beta` label; for example, when we make decomposing permission sets generally available, the new flag value will be `--behavior decomposePermissionSet`.  This command, and the individual behaviors, can become generally available at different times; check these release notes for announcements.
+
+  (plugin-deploy-retrieve PR [#1015](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/1015))
+
+* NEW: We've improved the `doctor` command so it now checks whether your computer can access certain Web sites and registries required by Salesforce CLI.  Here's truncated sample output to show which URLs it checks:
+
+    ```bash
+    $ sf doctor
+    === Running all diagnostics
+
+    pass - salesforcedx plugin not installed
+    pass - no linked plugins
+    pass - [@salesforce/plugin-deploy-retrieve] sourceApiVersion matches apiVersion
+    pass - [@salesforce/plugin-trust] can ping: https://registry.npmjs.org
+    pass - [@salesforce/plugin-trust] can ping: https://registry.yarnpkg.com
+    pass - [@salesforce/plugin-trust] can ping: https://registry.npmjs.org/
+    pass - can access: https://test.salesforce.com
+    pass - can access: https://appexchange.salesforce.com/services/data
+    pass - can access: https://developer.salesforce.com/media/salesforce-cli/sf/channels/stable/sf-win32-x64-buildmanifest
+    ...
+    ```
+    (plugin-info PR [#746](https://github.com/salesforcecli/plugin-info/pull/746), plugin-trust PR [#828](https://github.com/salesforcecli/plugin-trust/pull/828))
+  
+
+* NEW: Source Mobility (BETA). Source files can now be moved within your local Salesforce DX project without source-tracking thinking that you've deleted and then recreated a metadata component. This is a BETA feature and you must opt-in to enable it. You can opt-in by setting the SF_BETA_TRACK_FILE_MOVES environment variable to `true`.  Then reorganize your files as you like!  A few things to keep in mind:
+
+    * Source Mobility works with file moves, not file renames. Renaming a source file is still interpreted as deleting a metadata component and creating a new one with the different name.
+    * Child source files can only move to an identically named parent. For example, a custom field can move between Object folders in different package directories only if both Object folders have the same name.
+
+    Enjoy!  (GitHub discussion [#2682](https://github.com/forcedotcom/cli/discussions/2682), source-tracking [#574](https://github.com/forcedotcom/source-tracking/pull/574))
+    
+* NEW: Upload a local file to an org with the new `data create file` command. The default title of the uploaded file in the Salesforce UI is its filename; you can change its title with the `--title` flag. By default, the file isn't associated with a Salesforce record; use the `--parent-id` flag to attach the file to an existing Salesforce record, such as an account.
+
+    In this example, the uploaded file is given a new title and it's attached to the Salesforce record with ID a03fakeLoJWPIA3:
+
+    ```bash
+    sf data create file --file resources/astro.png --parent-id a03fakeLoJWPIA3 --title AstroOnABoat --target-org my-sandbox
+    ```
+    (GitHub issues [#2344](https://github.com/forcedotcom/cli/discussions/2344) and [#2346](https://github.com/forcedotcom/cli/discussions/2346), plugin-data PR [#922](https://github.com/salesforcecli/plugin-data/pull/922))
+  
+* CHANGE: We've changed the name of the new beta `sfdx-project.json` option that you use to decompose the optional metadata types when sync'ing source between your org and project.  
+
+    * Old name: `registryPresets`
+    * New name: `sourceBehaviorOptions`
+    
+    For example:
+
+     ```bash
+     "sourceBehaviorOptions": ["decomposePermissionSetBeta", "decomposeWorkflowBeta"]
+     ```
+    
+    The new beta feature itself hasn't changed, including the list of possible values for the `sourceBehaviorOptions`. See the [April 10, 2024 release notes](./README.md#2368-april-10-2024) for more information. (schemas PR [#87](https://github.com/forcedotcom/schemas/pull/87), source-deploy-retrieve PR [#1312](https://github.com/forcedotcom/source-deploy-retrieve/pull/1312))
+
+* FIX: If you delete a Global Action in a source-tracking-enabled org, then run `project retrieve start`, Salesforce CLI now deletes it locally.  Previously it did nothing because the server incorrectly lists the change as `QuickActionDefinition`.  (GitHub issue [#2829](https://github.com/forcedotcom/cli/issues/2829), source-tracking PR [#590](https://github.com/forcedotcom/source-tracking/pull/590))
+
+* FIX: The `project deploy report` command no longer displays incorrect warnings about source format files that don't apply to the asynchronous deployment of metadata format files. (GitHub issue [#2862](https://github.com/forcedotcom/cli/issues/2862), source-deploy-retrieve PR [#1311](https://github.com/forcedotcom/source-deploy-retrieve/pull/1311))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+    
+    * GenAiFunction
+    * GenAiPlanner
+    * DataKitObjectDependency
+
+## 2.42.6 (May 22, 2024)
+
+* NEW: Quickly find the date that your current Salesforce CLI version was published by running the `version --verbose` command. The new output also lists the current `latest` (AKA `stable`) version of Salesforce CLI, based on the [npm tags](https://www.npmjs.com/package/@salesforce/cli?activeTab=versions). The new output also displays the same information for any user-installed plugins, including the Salesforce JIT plugins such as `@salesforce/sfdx-scanner`.  We also made the output easier to read. (oclif plugin-version PR [#425](https://github.com/oclif/plugin-version/pull/425))
+
+    Here's partial output of the new command showing that the installed version (`2.39.6`) was published 21 days ago, and that the latest version is `2.40.7`:
+
+     ```bash
+     $ sf version --verbose
+     CLI Version:
+	    @salesforce/cli/2.39.6 published 21 days ago (Tue Apr 23 2024) (latest is 2.40.7)
+     ...
+     ```
+
+* CHANGE: If you install Salesforce CLI using `npm`, your local version of Node.js must be at least 18.16. (cli PR [#1645](https://github.com/salesforcecli/cli/pull/1645))
+
+* FIX: On Windows, running a Salesforce CLI command no longer causes a new CMD window to briefly appear and then disappear. Thanks [@jaklein](https://github.com/jaklein) for pointing out the fix!  (GitHub issue [#2833](https://github.com/forcedotcom/cli/issues/2833), plugin-telemetry PR [#620](https://github.com/salesforcecli/plugin-telemetry/pull/620))
+
+* FIX: (This fix is mostly relevant to our fabulous plugin developers) We've updated various files, such as the schema for `sfdx-project.json`, so that you no longer get type issues or `Property not found` when developing with our APIs in VSCode or other IDE. (GitHub issue [#2201](https://github.com/forcedotcom/cli/issues/2201), schemas PR [#85](https://github.com/forcedotcom/schemas/pull/85), sfdx-core [#1066](https://github.com/forcedotcom/sfdx-core/pull/1066), packaging [#569](https://github.com/forcedotcom/packaging/pull/569))
+
+## 2.41.8 (May 15, 2024)
+
+* NEW: The `project retrieve start` command now warns you if you have the pattern `**/unpackaged/**` in your `.forceignore` file. This pattern causes the retrieve to ignore all files, because `/unpackaged` is the directory within the retrieved ZIP file in which all unpackaged metadata lives. (GitHub issue [#2399](https://github.com/forcedotcom/cli/issues/2399), source-deploy-retrieve PR [#1301](https://github.com/forcedotcom/source-deploy-retrieve/pull/1301)) 
+
+* CHANGE: The `org delete snapshot` command now prompts for confirmation from the user before it deletes the snapshot; previously the command didn't prompt. Use the new `--no-prompt` flag to not be prompted, which is the old behavior. (plugin-signups PR [#567](https://github.com/salesforcecli/plugin-signups/pull/567))
+
+* FIX: Specifying the `--no-namespace` flag of the `org create scratch` command now correctly creates a scratch org that doesn't have a namespace. (GitHub issue [#2855](https://github.com/forcedotcom/cli/issues/2855), sfdx-core PR [#1064](https://github.com/forcedotcom/sfdx-core/pull/1064))
+
+* FIX: When retrieving a CustomField from the org, `project retrieve start` now preserves the content of the field's CustomObject source file. (GitHub issue [#2865](https://github.com/forcedotcom/cli/issues/2865), source-deploy-retrieve PR [#1308](https://github.com/forcedotcom/source-deploy-retrieve/pull/1308))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+  * ForecastingGroup
+  * RecordAlertTemplate
+  * RetrievalSummaryDefinition
+  * SearchCustomization
+  * SearchOrgWideObjectConfig
+ 
+## 2.40.7 (May 8, 2024)
+
+* NEW: Some Salesforce CLI downloads, installations, and updates are now faster because we reduced the size of the Salesforce CLI OS-specific installers and TAR files. Specifically, we no longer include files like `oclif.lock`, `yarn.lock`, `npm-shrinkwrap`, and `package-lock` in them.  (GitHub discussion [#2835](https://github.com/forcedotcom/cli/discussions/2835), oclif PR [#1385](https://github.com/oclif/oclif/pull/1385))
+
+* FIX: When converting from mdapi format to source format, Salesforce CLI now preserves all comments in the metadata XML file. As a result, the help text, labels, and picklist values of Custom Object Translations are correctly included in the source format files. (GitHub issue [#2830](https://github.com/forcedotcom/cli/issues/2830), source-deploy-retrieve PR [#1288](https://github.com/forcedotcom/source-deploy-retrieve/pull/1288))
+
+* FIX: Salesforce CLI once again supports big object types whose index files use the legacy `.indexe` suffix rather than the better `.index` suffix. But we've also added a warning if your big object uses the `.indexe` suffix, asking you to update it to `.index`.  (GitHub issue [#2847](https://github.com/forcedotcom/cli/issues/2847), source-deploy-retrieve PR [#1298](https://github.com/forcedotcom/source-deploy-retrieve/pull/1298))
+
+* FIX: The `.forceignore` file now works consistently, whether you're using source or mdapi format. Specifically, when you deploy or retrieve in source format (using `sf project deploy start`, for example), the command respects file names of `.forceignore` entries in source format. Similarly, when you deploy or retrieve in mdapi format (using `sf project deploy start --metadata-dir`, for example), the command respects file name entries in mdapi format. (GitHub issue [#2737](https://github.com/forcedotcom/cli/issues/2737), source-deploy-retrieve PR [#1295](https://github.com/forcedotcom/source-deploy-retrieve/pull/1295))
+
+* FIX: The `org shape list` command now works as expected, even when the connection to the Dev Hub org is incorrect.
+
+## 2.39.6 (May 1, 2024)
+
+* FIX: `project delete source` doesn't throw errors when confirming that you want to delete source that doesn't exist locally.  (GitHub issue [#2836](https://github.com/forcedotcom/cli/issues/2836), plugin-deploy-retrieve PR [#986](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/986))
+
+* FIX: `project generate manifest --from-org` was throwing errors when the metadata API responds with metadata missing required properties.  We've alerted the resonsible team, and in the meantime created some checks in the CLI to prevent the error (and warn you about what metadata can't be processed).  (GitHub issue [2841](https://github.com/forcedotcom/cli/issues/2841), source-deploy-retrieve PR [#1296](https://github.com/forcedotcom/source-deploy-retrieve/pull/1296)).
+
+* FIX: `sf plugins link` had a problem linking plugins that needed to be compiled before use.  We've fixed that (GitHub issue [#2818](https://github.com/forcedotcom/cli/issues/2818), oclif/plugin-plugins PR [#841](https://github.com/oclif/plugin-plugins/pull/841))
+
+* FIX: `sf apex test run` handles the `--wait` flag better.  (GitHub issue [#2108](https://github.com/forcedotcom/cli/issues/2108), plugin-apex PR [#422](https://github.com/salesforcecli/plugin-apex/pull/422), apex library PR [#364](https://github.com/forcedotcom/salesforcedx-apex/pull/364))
+
+## 2.38.7 (April 24, 2024)
+
+* NEW: Salesforce CLI downloads, installations, and updates just got a whole lot faster, especially on Windows! Why?  Because we've significantly reduced the size of both the `npm` packages and the OS-specific installers.  The `npm` reduction is the champion: it's ~35% smaller. But the installers are ~10% slimmer too. Nice. 
+
+* NEW: You can now use the `language` property in scratch org definition files in combination with scratch org snapshots in Summer24.  (GitHub issue [#2643](https://github.com/forcedotcom/cli/issues/2643), sfdx-core PR [#1055](https://github.com/forcedotcom/sfdx-core/pull/1055) plus some server-side changes in the major release)
+   
+* FIX: Salesforce CLI, when interacting with an org, now properly retries the command when it runs into a network error. (GitHub issues [#1350](https://github.com/forcedotcom/cli/issues/1350) and [#2557](https://github.com/forcedotcom/cli/issues/2557), jsforce PR [#1403](https://github.com/jsforce/jsforce/pull/1403))
+
+* FIX: The `project deploy report` command now returns results about all deployed files, even if they don't currently exist in your local project. This scenario can happen if the deploy occurs on one computer and the report command is run on a different computer where the project looks different. The report command warns the user if a local file doesnt' exist. (GitHub issues [#2602](https://github.com/forcedotcom/cli/issues/2603) and [#2602](https://github.com/forcedotcom/cli/issues/2602), source-deploy-retrieve PR [#1273](https://github.com/forcedotcom/source-deploy-retrieve/pull/1273))
+
+* FIX: The `project deploy retrieve` command now does not check for a project when doing a metadata api retrieve when using the `--manifest` flag, and it shouldn't have started doing that. (GitHub issue [#2832](https://github.com/forcedotcom/cli/issues/2832) and [#2831](https://github.com/forcedotcom/cli/issues/2831), plugin-deploy-retrieve PR [#978](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/978)
+
+* FIX: NodeJS made a breaking windows-related security change.  We adjusted the CLI to comply.  (GitHub issue [#2822](https://github.com/forcedotcom/cli/issues/2822), plugin-telemetry PR [#611](https://github.com/salesforcecli/plugin-telemetry/pull/611), oclif/plugin-plugins PR [#847](https://github.com/oclif/plugin-plugins/pull/847), oclif/plugin-update [#788](https://github.com/oclif/plugin-update/pull/788)) 
+
+NOTE: As a result of this NodeJS change, some windows users will see a terminal "flash" (see [#2833](https://github.com/forcedotcom/cli/issues/2833)) in certain scenarios.  We're working on a way to avoid that.
+
+## 2.37.4 (April 17, 2024)
+
+* NEW: The JSON output of the `package version create` command now contains more information: the percentage of Apex code lines that are covered by tests (CodeCoverage) and the full package version number (VersionNumber). The new CodeCoverage key corresponds to the Tooling API `Package2Version.CodeCoverage` field; the VersionNumber key corresponds to a concatenation of the `Package2Version.MajorVersion`, `Package2Version.MinorVersion`, `Package2Version.PatchVersion`, and `Package2Version.BuildNumber` fields. (packaging PR [#492](https://github.com/forcedotcom/packaging/pull/492))
+
+    Thank you, [Ronny Rokitta](https://github.com/Rocko1204)!  This is a great follow-on contribution from the one you made in [January](./README.md#2257-jan-24-2024) -- we love repeat contributors. Cheers!
+
+* CHANGE: We removed the `force org clone` and `force org status` commands from Salesforce CLI; use the `org create sandbox` and `org resume sandbox`, respectively, instead. We deprecated the two commands on [Feb 9, 2023](https://github.com/forcedotcom/cli/blob/main/releasenotes/sfdx/README.md#71871-feb-9-2023).  (plugin-org PR [#1009](https://github.com/salesforcecli/plugin-org/pull/1009)).
+
+* FIX: If you deploy source to an org, and source tracking fails for some reason (such as a server error, CLI error, or a problem in your environment), you now get the full details of the failure. Previously you would get just the `MetadataTransferError` error, and no more information, so it was difficult to troubleshoot what the problem was. (source-deploy-retrieve PR [#1275](https://github.com/forcedotcom/source-deploy-retrieve/pull/1275))
+
+* FIX: You can now successfully run `project deploy report` and get information about a deployment that you first validated with `project deploy validate` and then quick deployed with `project deploy quick`.  (plugin-deploy-retrieve PR [#962](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/962))
+
+## 2.36.8 (April 10, 2024)
+
+* NEW: (Beta) Specify that Salesforce CLI decompose four more metadata types when it converts from mdapi to source format, in addition to the types it currently decomposes automatically (CustomObject and CustomObjectTranslation).  And stay tuned, we're planning to do more types soon!
+
+    By "decompose" we mean that Salesforce CLI breaks the single, and often very large, mdapi-format XML file that corresponds to a metadata component into smaller XML files based on the sub-types. These files live in sub-directories of a directory named the same as the component. See [Salesforce DX Project Structure and Source Format](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_source_file_format.htm) for information on how CustomObject and CustomObjectTranslations are decomposed; that topic will soon be updated with similar information about the new decomposed types.
+
+    Unlike CustomObject and CustomObjectTranslation, you must explicitly opt-in to decompose these new types. It's easy: just add a `registryPresets` option to your `sfdx-project.json` file and set it to one or more of these values:
+
+    * `decomposePermissionSetBeta` : decompose the [PermissionSet](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_permissionset.htm) metadata type
+    * `decomposeWorkflowBeta` : decompose the [Workflow](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_workflow.htm) metadata type
+    * `decomposeCustomLabelsBeta` : decompose the [CustomLabels](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_customlabels.htm) metadata type
+    * `decomposeSharingRulesBeta` : decompose the [SharingRules](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_sharingrules.htm) metadata type
+
+    When you next retrieve the component, it will be decomposed. (The values include the word `Beta`, because this feature is currently in beta. When it becomes generally available, you'll simply remove the `Beta` part.)
+
+    For example, if you want to decompose PermissionSet and Workflow types, add this to your `sfdx-project.json`:
+
+    `"registryPresets": ["decomposePermissionSetBeta", "decomposeWorkflowBeta"]`
+
+    If you already have these metadata types in your project, be sure you follow these steps to start using this new feature:
+
+    1. Remove all the files that correspond to the existing metadata components from your project. For example, if you want to start decomposing PermissionSet and Workflow types, remove files that look something like this:
+
+        ```bash
+        cd <myproject>
+        rm force-app/main/default/permissionsets/MyPermSet.permissionset-meta.xml
+        rm force-app/main/default/workflows/Account.workflow-meta.xml
+        ```
+
+    1. Update your `sfdx-project.json` file and specify the two values to the `registryPresets` option:
+
+       `"registryPresets": ["decomposePermissionSetBeta", "decomposeWorkflowBeta"]`
+
+    1. Retrieve these components again:
+
+       `sf project retrieve start --metadata PermissionSet --metadata Workflow`
+
+  The command retrieved a bunch of smaller XML files for each permission set and workflow, rather than a single file.  Hurray!  (GitHub discussion [#2544](https://github.com/forcedotcom/cli/discussions/2544), issues [#1159](https://github.com/forcedotcom/cli/issues/1159), [#2356](https://github.com/forcedotcom/cli/discussions/2356), and [#2376](https://github.com/forcedotcom/cli/discussions/2376). source-deploy-retrieve PR [#1217](https://github.com/forcedotcom/source-deploy-retrieve/pull/1217) source-tracking PR [#552](https://github.com/forcedotcom/source-tracking/pull/552))
+
+    **NOTE**: _This feature is a Beta Service. Customers may opt to try such Beta Service in its sole discretion. Any use of the Beta Service is subject to the applicable Beta Services Terms provided at Agreements and Terms (https://www.salesforce.com/company/legal/agreements/)._
+
+    **NOTE**: _This beta feature is supported and tested for only the `sf project deploy|retrieve|delete|convert` commands.  We don't support using the `force:source:push|pull|deploy|retrieve` commands with this feature._    
+
+* NEW: Bypass the warning prompt that's displayed when you install a trusted, yet unsigned, plugin using its GitHub URL by adding the URL to the [Salesforce CLI allowlist](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_allowlist.htm). Previously you could add only npm names to the file. The GitHub URL must be in the format `https://github.com/<org>/<repo>`.
+
+    For example, let's say you add the `https://github.com/oclif/plugin-version` plugin, which isn't signed by Salesforce, to the `unsignedPluginAllowList.json` file. You can then run this command and you won't get the warning prompt:
+
+    ```bash
+    sf plugins install https://github.com/oclif/plugin-version
+    ```
+
+    We also improved the warning and install messages to clearly indicate which plugin you're installing. (plugin-trust PR [#771](https://github.com/salesforcecli/plugin-trust/pull/771))
+
+* FIX: Salesforce DX projects now support the AffinityScoreDefinition [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json).
+ 
+## 2.35.6 (April 3, 2024)
+
+* NEW: Specify the flag values for Salesforce CLI commands in local text files by using the `--flags-dir <dir-name>` flag when running the command. If the command finds a file in the specified directory with the same name as one of its flags, it uses the contents of the file as the value of the flag. Take this command, for example:
+
+    ```bash
+    sf project deploy start  --metadata ApexClass --test-level RunLocalTests --target-org my-scratch
+    ```
+    Let's say you create a directory called `flag-values` in your DX project. You then create a file in that directory called `metadata` (no extension) and add one line of content to the file: `ApexClass`.  Similarly, you create a file called `test-level` with contents `RunLocalTests` and a file called `target-org` with contents `my-scratch`. You can then run the preceding command from the DX project this way:
+
+   ```bash
+   sf project deploy start --flags-dir ./flag-values
+   ```
+   Additional usage notes:
+
+     * The files that contain flag values don't usually have an extension; the only exception is if the files contain `JSON` content, in which case you must use the `.json` extension, such as `files.json`. 
+     * For Boolean flags, create an empty file with the name of the Boolean flag.  For example, to specify the `--concise` flag, create an empty file called `concise`. 
+     * You can name files for Boolean flags `no-<flagname>`, as long as the Boolean flag supports it. For example, to use this feature with the `org create scratch` command and disable source tracking, create an empty file called `no-track-source`. 
+     * If you include multiple lines in a file, then the result is multiple flags, such as `--metadata ApexClass --metadata CustomObject --metadata PermissionSet`.
+     * Actual flags take precedence over values in a file. For example, if you specify `--target-org my-scratch` when you run the command, but also specify `--flags-dir` that points to a `target-org` file that contains the line `my-other-scratch`, the command connects to `my-scratch`.  The only exception is for flags that take multiple values, such as `--metadata`; in this case, the flag and file values are combined. 
+     * You can name the files using the flag's short name, such as `m` rather than `metadata`.
+     * This release adds the new `--flags-dir` flag to all CLI commands except for the commands contained in these plugins:
+          * [`sfdx-scanner`](https://github.com/forcedotcom/sfdx-scanner): Code Analyzer commands, such as `scanner run`.
+          * [`plugin-devops-center`](https://github.com/salesforcecli/plugin-devops-center): DevOps Center commands, such as `project deploy pipeline start`.
+          * [`plugin-functions`](https://github.com/salesforcecli/plugin-functions): Salesforce Functions commands, such as `run function`.
+
+    Pretty cool feature, don't you think?  (GitHub discussions [#2346](https://github.com/forcedotcom/cli/discussions/2346) and [#2670](https://github.com/forcedotcom/cli/discussions/2670). GitHub issue [#2260](https://github.com/forcedotcom/cli/discussions/2260). salesforcecli/cli PR [#1536](https://github.com/salesforcecli/cli/pull/1536), 
+
+* CHANGE: As [previously announced](https://github.com/forcedotcom/cli/issues/2691), Salesforce CLI is now using a major new version of [`oclif/plugin-plugins`](https://github.com/oclif/plugin-plugins); this oclif plugin uses `npm` instead of `yarn` (v1) to install and update user plugins.
+
+    In most cases, there's nothing for you to do as a result of this change. The user plugins you've already installed will continue to work and be updatable using `plugins update`. But just in case, check the **What do I need to do?** section of the [announcement](https://github.com/forcedotcom/cli/issues/2691) for the specific use cases in which you might need to do something. The announcement also explains why we made this change. 
+
+    If you experience issues after you update to this Salesforce CLI release, we recommend that you run `plugins reset --reinstall --hard`, which completely uninstalls all your plugins and then reinstalls them on your behalf. If you continue to experience issues, create a new GitHub issue.  (oclif/plugin-plugins PR [#776](https://github.com/oclif/plugin-plugins/pull/776))
+
+* FIX: You can now include the same source component in all the manifest files (standard, pre-deploy-delete, post-deploy-delete) simultaneously. As a result, you can now, for example, first delete a component and then add it again in a single execution of the `project deploy start` command.  (GitHub issue [#2761](https://github.com/forcedotcom/cli/issues/2761), source-deploy-retrieve PR [#1261](https://github.com/forcedotcom/source-deploy-retrieve/pull/1261))
+
+* FIX: Salesforce CLI now supports authenticating to orgs with `.cn` domains. (plugin-auth PR [#995](https://github.com/salesforcecli/plugin-auth/pull/955))
+
+* FIX: You can now use the `--target-org` flag with the `project deploy cancel` command. (GitHub discussion [#2300](https://github.com/forcedotcom/cli/discussions/2300#discussioncomment-8053672), plugin-deploy-retrieve PR [#945](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/945))
+
+* FIX: If you run a non-existent command with "closed stdin" (i.e. you specify `<&-` or `< /dev/null` after the command), Salesforce CLI now waits 10 seconds after prompting for a matching command, and then returns the appropriate error exit code. Previously it returned a `0` exit code. [oclif GitHub issue [#266](https://github.com/oclif/plugin-not-found/issues/266), oclif plugin-not-found PR [#566](https://github.com/oclif/plugin-not-found/pull/566))
+
+* FIX: We've improved the performance and output messages for many of the `data` commands.  In particular:
+
+    * Improved the performance and reduced the API call usage when monitoring bulk jobs for these commands: `data delete bulk`, `data upsert bulk`, `data delete resume`, `data upsert resume`, `data query`.
+    * Improved the error if you pass an unparseable CSV file to these commands: `data delete bulk`, `data upsert bulk`.
+    * Improved the output of the bulk job event updates for these commands: `data delete bulk`, `data upsert bulk`, `data delete resume`, `data upsert resume`.
+ 
+     (plugin-data PR [#843](https://github.com/salesforcecli/plugin-data/pull/843))
+
+## 2.34.7 (March 27, 2024)
+
+* CHANGE: You can now override the name or license type of a new sandbox (that you create with a definition file) by specifying the `--name` or `--license-type` flags in addition to `--definition-file`. Previously, if you specified a definition file, you couldn't also specify either `--name` or `--license-type`. 
+
+    For example, let's say the `sandboxName` option in the `config/dev-sandbox-def.json` file is `fulldev1`; the following command creates a sandbox using all the options in the definition file, except that the sandbox name is `fulldev2`:
+
+    ```bash
+    $ sf org create sandbox --definition-file config/dev-sandbox-def.json --target-org prodOrg --name fulldev2
+    ```
+
+    (plugin-org PR [#991](https://github.com/salesforcecli/plugin-org/pull/991))
+
+* FIX: You can now successfully authorize an org using `org login web` and version 123 of the Chrome browser, which was recently released.  (GitHub issue [#2785](https://github.com/forcedotcom/cli/issues/2785), sfdx-core PR [#1040](https://github.com/forcedotcom/sfdx-core/pull/1040), plugin-auth PR [#975](https://github.com/salesforcecli/plugin-auth/pull/975))
+
+* FIX: String replacements during deployments of individual CustomLabel metadata types (without their parent CustomLabels metadata type) are now working as expected.  (GitHub issue [#2755](https://github.com/forcedotcom/cli/issues/2755), source-deploy-retrieve PR [#1257](https://github.com/forcedotcom/source-deploy-retrieve/pull/1257))
+
+* FIX: You can now successfully execute the `sf org open` command from the terminal window of VS Code that's running on Windows Subsystem for Linux (WSL) 2. (GitHub issue [#2677](https://github.com/forcedotcom/cli/issues/2677), plugin-org PR [#962](https://github.com/salesforcecli/plugin-org/pull/962))
+
+    Thank you [nrakuyama](https://github.com/nrakuyama) for contributing the fix!  We love your initiative and help.  Here's to many more!
+
+* FIX: We've improved how Salesforce CLI internally converts files between source and metadata formats. The conversion no longer returns an error when done outside a Salesforce DX project. Also, the conversion can now write a zip to disk. (source-deploy-retrieve PR [#1252](https://github.com/forcedotcom/source-deploy-retrieve/pull/1252))
+
+    Many thanks to [Aaron Csetter](https://github.com/aaron-csetter) for finding the problems, and then contributing the fixes. Contributions like yours help make Salesforce CLI a better-than-ever developer tool, and we're very appreciative!
+  
+* FIX: When deploying, Salesforce CLI now continues to poll for status even when these HTTP error codes are in the response: 502, 503, and 420. (source-deploy-retrieve PR [#1262](https://github.com/forcedotcom/source-deploy-retrieve/pull/1262))
+
+* FIX: Salesforce DX projects now support the ConversationMessageDefinition [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json).
+
+## 2.33.3 (March 20, 2024)
+
+* FIX: The `org user display` command no longer displays the Profile Name twice. (GitHub issue [#2762](https://github.com/forcedotcom/cli/issues/2762), plugin-user PR [#898](https://github.com/salesforcecli/plugin-user/pull/898))
+
+    Thank you [dwbuttler](https://github.com/dwbuttler) for noticing the problem, reporting the issue, and then simply fixing it yourself.  We love your initiative!  And we look forward to more contributions from you and our fabulous community.
+
+* FIX: We've improved the error message returned when `project deploy validate --json` encounters a validation error with one or more metadata components. (GitHub issue [#2757](https://github.com/forcedotcom/cli/issues/2757), plugin-deploy-retrieve PR [#938](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/938))
+
+* FIX: You can now successfully authenticate an org in which PKCE ([Proof Key for Code Exchange](https://help.salesforce.com/s/articleView?id=sf.remoteaccess_pkce.htm&type=5)) is enforced.  (GitHub Discussion [#2726](https://github.com/forcedotcom/cli/discussions/2726), sfdx-core PR [#1035](https://github.com/forcedotcom/sfdx-core/pull/1035))
+  
+## 2.32.8 (March 13, 2024)
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+  * MlModelArtifact
+  * MlModelConnection
+  * MlModelSchema
+
+## 2.31.8 (March 8, 2024)
+
+* NEW: Hold on to your hats, folks -- you can now easily refresh a sandbox org with the new `org refresh sandbox` command. Refreshing a sandbox copies the metadata, and optionally data, from your production org to the refreshed sandbox org. Specify the sandbox you want to refresh with the --name flag and the production org that contains the sandbox licenses with the --target-org flag. You can optionally specify a [definition file](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_sandbox_definition.htm) with the --definition-file flag if you want to change the configuration of the refreshed sandbox, such as its license type or template ID. 
+
+    This example shows how to refresh a sandbox named "devSbx1" without changing its configuration. The production org that contains the sandbox license has the alias "prodOrg".
+
+    ```bash
+    sf org refresh sandbox --name devSbx1 --target-org prodOrg
+    ```
+    In this example, your default org is also your production org with the sandbox licenses, so you don't need to specify --target-org. The configuration changes are in the specified definition file.
+
+    ```bash
+    sf org refresh sandbox --name devSbx2 --definition-file config/devSbx2-config.json
+    ```
+    
+    You can't change the sandbox name when you refresh it with this command. If you want to change the sandbox name, first delete it with the `org delete sandbox` command. And then recreate it with `org create sandbox` and give it a new name.
+
+    (GitHub discussion [#2511](https://github.com/forcedotcom/cli/discussions/2511), plugin-org PR [#973](https://github.com/salesforcecli/plugin-org/pull/973), sfdx-core PR [#1031](https://github.com/forcedotcom/sfdx-core/pull/1031))
+
+* FIX: Salesforce CLI no longer prompts and waits for an answer, and then time out and return a non-zero exit code, when you run a command that asks a question in a non-TTY environment. (GitHub issue [#2739](https://github.com/forcedotcom/cli/issues/2739), oclif/core PR [#967](https://github.com/oclif/core/pull/967))
+
+* FIX: You can now correctly assign multiple permission set licenses at once with the `org assign permsetlicense` command by specifying multiple instances of the `--name` flag. While fixing this issue, we cleaned up a few other error-related issues.  (GitHub issue [#2744](https://github.com/forcedotcom/cli/issues/2744), plugin-user PR [#877](https://github.com/salesforcecli/plugin-user/pull/877))
+
+* FIX: Salesforce DX projects now support the EnablementProgramDefinition [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json).
+
+## 2.30.8 (Feb 28, 2024)
+
+* CHANGE: We made a bunch of improvements to the `data import tree` and `data export tree` commands. But because these improvements introduce breaking changes, we're going to first beta the new functionality, and then make it generally available when we're sure everything is in tip-top shape. Here's an overview of the plan, but see the [pinned issue #2738](https://github.com/forcedotcom/cli/issues/2738) for details about the improvements, the breaking changes, and timeline.
+
+    * This release contains two new commands with the improvements: `data import beta tree` and `data export beta tree`. The existing `data import tree` and `data export tree` commands continue to work as before and coexist with the new beta commands.
+    * Test these beta commands and let us know if you find any issues. Also let us know if you like the improvements!
+    * When the beta period is over, we'll move the functionality that we added to `data import|export beta tree` to the "official" `data import|export tree` commands. We'll then move the functionality in the _old_ `data import|export tree` commands to new commands called `data import|export legacy tree`. 
+
+    Enjoy! (GitHub issues [#2663](https://github.com/forcedotcom/cli/issues/2663) and [#248](https://github.com/forcedotcom/cli/issues/248). GitHub discussion [#2359](https://github.com/forcedotcom/cli/discussions/2359). plugin-data PR [#821](https://github.com/salesforcecli/plugin-data/pull/821) and [#810](https://github.com/salesforcecli/plugin-data/pull/810))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+    
+    * OauthTokenExchangeHandler (GitHub discussion [#2736](https://github.com/forcedotcom/cli/discussions/2736))
+    * ActionableEventOrchDef
+    * ActionableEventTypeDef
+    * OmniExtTrackingDef
+      
+* FIX: When you pass a command alias to `sf which`, it now outputs an `aliasOf` property that shows the command that the passed-in command is an alias of. (oclif GitHub issue [#515](https://github.com/oclif/plugin-which/issues/515), plugin-which PR [#545](https://github.com/oclif/plugin-which/pull/545))
+
+
+## 2.29.5 (Feb 21, 2024)
+
+* CHANGE: We removed the `--target-dev-hub` flag from these commands; the flag has been deprecated and hidden for over two years because it has no effect:
+
+    * `org create user`
+    * `org display user`
+    * `org list users`
+ 
+    (plugin-users PR [#864](https://github.com/salesforcecli/plugin-user/pull/864))
+
+* FIX: We updated our GitHub Actions to be more friendly to external developers. In particular, we modified our [external plugin template](https://github.com/salesforcecli/plugin-template-sf-external) so that `dev generate plugin` generates updated sample GitHub Actions workflow files. We also added Personal Access Token instructions to the [README](https://github.com/salesforcecli/github-workflows) in our GitHub Actions repo.
+
+* FIX: Salesforce DX projects now support the EnablementMeasureDefinition [metadata type](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json).
+
+## 2.28.6 (Feb 14, 2024)
+
+* NEW: Your work life is about to get more colorful with Salesforce CLI's new help themes. The help output now uses colors to highlight certain parts, such as the help sections (USAGE, FLAGS, DESCRIPTION, and so on), flags and their descriptions, executable name, and more. To see the default colors, run any command with `--help`- or `-h`.
+
+    If you don't like the colors we chose, specify your own colors by creating a file called `theme.json` file in this location:
+
+    * (Linux and macOS): `$HOME/.config/sf/theme.json`
+    * (Windows) Depending on your configuration, either `C:\Users\<username>\.config\sf\theme.json` or `%LOCALAPPDATA%\sf\theme.json`
+
+   Use these JSON keys to specify the color of various sections. 
+  
+    * `alias`: The aliases listed in the ALIASES section.
+    * `bin`: The `sf` executable.
+    * `command`: The command's name.
+    * `commandSummary`: The command's summary.
+    * `dollarSign`: The `$` printed before examples and usage.
+    * `flag`: The flag long and short names.
+    * `flagDefaultValue`: The text `[default: X]` shown for flags that have a default value.
+    * `flagOptions`: The valid options for a flag.
+    * `flagRequired`: The text `(required)` shown for required flags.
+    * `flagSeparator`: The `,` that separates the short and long flag names (for example, `-f, --foo`).
+    * `sectionDescription`: The text inside each section (for example, everything under the DESCRIPTION section).
+    * `sectionHeader`: The section header (for example, DESCRIPTION).
+    * `topic`: The topics listed in the TOPICS section.
+    * `version`: The VERSION section shown when you run `sf --help`.
+
+    For the key's value, use [chalk-style colors](https://github.com/chalk/chalk/?tab=readme-ov-file#colors) (such as `greenBright`), hex code (`#FF0000`) or RGB (`rgb(255,255,255)`). To _not_ colorize a section, set it to `none` or remove it from the `theme.json` file.
+
+    As an example, here's the default `theme.json` file; it uses chalk-style colors. 
+
+   ```json
+   {
+      "aliases": "none",
+      "bin": "blueBright",
+      "command": "blueBright",
+      "commandSummary": "none",
+      "dollarSign": "green",
+      "flag": "green",
+      "flagDefaultValue": "blueBright",
+      "flagOptions": "blueBright",
+      "flagRequired": "red",
+      "flagSeparator": "none",
+      "sectionDescription": "none",
+      "sectionHeader": "blue",
+      "topic": "blueBright",
+      "version": "none"
+    }
+   ```
+
+    Many thanks to [Alan Oricil](https://github.com/AllanOricil), who contributed the general themes feature to [`oclif`](https://github.com/oclif/core/pull/852). We thought it was very cool, so decided to implement it in Salesforce CLI. May the pretty colors bring a little spark of joy to our community! (salesforce/cli PR [#1451](https://github.com/salesforcecli/cli/pull/1451))
+
+* NEW: It's now super-easy to get your Salesforce CLI installation into a "clean" state with the new `--reinstall` and `--hard` flags of `plugins reset`.
+
+    * `--reinstall` does exactly what it says: reinstalls every plugin that you previously installed.
+    * `--hard` removes all package manager related files and directories (`node_modules`, `package.json`, `yarn.lock`, `package-lock.json`) from Salesforce CLI's internal data directory.
+    
+    For example:
+
+    ```bash
+    sf plugins reset --reinstall --hard
+    ```
+    (oclif/plugin-plugins PR [#777](https://github.com/oclif/plugin-plugins/pull/777))
+
+* CHANGE: Any [string replacements](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_string_replace.htm) configured in your `sfdx-project.json` file are now also applied to source files that are packaged with the `package version create` command. The documentation will be updated shortly to reflect this change. (plugin-packaging PR [#566](https://github.com/salesforcecli/plugin-packaging/pull/566)
+
+* CHANGE: We removed the SF_CODE_COVERAGE_REQUIREMENT environment variable because it never did anything.  (sfdx-core PR [#1023](https://github.com/forcedotcom/sfdx-core/pull/1023)
+
+* FIX: The `package version list` and `package1 version list` commands now return up to 10K records; previously the maximum was 2000.  To get even more records, set the SF_ORG_MAX_QUERY_LIMIT environment variable. (GitHub issue [#2073](https://github.com/forcedotcom/cli/issues/2073), packaging PR [#500](https://github.com/forcedotcom/packaging/pull/500))
+
+* FIX: Piping the SFDX authorization URL from stdin to the `org login sfdx-url` command is now working correctly.  NOTE that as part of this fix, you're not longer required to provide the `-` value to the `--sfdx-url-stdin` flag. Here's an example; it uses the _template_ for the SFDX authorization URL, not real secret information, for obvious reasons:
+
+    ```bash
+    echo "force://<clientId>:<clientSecret>:<refreshToken>@<instanceUrl>" | sf org login sfdx-url --sfdx-url-stdin
+    ```
+
+  (GitHub issue [#2690](https://github.com/forcedotcom/cli/issues/2690), oclif core [#935](https://github.com/oclif/core/pull/935))
+
+* FIX: You can now correctly deploy and package source files that start with a period, such as `.specialFile`. (GitHub issue [#2666](https://github.com/forcedotcom/cli/issues/2666), source-deploy-retrieve PR [#1224](https://github.com/forcedotcom/source-deploy-retrieve/pull/1224))
+
+## 2.27.6 (Feb 7, 2024)
+
+* FIX: The `package version create list --created-last-days 0` command now correctly returns package versions that were created today. (GitHub issue [#2668](https://github.com/forcedotcom/cli/issues/2668), packaging PR [#496](https://github.com/forcedotcom/packaging/pull/496))
+
+* FIX: The `project deploy quick --job-id <ID>` command now always works correctly with 15-character deployment job IDs. If the job ID isn't in the local cache, you must provide a valid target org with the `--target-org` flag.  (GitHub issue [#2591](https://github.com/forcedotcom/cli/issues/2591), plugin-deploy-retrieve PR [#884](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/884))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+    
+    * GenAiPromptTemplate
+    * GenAiPromptTemplateActv
+
+* FIX: The `org logout` command asked if you wanted to log out of all orgs when you wanted to log out of just one.  The message now correctly asks about only the one org.  (GitHub issue [#2671](https://github.com/forcedotcom/cli/issues/2671), plugin-auth PR [#923](https://github.com/salesforcecli/plugin-auth/pull/923))
+
+## 2.26.10 (Jan 31, 2024)
+
+* NEW: Choose whether Salesforce CLI capitalizes default record types when it creates a scratch org with the new Boolean `org-capitalize-record-types` configuration variable and corresponding `SF_CAPITALIZE_RECORD_TYPES` environment variable.
+
+    Default record types are defined in the `objectSettings` option of a scratch org definition file, as described in [Scratch Org Definition File Options](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_scratch_orgs_def_file.htm). The setting is required before installing a package that creates record types. Currently, Salesforce CLI automatically capitalizes these default record types when it creates them in the scratch org, even if they're lower case in the definition file, such as `svc_Technical_Support` in this snippet:
+
+   ```json
+    "objectSettings": {
+      "case": {
+        "defaultRecordType": "svc_Technical_Support",
+        "sharingModel": "private"
+      }
+    }
+   ```
+   If you don't want Salesforce CLI to capitalize the record types, set `org-capitalize-record-types` or `SF_CAPITALIZE_RECORD_TYPES` to `false`. For example:
+
+  ```bash
+  sf config set org-capitalize-record-types=false --global
+  ```
+  **Important**: Salesforce CLI plans to switch this behavior on or after June 1, 2024. See the ANNOUNCEMENT above.  
+  
+* FIX: We've improved source tracking so it better handles undecodable SourceMember keys; previously, the relevant command, such as `project deploy start`, would return an errror such as `URIError: URI malformed` if it encountered one. (GitHub issue [#2624](https://github.com/forcedotcom/cli/issues/2624), source-tracking PR [#531](https://github.com/forcedotcom/source-tracking/pull/531))
+
+* FIX: We've improved the `apex run` command so it can handle SOAP responses that don't include a header when executing anonymous Apex. (GitHub issue [#2630](GitHub issue link: https://github.com/forcedotcom/cli/issues/2630), salesforcedx-apex PR [#343](https://github.com/forcedotcom/salesforcedx-apex/pull/343))
+
+* FIX: The error output from a failed execution of the `package version create report` command now contains the correct CLI command to run to get all relevant errors (`data query` rather than the incorrect `data:soql:query`). (GitHub issue [#2660](https://github.com/forcedotcom/cli/issues/2660), plugin-packaging PR [#561](https://github.com/salesforcecli/plugin-packaging/pull/561))
+
+## 2.25.7 (Jan 24, 2024)
+
+* NEW: We made some groovy improvements to the `dev generate flag` command. For example:
+
+    * We added a new flag type: `option`. Specify this type for flags that have a short list of pre-defined string values, similar to a picklist. The command then prompts you to enter these pre-defined values.
+    * When you pick one of the org-related flag types for your new flag, such as `optionalOrg` or `requiredHub`, the command now asks if you want to mimic the standard Salesforce CLI flag (`--target-org` or `--target-dev-hub`, respectively).  If you answer `Y`, the command uses the standard short flag name, summary, description, and default value for your new flag.  You can change the long flag name if you want, or use the standard name.
+    * When you scroll through the possible flag values, we now provide a brief description of the type at the bottom of the terminal window. 
+    * We tightened up the validation of inputted values in all the `dev generate <thing>` commands.
+ 
+  (plugin-dev PR [#456](https://github.com/salesforcecli/plugin-dev/pull/456)) 
+   
+* NEW: Open your org in an incognito window of your browser with the new `--private` flag of `org open`. This example opens your default org in an incognito window of the Chrome browser:
+
+   ```bash
+   sf org open --browser chrome --private
+   ```
+   (GitHub issues [#1852](https://github.com/forcedotcom/cli/issues/1852), [#636](https://github.com/forcedotcom/cli/issues/636), and [#2262](https://github.com/forcedotcom/cli/discussions/2262);  plugin-org PR [#923](https://github.com/salesforcecli/plugin-org/pull/923))
+  
+* NEW: The JSON output of the `package version create` command now contains more information: the package name and whether code coverage tests were run and the resulting code coverage percentage is 75% or greater.  These values correspond to the Tooling API `Package2.Name` and `Package2Version.HasPassedCodeCoverageCheck` fields. (packaging library PRs [#486](https://github.com/forcedotcom/packaging/pull/486) and [#466](https://github.com/forcedotcom/packaging/pull/466))
+
+     Many thanks to [Ronny Rokitta](https://github.com/Rocko1204) for this contribution. We love it. 
+  
+* FIX: If the `package version create` command times out, the output now includes a request ID so you can later query the status of the package version create request with the `package version create report --package-create-request-id <ID>` command. (GitHub issue [#2605](https://github.com/forcedotcom/cli/issues/2605), packaging library PR [#485](https://github.com/forcedotcom/packaging/pull/485))
+
+* FIX: Salesforce CLI no longer includes security tokens in the URL used to open an org in a browser with the `org open` command. (plugin-org PR [#913](https://github.com/salesforcecli/plugin-org/pull/913))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+    
+    * ExtlClntAppNotificationSettings
+    * DataCalcInsightTemplate
+    * DataKitObjectTemplate
+
+## 2.24.4 (Jan 17, 2024)
+
+* NEW: Pipe the SFDX authorization URL through standard input when executing the `org login sfdx-url` command by specifying the new `--sfdx-url-stdin` flag and providing the `-` character as the value. Here's an example; it uses the _template_ for the SFDX authorization URL, not real secret information, for obvious reasons:
+
+    ```
+    echo "force://<clientId>:<clientSecret>:<refreshToken>@<instanceUrl>" | sf org login sfdx-url --sfdx-url-stdin -
+    ```
+
+    Many thanks to [Kyle Capehart](https://github.com/k-capehart) for contributing this cool new feature. Awesome sauce. We look forward to more contributions from you!  (GitHub issue #[2120](https://github.com/forcedotcom/cli/issues/2120), plugin-auth PR [#886](https://github.com/salesforcecli/plugin-auth/pull/886))
+  
+* FIX: The `project deploy start` command now correctly returns exit code 1 if you explicitly specify something to deploy (such as `--manifest package.xml` or `--source-dir force-app`) but nothing is deployed.  If you don't specify anything, and nothing is deployed, the exit code is 0. (GitHub issue [2621](https://github.com/forcedotcom/cli/issues/2621), plugin-deploy-retrieve PR [862](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/862))
+
+* FIX: Salesforce DX projects now support these [metadata types](https://github.com/forcedotcom/source-deploy-retrieve/blob/main/src/registry/metadataRegistry.json):
+
+    * ExpressionSetObjectAlias
+    * ExtDataTranObjectTemplate
+    * ExtDataTranFieldTemplate
+
+## 2.23.20 (Jan 10, 2024)
+
+* NEW and CHANGED (two for one!): We improved the output of the `sf commands` command so that it no longer displays deprecated commands and deprecated aliases of commands; the output is now cleaner and easier to read. Don't worry, you can still see all the deprecated stuff with the new `--deprecated` flag.  (oclif/plugin-commands PR [#568](https://github.com/oclif/plugin-commands/pull/568))
+
+    ```bash
+    sf commands --deprecated
+    ```
+
+* CHANGE: We generally cleaned up how we manage and display deprecated and hidden commands. For example, all deprecated commands now display appropriate and consistent warnings when you run them. Also, hidden commands no longer show up when you use autocomplete. (If you already use autocomplete, be sure to run `sf autocomplete --refresh-cache` to get this change.) (plugin-source PR [#1050](https://github.com/salesforcecli/plugin-source/pull/1050), plugin-auth PR [#905](https://github.com/salesforcecli/plugin-auth/pull/905), plugin-schema PR [#668](https://github.com/salesforcecli/plugin-schema/pull/668), plugin-limits PR [#739](https://github.com/salesforcecli/plugin-limits/pull/739), plugin-user PR [#835](https://github.com/salesforcecli/plugin-user/pull/835), plugin-org PR [#914](https://github.com/salesforcecli/plugin-org/pull/914))
+
+* FIX: You can now successfully create a Partner Developer Edition scratch org with the `org create scratch --edition partner-developer` command. (GitHub issue [#2614](https://github.com/forcedotcom/cli/issues/2614), plugin-org PR [#916](https://github.com/salesforcecli/plugin-org/pull/916))
+
+## 2.22.7 (Jan 3, 2023)
+
+* NEW: These scratch org snapshot commands are now beta; they were previously pilot. 
+
+    * `org create snapshot`
+    * `org delete snapshot`
+    * `org get snapshot`
+    * `org list snapshot`
+ 
+     A snapshot is a point-in-time copy of a scratch org. It captures the state of a scratch org’s configuration so that you can use it to create scratch org replicas.
+
+    Snapshots are available when your Dev Hub org is upgraded to the Spring ’24 release. Then enable Scratch Org Snapshots in the Dev Hub org that you use to create scratch orgs. For more information, see [Scratch Org Snapshots](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_snapshots_intro.htm). (Available December 20, 2023, when the Spring '24 documentation is in preview.)
+
+* NEW: When previewing a retrieve with the `project retrieve preview` command, use the new `--concise` flag to show only the changes that will be retrieved. The output also omits the files that are in the `.forceignore` file. For example:
+
+    ```bash
+    sf project retrieve preview --metadata ApexClass --target-org my-scratch --concise
+    ```
+    (GitHub issue [#2489](https://github.com/forcedotcom/cli/discussions/2489), plugin-deploy-retrieve PR [#831](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/831))
+
+* FIX: Salesforce CLI now checks your local plugin allow list (specifically the `unsignedPluginAllowList.json` file) before it makes a callout to an npm registry endpoint. As a result, installs of allowed plugins are now faster. (GitHub issue [#2584](https://github.com/forcedotcom/cli/issues/2584), plugin-trust PR [#668](https://github.com/salesforcecli/plugin-trust/pull/668))
+
+* FIX: Salesforce DX projects now support these metadata types:
+
+    * SvcCatalogFilterCriteria
+    * SvcCatalogFilterCondition
+    * SvcCatalogItemDefFiltrCrit 
+
+## Dec 20 and 27, 2023
+
+Due to the holiday break in the United States, we aren't releasing new stable versions on Dec 20 or Dec 27. Happy holidays!
+
+## 2.21.7 (Dec 13, 2023)
+
+* NEW: View the namespace associated with an org with the new `Namespace` column of the `sf org list --verbose` command. If an org doesn't have a namespace, the value is blank. (GitHub issue [#1790](https://github.com/forcedotcom/cli/issues/1790), plugin-org PR [#596](https://github.com/salesforcecli/plugin-org/pull/596))
+
+    Many thanks to [atsutton](https://github.com/atsutton) for contributing the code for this new feature! It's a nice improvement to the command.  Keep 'em coming!
+
+* FIX: We improved the error message when you try to run `org create user` on a scratch org whose associated Dev Hub is running on Hyperforce and you authorized it with JWT. Salesforce doesn't support this use case. To work around it, try authorizing the Dev Hub using the `org login web` or `org login sfdx-url` commands instead of `org login jwt`.  (GitHub issue [#2575](https://github.com/forcedotcom/cli/issues/2575), plugin-user PR [#805](https://github.com/salesforcecli/plugin-user/pull/805))
+
+* FIX: Using wildcards when retrieving metadata that isn't yet in your local project with the `project retrieve start --metadata` command now works as expected. For example, `project retrieve start --metadata "ApexClass:MyClass*` now always correctly retrieves all Apex classes that start with `MyClass`.  (GitHub issue [#2522](https://github.com/forcedotcom/cli/issues/2522), source-deploy-retrieve PR [#1182](https://github.com/forcedotcom/source-deploy-retrieve/pull/1182))
+
+* FIX: When running Apex tests, Salesforce CLI now correctly displays test names that include a namespace. (GitHub issue [#296](https://github.com/forcedotcom/salesforcedx-apex/issues/296), salesforcedx-apex PR [#339](https://github.com/forcedotcom/salesforcedx-apex/pull/339))
+
+    Shout-out and thanks to [Jonny Power](https://github.com/JonnyPower) for contributing the fix!  We love it.
+
+* FIX: When you install an unsigned plugin that's in the `unsignedPluginAllowList.json` file, the `plugins install` command now bypasses _any_ HTTP 403 error, not just `403 Forbidden`. (GitHub issue [#2584](https://github.com/forcedotcom/cli/issues/2584), plugin-trust [#662](https://github.com/salesforcecli/plugin-trust/pull/662))
+
+    Thank you [kyle-blair](https://github.com/kyle-blair) for contributing the fix! You're the best. 
+
+## 2.20.7 (Dec 6, 2023)
+
+* NEW: We've improved source tracking and the output of the `project deploy start` command in various ways:
+
+    * We now output a warning if a tracked source file doesn't create a SourceMember Tooling API record in the org, or creates one with an unexpected name. During a deployment, Salesforce CLI waits for these events to complete, and depending on the deployment size and the fact that these kinds of events may never complete, the deployment appears stuck. These warnings give you more insight into what's happening.  If you notice the same warning consistently, open a GitHub issue so we can stop unnecessarily waiting for it. 
+    * The progress bar now also includes the progress of SourceMember polling in the org.
+    * The status bar hides errors and tests if there are none.
+    
+    (GitHub issue [#2495](https://github.com/forcedotcom/cli/issues/2495), source-tracking PR [#511](https://github.com/forcedotcom/source-tracking/pull/511), deploy-retrieve PRs [#819](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/819) and [#820](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/820))
+
+* CHANGE: When installing Salesforce CLI on Windows with the `.exe` installer, the option in the Choose Components window to **Add %LOCALAPPDATA%\sf to Windows Defender exclusions** is now deselected by default. We changed the behavior because we wanted the default Windows installation to be more secure. However, excluding the CLI files from the antivirus scans improves the performance of Salesforce CLI, so select the option if you want. But use with caution. (salesforce/cli PR [#1328](https://github.com/salesforcecli/cli/pull/1328))
+
+* FIX: When running `cmdt generate records` and the referenced CSV file doesn't include a value for a field, the command now skips the field; previously it incorrectly inserted an `undefined` value. (GitHub issues [#2074](https://github.com/forcedotcom/cli/issues/2074) and [#1714](https://github.com/forcedotcom/cli/issues/1714), plugin-custom-metadata PR [#662](https://github.com/salesforcecli/plugin-custom-metadata/pull/662))
+  
+* FIX: We updated the summary of the `--suite-names` flag of `apex run test` to no longer say the default value is all Apex test suites. The flag has no default value, and it's not possible to run all suites. (GitHub issue [#2580](https://github.com/forcedotcom/cli/issues/2580), plugin-apex PR [#294](https://github.com/salesforcecli/plugin-apex/pull/294))
+
+## 2.19.7 (Nov 29, 2023)
+
+* NEW: If you specify Apex tests with the `--tests` flag of `project deploy start|validate`, the `--test-level` flag defaults to `RunSpecifiedTests`. (GitHub issue [#2396](https://github.com/forcedotcom/cli/issues/2396), plugin-deploy-retrieve PR [#812](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/812))
+
+    Many thanks to Christopher Bohlman ([cbohlman](https://github.com/cbohlman)) for contributing the code.  We put out a "Help Wanted" call, and he answered with aplomb. Community Collaboration in Action -- we love it!  
+
+* NEW: Manage source tracking in existing orgs with these two new commands:
+
+    * `org enable tracking`: Allow Salesforce CLI to track changes in your source files between your project and an org.
+    * `org disable tracking`: Prevent Salesforce CLI from tracking changes in your source files between your project and an org.
+ 
+    Enabling or disabling source tracking has no direct effect on the org, it affects only your local environment. Specifically, Salesforce CLI stores the setting in the org's local configuration file so that source tracking operations are, or aren't, executed when working with the org. Run the `org enable tracking` command on orgs that support source tracking, such as scratch orgs and Developer and Developer Pro sandboxes. The command returns an error if the org doesn't support tracking. Examples of orgs that don't support source tracking include Developer Edition orgs, production orgs, Partial Copy sandboxes, and Full sandboxes. 
+
+    As an example, imagine you have a sandbox that you use for integration tests, and you want to deploy source to it but not wait for tracking operations.  This example shows how to disable source tracking on an org with alias `mySandbox`:
+
+  ```bash
+  sf org disable tracking --target-org mySandbox
+  ```
+
+    (GitHub issue [#2495](https://github.com/forcedotcom/cli/issues/2495), plugin-org PR [#868](https://github.com/salesforcecli/plugin-org/pull/868))
+
+* NEW:  Ignore warnings and allow a deployment to validate successfully with the new `--ignore-warnings` flag of `project deploy validate`. This flag is similar to the equivalent flag of `project deploy start`. (GitHub issue [#2559](https://github.com/forcedotcom/cli/issues/2559), plugin-deploy-retrieve PR [#803](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/803))
+
+* CHANGE: We've added exit codes for many Salesforce CLI command failures to better help you understand what happened. In particular, commands that:
+
+    * Exit from a user-initiated Ctrl-C now return exit code 130. (sf-plugins-core PR [#445](https://github.com/salesforcecli/sf-plugins-core/pull/445))
+    * Fail due to an internal Salesforce error (AKA "gack") now return exit code 20. (sf-plugins-core PR [#442](https://github.com/salesforcecli/sf-plugins-core/pull/442))
+    * Fail due to a `TypeError` now return exit code 10. (sf-plugins-core PR [#442](https://github.com/salesforcecli/sf-plugins-core/pull/442))
+
+* CHANGE: We've removed the `--json` flag of the `apex log tail` command. Why?  Because it didn't make much sense in the first place. The only way to exit the command is to enter Ctrl-C, so the JSON output can't be captured. And don't worry, we checked our telemetry data: this flag is hardly ever used.  Get logs in JSON format with the `apex list log` or `apex get log` commands. (plugin-apex PR [#280](https://github.com/salesforcecli/plugin-apex/pull/280))
+
+* CHANGE: We removed the `plugin-login` plugin from Salesforce CLI.  The plugin contained two general commands, both of which are deprecated: `org login` and `org logout`.   Use specific commands instead, such as `org login web` or `org login jwt`.
+
+* CHANGE: We converted `plugin-packaging` from a JIT to a core plugin.  This change doesn't fix the root cause of GitHub issue [2540](https://github.com/forcedotcom/cli/issues/2540) but should help some users who commented there.
+
+* FIX: Your CLI configuration files are now cross-save safe. Wow! But what does that mean? Well, Salesforce CLI would sometimes try to save 2 copies of the same file concurrently, resulting in either an invalid JSON file or one of the "savers" losing their changes. To fix this issue, we redesigned how files are saved to try to be safer about concurrency. This fix applies to configuration files that you know and love, such as `sfdx-project.json` and org config files, as well as internal files that keep track of your configuration values, org authorization information, and various caches. (GitHub issues [#2423](https://github.com/forcedotcom/cli/issues/2423) and [#2528](https://github.com/forcedotcom/cli/issues/2528), sfdx-core PR [#959](https://github.com/forcedotcom/sfdx-core/pull/959)) 
+
+* FIX: The `org login access-token` command now honors the SF_ACCESS_TOKEN environment variable, in addition to SFDX_ACCESS_TOKEN.  Side note: We encourage you to use the SF_ env vars because the old SFDX_ ones might go away one day. We also fixed the `--help` for the command to mention SF_ACCESS_TOKEN.  (GitHub issue [#2574](https://github.com/forcedotcom/cli/issues/2574), plugin-auth PR [#864](https://github.com/salesforcecli/plugin-auth/pull/864))
+
+* FIX: The `cmdt generate records` command now correctly handles CSV files that produce non-unique custom metadata type record names. (GitHub issue [#2573](https://github.com/forcedotcom/cli/issues/2573), plugin-custom-metadata PR [#655](https://github.com/salesforcecli/plugin-custom-metadata/pull/655))
+
+* FIX: The `project deploy quick` command now correctly waits for the quick deploy to finish, and then returns the results of the quick deploy and not of the original validate deploy. (GitHub issue [2537](https://github.com/forcedotcom/cli/issues/2537), plugin-deploy-retrieve PR [#815](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/815))
+
+* FIX: If the `project deploy start` command fails to deploy a component, it now always displays the error along with the name of the failed component. (GitHub issue [2561](https://github.com/forcedotcom/cli/issues/2561), plugin-deploy-retrieve PR [#816](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/816))
+
+* FIX: We've updated the flag descriptions of the `--target-org` and `--target-dev-hub` flags in all relevant commands to say that the flag isn't required if the related configuration value (`target-org` and `target-dev-hub`) is set. (GitHub issue [#2538](https://github.com/forcedotcom/cli/issues/2538), sf-plugins-core PR [#455](https://github.com/salesforcecli/sf-plugins-core/pull/455))
+
+* FIX: We've fixed a bug when running `apex run test -r junit` or `apex get test -r junit` in which you sometimes got the error `Invalid time value`. (GitHub issue [#213](https://github.com/forcedotcom/salesforcedx-apex/issues/213), salesforcedx-apex PR [334](https://github.com/forcedotcom/salesforcedx-apex/pull/334))
+
+* FIX: Salesforce CLI now correctly catches errors that are thrown when looking for decoded keys.  (GitHub issue [#2560](https://github.com/forcedotcom/cli/issues/2560), source-deploy-retrieve PR [#1167](https://github.com/forcedotcom/source-deploy-retrieve/pull/1167))
+
+* FIX: You can now successfully run a command that's in a JIT plugin, but not yet installed, with the `--json` flag. For example, if you previously ran `sf package version create --json`, but the JIT plugin-packaging plugin wasn't yet installed, the plugin would be automatically installed but you'd get garbled and incorrect JSON command output. Now the JSON output is as clean as the proverbial whistle.   (GitHub issue [#2562](https://github.com/forcedotcom/cli/issues/2562), plugin-trust PR [#643](https://github.com/salesforcecli/plugin-trust/pull/643), oclif plugin-plugins PR [#712](https://github.com/oclif/plugin-plugins/pull/712))
+
+* FIX: Salesforce CLI now correctly honors the `SF_DISABLE_LOG_FILE=true` environment variable setting without returning an error. (GitHub issue [#2553](https://github.com/forcedotcom/cli/issues/2553), sfdx-core PR [#979](https://github.com/forcedotcom/sfdx-core/pull/979))
+
+## Nov 22, 2023
+
+Due to the Thanksgiving break in the United States, we aren't releasing a new stable version today.  Happy Thanksgiving!
+
+## 2.17.14 (Nov 15, 2023)
+
+* NEW: Easily uninstall all user-installed and linked plugins, including JIT plugins, with the new `plugins reset` command.
+
+    ```bash
+    sf plugins reset
+    ```
+    
+    After you run the command, you're left with only the core Salesforce CLI plugins, as if you had just installed the CLI from scratch. (oclif plugin-plugins PR [#701](https://github.com/oclif/plugin-plugins/pull/701))
+
+* CHANGE: We've changed the official names of these commands that display org limits and counts. Both the new and old names work, but the [CLI Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_unified.htm) will soon list only the new name. (plugin-limits PR [#673](https://github.com/salesforcecli/plugin-limits/pull/673))
+
+    |New Name|Old Name|Description|
+    |---|---|---|
+    |`org list limits`|`limits api display`|Display information about limits in your org.|
+    |`org list sobject record-counts`|`limits recordcounts display`|Display record counts for the specified standard or custom objects.|
+
+* FIX: Salesforce CLI now handles the `SF_CONTAINER_MODE` and `SF_DOMAIN_RETRY` environment variables; previously it handled only the old `SFDX_` equivalents (`SFDX_CONTAINER_MODE` and `SFDX_DOMAIN_RETRY`). And `SF_CONTAINER_MODE` [isn't documented](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_dev_cli_env_variables.htm) -- oopsie!  We're in the process of fixing that doc bug too.   (GitHub issue [#2554](https://github.com/forcedotcom/cli/issues/2554), plugin-org PR [#857](https://github.com/salesforcecli/plugin-org/pull/857))
+
+* FIX: We've improved how `sf plugins install https://github.com/foo/bar` works, which sometimes returned an error. (oclif plugin-plugins PR [#702](https://github.com/oclif/plugin-plugins/pull/702))
+
+* FIX: Installing a plugin on Windows with the `sf plugins install` command no longer returns an error if the path to the Node.js binary contains a space. (GitHub issue [#2465](https://github.com/forcedotcom/cli/issues/2564), oclif plugin-plugins PR [#711](https://github.com/oclif/plugin-plugins/pull/711), [#718](https://github.com/oclif/plugin-plugins/pull/718))
+
+* FIX: Salesforce DX projects now support these metadata types. (GitHub issue [#2527](https://github.com/forcedotcom/cli/issues/2527))
+
+    * CareBenefitVerifySettings
+    * CareProviderAfflRoleConfig
+    * ContextDefinition
+    * DiscoveryStory
+    * DocumentCategory
+    * DocumentCategoryDocumentType
+    * ExpressionSetMessageToken
+    * ExternalAIModel
+    * ManagedEventSubscription
+    * RecordAggregationDefinition
+    * RegisteredExternalService
+    * WebStoreBundle
+
+## 2.16.7 (Nov 8, 2023)
+
+* NEW: Use the new `scopeProfiles` option of the `sfdx-project.json` file to control which profile settings are included in a new package version when you run the `package create version` command. If you set `scopeProfiles` to `true` for a package directory, profile settings from only the package directory being packaged are included, and profile settings outside of that package directory are ignored. When you set `scopeProfiles` to `false` (the default value), the new package version includes relevant pieces of profile settings in any package directory defined in `sfdx-project.json`.
+
+    The `scopeProfiles` option is a child of `packageDirectory`, as shown in this example. 
+
+    ```
+    {
+    "packageDirectories": [
+        {
+            "path": "force-app",
+            "package": "TV_unl",
+            "scopeProfiles": "true",
+            "versionName": "ver 0.1",
+            "versionNumber": "0.1.0.NEXT",
+            "default": true,
+            "unpackagedMetadata": {
+                "path": "my-unpackaged-directory"
+            }
+        }
+    ],
+    "namespace": "",
+    "sfdcLoginUrl": "https://login.salesforce.com",
+    "sourceApiVersion": "58.0"
+    }
+    ```
+    (packaging PR [#416](https://github.com/forcedotcom/packaging/pull/416), schemas PR [#80](https://github.com/forcedotcom/schemas/pull/80), sfdx-core PR [#957](https://github.com/forcedotcom/sfdx-core/pull/957))
+    
+* CHANGE: We upgraded the version of Node.js bundled in the Salesforce CLI operating system-specific installers, TAR files, and Docker images to v20. Why?  Because we always bundle the Active LTS version of Node.js in tandem with its [release schedule](https://github.com/nodejs/release#release-schedule), and v20 went LTS on October 24, 2023.
+
+* FIX: We've improved the output of the `sf plugins install` command. For example, the warnings are better grouped and you no longer see duplicate warnings. And the final message clearly states that the plugin was successfully installed, if indeed it was. (oclif plugin-plugin PR [#683](https://github.com/oclif/plugin-plugins/pull/683))
+
+* FIX: The `project retrieve start` command now correctly retrieves CustomFieldTranslation metadata types across multiple package directories. (GitHub issue [#2124](https://github.com/forcedotcom/cli/issues/2124), source-deploy-retrieve PR [#1146](https://github.com/forcedotcom/source-deploy-retrieve/pull/1146))
+
+* FIX: The `--help` output for some commands no longer shows `[object Object]` for the default value of some flags; the output now shows the actual default value. An example of a command with the incorrect `--help` output was `org create scratch`. (GitHub issue [#2539](https://github.com/forcedotcom/cli/issues/2539), oclif core PR [#844](https://github.com/oclif/core/pull/844))
+
+* FIX: You can now use the `--dev-debug` flag on its own to get debug log files from oclif and Salesforce CLI when you run a command; previously you also had to set the SF_LOG_LEVEL environment variable.  If the environment variable isn't set, then the default log level is `trace`.  (salesforcecli PR [#1246](https://github.com/salesforcecli/cli/pull/1246))
+
+## 2.15.9 (Nov 1, 2023)
+
+* NEW: The `dev convert script` command for migrating your CI scripts to use the `sf`-style commands now handles `sfdx` commands that span multiple lines.  For example, the command converts this:
+
+    ```bash
+    sfdx force:user:create -f config/user-def.json \
+    -a myuser \
+    -u myorg
+    ```
+    into this:
+
+    ```bash
+    sf org create user --definition-file config/user-def.json \
+    --set-alias myuser \
+    --target-org myorg
+    ```
+    (plugin-dev PR [#402](https://github.com/salesforcecli/plugin-dev/pull/402))
+  
+* FIX: The `org list` command now correctly renders the output when a listed org has expired or been deactivated, such as a [developer edition org](https://help.salesforce.com/s/articleView?id=sf.admin_deactivate_org.htm&type=5). (GitHub issue [#2533](https://github.com/forcedotcom/cli/issues/2533), plugin-org PR [#845](https://github.com/salesforcecli/plugin-org/pull/845))
+
+* FIX: Salesforce CLI now correctly handles internal alias files that aren't in the expected format. (sfdx-core PR [#969](https://github.com/forcedotcom/sfdx-core/pull/969))
+
+## 2.14.6 (Oct 25, 2023)
+
+* NEW: Disable Salesforce CLI version checking with the new `SF_SKIP_NEW_VERSION_CHECK` environment variable. By default, every CLI command execution checks whether there's a new CLI version available, and prints out a warning message if it finds one. While this message is useful, it's not always wanted, especially in CI environments. To completely disable the check, set `SF_SKIP_NEW_VERSION_CHECK=true`.
+
+    Alternatively, you can configure the frequency of the warning message, such as once a day, by setting these two environment variables:
+  
+    * `SF_NEW_VERSION_CHECK_FREQ`: A number that specifies the frequency that the warning message is displayed. Default is `0`, which displays the message every time a new version is found. 
+    * `SF_NEW_VERSION_CHECK_FREQ_UNIT`: The unit of time of the frequency.  Possible values are `days`, `hours`, `minutes` (the default value), `seconds`, and `milliseconds`.
+ 
+    For example, to get the warning message once a day, set `SF_NEW_VERSION_CHECK_FREQ=1` and `SF_NEW_VERSION_CHECK_FREQ_UNIT=days`.  Note that these two `FREQ` environment variables configure only when the warning is displayed; the version check still occurs for each command execution unless you set `SF_SKIP_NEW_VERSION_CHECK=true`. [oclif/plugin-warn-if-update-available PR [#437](https://github.com/oclif/plugin-warn-if-update-available/pull/437))
+
+* NEW: Open a flow in Flow Builder from the command line by passing the local Flow metadata file to `org open --source-file`.  For example, to open the local Hello flow in Flow Builder:
+
+     ```bash
+     sf org open --source-file force-app/main/default/flows/Hello.flow-meta.xml
+     ```
+    Many thanks to [Arturs Gusjko](https://github.com/GusjkoA) who not only came up with the great idea, but also provided [excellent QA and suggestions](https://github.com/salesforcecli/plugin-org/pull/836) to help us release a better feature. Terrific community collaboration!   (GitHub issue [#2519](https://github.com/forcedotcom/cli/discussions/2519), plugin-org PR [#829](https://github.com/salesforcecli/plugin-org/pull/829))
+  
+* FIX: We corrected the help for `config list` to say that the command lists the config variable values based on the current context.  For example, if you run the command from a project which has a local config variable set, but it's also set globally, the command prints the local value which overrides the global one. (GitHub issue [#2435](https://github.com/forcedotcom/cli/issues/2435), plugin-settings [#405](https://github.com/salesforcecli/plugin-settings/pull/405))
+
+* FIX: The `SF_NPM_REGISTRY` environment variable is now working correctly. (GitHub issue [#2517](https://github.com/forcedotcom/cli/issues/2517), plugin-trust PR [#618](https://github.com/salesforcecli/plugin-trust/pull/618))
+ 
+## 2.13.9 (Oct 18, 2023)
+
+* FIX: If the `project deploy start --metadata-dir` command encounters failures when deploying files in metadata format, the error message now contains the line and column number in the file where the error occurred. We also improved the output with better sorting and duplication removal. (GitHub issue [#356](https://github.com/forcedotcom/cli/issues/356), plugin-deploy-retrieve PR [#771](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/771))
+
+* FIX: We improved the help of the `org generate password` command to say that the `--on-behalf-of` flag works only on users that were created locally with the `org create user` command and not users created in org's Setup UI. (GitHub issue [#2506](https://github.com/forcedotcom/cli/issues/2506), plugin-user PR [#747](https://github.com/salesforcecli/plugin-user/pull/747))
+  
+* FIX: Salesforce DX projects now support the EventRelayConfig metadata type. 
+  
+## 2.12.9 (Oct 11, 2023)
+
+* CHANGE: Salesforce CLI now prompts you to select a matching command, even when the partial command you entered matches just a single command. This change prevents inadvertent behavior, such as automatic JIT plugin installations because the CLI thinks you want to run a command in a JIT plugin that isn't installed.  (GitHub issue [#2493](https://github.com/forcedotcom/cli/issues/2493), salesforcecli PR [#1180](https://github.com/salesforcecli/cli/pull/1180))
+
+* FIX: The `org resume sandbox` command now correctly handles multiple sandboxes in a resumable state. It first displays a warning about the multiple sandboxes, and then resumes the most recent sandbox creation or refresh. (GitHub issues [#2238](https://github.com/forcedotcom/cli/issues/2238) and [#1833](https://github.com/forcedotcom/cli/issues/1833), sfdx-core PR [#944](https://github.com/forcedotcom/sfdx-core/pull/944), plugin-org PR [#823](https://github.com/salesforcecli/plugin-org/pull/823))
+
+* FIX: The `--help` output of a deprecated aliased command (such as `force:org:list`) now displays the deprecation warning. (GitHub oclif issue [#800](https://github.com/oclif/core/issues/800), oclif PR [#801](https://github.com/oclif/core/pull/801))
+
+* FIX: Certain `package` commands now display the error when they fail; previously they failed silently. (GitHub issues [#2434](https://github.com/forcedotcom/cli/issues/2434) and [#2469](https://github.com/forcedotcom/cli/issues/2469), packaging PR [#403](https://github.com/forcedotcom/packaging/pull/403))
+
+* FIX: The CLI's source tracking library now prevents the registration of duplicate listeners. When the Salesforce Extensions for VS Code release an update with the updated source tracking library, the library will prevent the extensions from registering duplicate listeners. (GitHub issues [#2441](https://github.com/forcedotcom/cli/issues/2441), [#2458](https://github.com/forcedotcom/cli/issues/2458), [#2483](https://github.com/forcedotcom/cli/issues/2483), [#2476](https://github.com/forcedotcom/cli/issues/2476), and [#2439](https://github.com/forcedotcom/cli/issues/2439). source-tracking PR [#480](https://github.com/forcedotcom/source-tracking/pull/480), sfdx-core PR [#941](https://github.com/forcedotcom/sfdx-core/pull/941))
+
+* FIX: HTML entities, such as `&#160;` in a CustomLabels metadata type, are now correctly encoded when deployed to an org. (GitHub issues [#2448](https://github.com/forcedotcom/cli/issues/2448) and [#2455](https://github.com/forcedotcom/cli/issues/2455), SDR PRs [#1102](https://github.com/forcedotcom/source-deploy-retrieve/pull/1102) and [#1128](https://github.com/forcedotcom/source-deploy-retrieve/pull/1128))
+
+* FIX: The `org list` and `org display` commands no longer display the raw HTML 503 response when run against an org on an instance that's currently out of service. (GitHub issue [#2487](https://github.com/forcedotcom/cli/issues/2487), plugin-org PR [#814](https://github.com/salesforcecli/plugin-org/pull/814))
+
+* FIX: Salesforce DX projects now support these metadata types:
+  
+    * ConversationChannelDefinition
+    * ExtlClntAppConfigurablePolicies
+
+## 2.11.8 (Oct 4, 2023)
+
+* NEW: Plugin installs use `yarn` under the hood. If you run into errors during installs or updates, you can now enable the network mutex option by setting the SF_USE_NETWORK_MUTEX environment variable to `true`. Setting this variable opens a local network to manage the concurrent `yarn` instances and may be more reliable. You can also pass an optional port for the local server to open on with the SF_NETWORK_MUTEX_PORT environment variable.  See the [yarn documentation](https://classic.yarnpkg.com/lang/en/docs/cli/#toc-concurrency-and-mutex) for more information. [oclif plugin-plugins PR [#670](https://github.com/oclif/plugin-plugins/pull/670))
+
+* NEW: Poll for status of a deployment when you run `project deploy report` with the new `--wait` flag. If you specify this flag, the command polls for the status every second until the timeout of `--wait` minutes.  If you don't specify the `--wait` flag, the command simply checks and displays the status of the deploy; the command doesn't poll for the status.
+
+    We also added the `--target-org` flag to `project deploy report`. You usually don't need to specify this flag because the cached deploy job already references the org to which you deployed. But if you run `project deploy report` on a computer different than the one from which you originally deployed, and the default org is different from the deployment org, then you must specify `--target-org`. The flag must point to the same deployment org; if it doesn't, you get an error. 
+
+    Finally, you no longer get an error if you run `project deploy resume` on a deployment that finished. Instead you get a message telling you that it completed and then the deploy results. (GitHub discussion [#2300](https://github.com/forcedotcom/cli/discussions/2300) and issues [#2293](https://github.com/forcedotcom/cli/issues/2293), [#2297](https://github.com/forcedotcom/cli/issues/2297), [#2078](https://github.com/forcedotcom/cli/issues/2078).  plugin-deploy-retrieve PRs [#762](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/762) and [#758](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/758))
+ 
+* CHANGE: We removed the `package version retrieve` command that we announced on September 15, 2023. This feature isn't quite ready for prime time, so we're removing it for now while we make improvements. We'll let you know after it's back up. (plugin-packaging PR [#447](https://github.com/salesforcecli/plugin-packaging/pull/447))
+
+* FIX: When you create a package version with the `package version create` command, the command now searches for profiles in the package directories defined in `sfdx-project.json`.   (GitHub issue [#2336](https://github.com/forcedotcom/cli/issues/2336), packaging PR [#397](https://github.com/forcedotcom/packaging/pull/397))
+
+* FIX: Salesforce DX projects now support the PricingRecipe metadata type.
+
+## 2.10.2 (Sept 27, 2023)
+
+* NEW: Code Coverage UI Improvements. We changed the code coverage colors to indicate good, average, and poor coverage. (GitHub Issue [#2412](https://github.com/forcedotcom/cli/issues/2412), plugin-deploy-retrieve PR [#756](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/756), plugin-source PR [#950](https://github.com/salesforcecli/plugin-source/pull/950), plugin-source PR (superseded) [#934](https://github.com/salesforcecli/plugin-source/pull/934))
+
+    Thank you @AllanOricil for your contributions to `plugin-source`! :heart:
+
+* NEW: Uninstalled JIT Plugins are now displayed when you run `sf plugins --core [--json]`. The command displays a warning if you try to inspect an uninstalled JIT plugin.
+
+* FIX: Uncovered line numbers are now correctly displayed in the Code Coverage report when you run `project deploy report`. (GitHub Issue [#2468](https://github.com/forcedotcom/cli/issues/2468), plugin-source PR [#950](https://github.com/salesforcecli/plugin-source/pull/950))
+
+* FIX: The `.forceignore` file now correctly handles an opt-in style with directories. (GitHub Issue [#2404](https://github.com/forcedotcom/cli/issues/2404), source-deploy-retrieve PR [#1093](https://github.com/forcedotcom/source-deploy-retrieve/pull/1093))
+
+* FIX: Running `project deploy quick` now displays the deploy ID of the quick deploy request, not the validation ID. (GitHub Issue [#2415](https://github.com/forcedotcom/cli/issues/2415), source-deploy-retrieve PR [#748](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/748))
+
+## 2.9.8 (Sept 20, 2023)
+
+* NEW: Salesforce CLI now shows a warning when the version of a core or JIT plugin is out of sync with what was shipped with your installed CLI.
+
+* NEW: JIT plugins now respect a lock file during install. This new behavior prevents JIT plugins from installing dependencies that are newer than what they were shipped and tested with. 
+
+* FIX: Running `project retrieve start` now shows warnings for problematic components. This behavior matches the functionality of `force:source:retrieve` (GitHub issue [#2405](https://github.com/forcedotcom/cli/issues/2405), plugin-deploy-retrieve PR [#747](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/747))
+
+* FIX: Metadata transfers now automatically retry when they encounter an `ENOMEM` error. Keeps your eyes out for Shane McLaughlin's [debut album](https://github.com/forcedotcom/cli/issues/2452#issuecomment-1710027941). (GitHub issue [#2452](https://github.com/forcedotcom/cli/issues/2452), source-deploy-retrieve PR [#1103](https://github.com/forcedotcom/source-deploy-retrieve/pull/1103))
+
+## 2.8.11 (Sept 15, 2023)
+
+* NEW: Download metadata from a specific package version with the new `package version retrieve` command. You can retrieve metadata for a second- or first-generation managed package or an unlocked package. Retrieving a package version downloads the metadata into the directory you specify. When you run the command, specify the package alias or the subscriber package version ID (starts with 04t) and the path to an empty directory.
+
+    To use this command you must have the Download Package Version Zip Files user permission.
+
+    In this example, the org that owns the package has an alias of `my-org`, and we're retrieving the metadata from a package version with ID `04tXXX`. The metadata is downloaded into the `my-directory` directory:
+
+    ```bash
+    sf package version retrieve --package 04tXXX --output-dir my-directory --target-org my-org
+    ```
+
+* NEW: Enable AppExchange App Analytics usage data collection on a managed package and its components with the new `--enable-app-analytics` flag of the `package update` command. See [Enable App Analytics on Your Second-Generation Managed Package
+](https://developer.salesforce.com/docs/atlas.en-us.pkg2_dev.meta/pkg2_dev/app_analytics_enable_2gp.htm) for more information. (plugin-packaging [#325](https://github.com/salesforcecli/plugin-packaging/pull/325))
+
+* FIX: We've updated the message displayed when you install an unsigned plugin using the `plugins install` command to be more friendly.  (plugin-trust PR [#581](https://github.com/salesforcecli/plugin-trust/pull/581))
+
+* FIX: We've improved the description of the `project generate` subtopic in the `package.json` file to include generating a project, manifest, and more. Thanks, [Peter Chittum](https://github.com/pchittum), for your contribution -- we love it! (plugin-deploy-retrieve PR [#742](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/742)) 
+
+## 2.7.11 (Sept 6, 2023)
+
+* NEW: Execute DevOps Center actions at the command line with these new beta CLI commands:
+
+    * `project deploy pipeline start`: Deploy changes from a branch to the pipeline stage’s org.
+    * `project deploy pipeline report`: Check the status of a pipeline deploy operation.
+    * `project deploy pipeline validate`: Perform a validate-only deployment from a branch to the pipeline stage’s org. 
+    * `project deploy pipeline quick` : Quickly deploy a validated deployment to an org.
+    * `project deploy pipeline resume`: Resume watching a pipeline deploy operation.
+
+    We created these commands for developers who want to work outside of DevOps Center or want to automate tasks. The commands are in [plugin-devops-center](https://github.com/salesforcecli/plugin-devops-center), which is a just-in-time (JIT) plugin. After you update to this Salesforce CLI release, run a DevOps Center command in a terminal or command window and the CLI automatically installs the plugin and then runs the command. Nifty, huh. Let's look at a few examples to see how the new beta commands work.
+
+    In this example, several work item feature branches were previously merged to the `recruit-integration` branch. To deploy the changes from the `recruit-integration` branch to its associated Integration environment:
+
+    ```bash
+    sf project deploy pipeline start --branch-name recruit-integration --devops-center-username MyDevOpsCenterOrg --devops-center-project-name "Recruiting App"
+    ```
+    In this example, UAT is the bundling stage, which means that you must indicate a version identifier with the `--bundle-version-name` flag. To deploy all merged changes in a version 1.0 bundle to the UAT environment: 
+    ```bash
+    sf project deploy pipeline start --branch-name recruit-uat --devops-center-username MyDevOpsCenterOrg --devops-center-project-name "Recruiting App" --bundle-version-name 1.0
+    ```
+    In this example, you first validate the changes in the `recruit-staging` branch so you can later perform a quick deployment to production. The validate command returns a job ID that you later pass to the quick deploy command.
+    ```bash
+    sf project deploy pipeline validate --branch-name recruit-staging --devops-center-username MyDevOpsCenterOrg --test-level RunLocalTests --devops-center-project-name "Recruiting App"
+    ```
+    When ready, execute the quick deployment to production by specifying the job ID returned by the validate command:
+    ```bash
+    sf project deploy pipeline quick --job-id 0Af0x000017yLUFCA2
+    ```
+    You can also use the new `target-devops-center` configuration variable to specify the default username or alias for the org in which DevOps Center is installed. Use it instead of the `--devops-center-username` flag. For example, to set the config variable globally:
+    ```bash
+    sf config set target-devops-center MyDevOpsCenterOrg --global
+    ```    
+    As always, run the new commands with the `--help` flag to see more examples and information.
+
+    Enjoy!
+  
+* NEW: Find 3rd-party (not created by Salesforce) CLI plugins with `sf plugins discover`.  The command uses [this list of packages](https://github.com/salesforcecli/plugin-marketplace/blob/main/src/shared/plugins.ts) to query npm for information about each plugin. If you'd like to contribute a plugin to the list, [send us a PR](https://github.com/salesforcecli/plugin-marketplace). 
+
+## 2.6.9 (Aug 30, 2023)
+
+* FIX: Salesforce CLI correctly retrieves metadata components (specifically Layouts and Profiles) whose names include non-alphanumeric characters, such as periods. (GitHub issue [#1683](https://github.com/forcedotcom/cli/issues/1683), source-deploy-retrieve PR [#1080](https://github.com/forcedotcom/source-deploy-retrieve/pull/1080))
+
+* FIX: Salesforce DX projects now support the FundraisingConfig metadata type. 
+
+## 2.5.7 (Aug 23, 2023)
+
+* NEW: You now get a warning if you try to unset a global configuration variable without specifying the `--global` flag. The command is still considered a success because there was no local config variable to unset. For example:
+
+    ```bash
+    $ sf config list
+    List Config
+    =============================================
+    | Name                Location Value          
+    | ─────────────────── ──────── ────────────── 
+    | org-max-query-limit Global   5000           
+    | target-org          Local    my-scratch-org 
+    
+    $ sf config unset org-max-query-limit
+    Warning: The org-max-query-limit config variable is still set globally, unset it by using the --global flag.
+    Unset Config
+    =============================
+    | Name                Success 
+    | ─────────────────── ─────── 
+    | org-max-query-limit true
+
+    $ sf config list
+    List Config
+    =============================================
+    | Name                Location Value          
+    | ─────────────────── ──────── ────────────── 
+    | org-max-query-limit Global   5000           
+    | target-org          Local    my-scratch-org 
+    ```
+
+    To unset the config var, specify the `--global` flag:
+
+    ```bash
+    $ sf config unset org-max-query-limit --global
+    Unset Config
+    =============================
+    | Name                Success 
+    | ─────────────────── ─────── 
+    | org-max-query-limit true    
+
+    $ sf config list
+    List Config
+    ====================================
+    | Name       Location Value          
+    | ────────── ──────── ────────────── 
+    | target-org Local    my-scratch-org 
+    ```
+
+    (plugin-settings PR [#346](https://github.com/salesforcecli/plugin-settings/pull/346))
+
+* CHANGE: We've generally improved the human-readable output of `org list`; the JSON output remains the same. Here are some of the key improvements:
+
+    * All orgs are listed in a single table, grouped by type, which is now indicated in a new column.  Org types include DevHub, Scratch, and Sandbox.
+    * The default org and DevHub are now indicated with emojis rather than the previous `(U)` and `(D)` characters which weren't intuitive.  See the legend at the end of the output for what's what.
+    * Column names are now type case rather than all-caps.
+
+    Here's an example of the output:
+
+    ```bash
+    $ sf org list
+        Type    Alias          Username                                      Org ID             Status                Expires
+     ── ─────── ────────────── ───────────────────────────────────────────── ────────────────── ───────────────────── ──────────
+     🌳 DevHub  JulesDevHub    jules@sf.com                                  00DB0001234c7jiMAA Connected 
+        Sandbox                jules@sf.com.jssandtwo                        00D020012344XTiEAM Connected
+     🍁 Scratch my-scratch-org test-qjrr9q5d13o8@example.com                 00DMN0012342Gez2AE Active                2023-08-21    
+   
+    Legend:  🌳=Default DevHub, 🍁=Default Org      Use --all to see expired and deleted scratch orgs
+    ```
+    (plugin-org PR [#765](https://github.com/salesforcecli/plugin-org/pull/765))
+
+* FIX: We've significantly shortened command startup times. Note that this performance enhancement applies to _all_ CLI commands, even ones in custom plugins. (telemetry PR [#274](https://github.com/forcedotcom/telemetry/pull/274), plugin-telemetry PR [#497](https://github.com/salesforcecli/plugin-telemetry/pull/497))
+
+## 2.4.8 (Aug 16, 2023)
+
+* NEW: We now provide these new TAR file formats and manifest files for installing Salesforce CLI on Linux operating systems:
+
+    * [sf-linux-arm64.tar.gz](https://developer.salesforce.com/media/salesforce-cli/sf/channels/stable/sf-linux-arm64.tar.gz)
+    * [sf-linux-arm64.tar.xz](https://developer.salesforce.com/media/salesforce-cli/sf/channels/stable/sf-linux-arm64.tar.xz)
+    * [sf-linux-arm64-buildmanifest](https://developer.salesforce.com/media/salesforce-cli/sf/channels/stable/sf-linux-arm64-buildmanifest)
+ 
+    See [Install Salesforce CLI With a TAR File](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_install_cli.htm#sfdx_setup_install_cli_linux) for details on using the files.  (The new download links will show up in the docs soon.)
+  
+* NEW: Use a wildcard (`*`) with the `--metadata` flag of the deploy and retrieve commands. This example shows how to deploy all FlexiPage metadata components whose names match `Property*`:
+
+    ```bash
+    sf project deploy start --metadata "FlexiPage:Property*" --target-org myscratch
+    ```
+    This sample output shows the components it deployed:
+
+    ```bash
+    Deployed Source
+    ==================================================================================================================
+    | State   Name                 Type      Path                                                                      
+    | ─────── ──────────────────── ───────── ───────────────────────────────────────────────────────────────────────── 
+    | Changed Property_Explorer    FlexiPage force-app/main/default/flexipages/Property_Explorer.flexipage-meta.xml    
+    | Changed Property_Finder      FlexiPage force-app/main/default/flexipages/Property_Finder.flexipage-meta.xml      
+    | Changed Property_Record_Page FlexiPage force-app/main/default/flexipages/Property_Record_Page.flexipage-meta.xml 
+    ```
+    (GitHub issue [#2386](https://github.com/forcedotcom/cli/issues/2386), source-deploy-retrieve PR [#1063](https://github.com/forcedotcom/source-deploy-retrieve/pull/1063))
+
+* NEW: If you authorize an org that has a namespace linked, and then run `sf org list --json`, the JSON output now includes the `namespacePrefix` key, with value set to the namespace name.  (GitHub issue [#1790](https://github.com/forcedotcom/cli/issues/1790), sfdx-core PR [#908](https://github.com/forcedotcom/sfdx-core/pull/908))
+
+* CHANGE: We changed the Node.js logger that Salesforce CLI uses from Bunyan to [Pino](https://getpino.io/#/). This internal change results in these user-visible changes:
+
+    * Each day's logs are written to a file whose name is based on that day. For example, the logs for August 8, 2023 are written to the file `USER_HOME_DIR/.sf/sf-2023-08-07.log`.
+
+      Previously, the log were written to the `USER_HOME_DIR/.sf/sf.log` file. Each day at midnight, that log file would be rotated to `USER_HOME_DIR/.sf/sf.log.0`, and any existing log files moved up by one number. That process didn't always work correctly.
+
+     * The new logger occasionally checks for, and then deletes, any log files that are older than 7 days. If you want to keep these old log files, copy them to a different location.
+ 
+     * The new logger will never delete the `USER_HOME_DIR/.sf/sf.log<N>` files written by the old logger. Other CLI plugins and tools, such as VS Code with the Salesforce Extension, still use the old logger and might write to these old files. At some point they will upgrade to use the new logger, but for now we still need to keep those old files around.
+ 
+     * Here's how the log-related environment variables now work:
+ 
+          * SF_LOG_ROTATION_PERIOD: You can set this variable to `1h` or `1m` if you want more, but smaller, log files. Any other value is treated as `1d`, which is the default.
+
+            The new log file is created when the command loads. For example, if your deployment takes 40 minutes, all of its associated logs are written to a file with name based on when the command began.
+
+          * SF_LOG_ROTATION_COUNT: This variable has no effect anymore. The number of logs that Salesforce CLI keeps is always 7 day's worth, regardless of how small the rotation period is.
+      
+    * Previously, setting `DEBUG=*` would log at the lowest level. You can now use both `DEBUG=*` and `SF_LOG_LEVEL=debug`, for example, to control how many logs you’re getting.
+ 
+    * If you create custom CLI plugins, read more about these changes [here](https://github.com/forcedotcom/sfdx-core/blob/main/MIGRATING_V4-V5.md).
+
+    (GitHub issues [#2209](https://github.com/forcedotcom/cli/issues/2209), [#2206](https://github.com/forcedotcom/cli/issues/2206), [#2198](https://github.com/forcedotcom/cli/issues/2198), [#2196](https://github.com/forcedotcom/cli/issues/2196), [#1928](https://github.com/forcedotcom/cli/issues/1928), [#1706](https://github.com/forcedotcom/cli/issues/1706), [#1699](https://github.com/forcedotcom/cli/issues/1699), [#1408](https://github.com/forcedotcom/cli/issues/1408).  sfdx-core PR [#876](https://github.com/forcedotcom/sfdx-core/pull/876))
+
+
+* CHANGE: These commands are generally available and no longer beta:
+    * `schema generate sobject`
+    * `schema generate field`
+    * `schema generate tab`
+    * `schema generate platformevent`
+
+     (plugin-sobject [#361](https://github.com/salesforcecli/plugin-sobject/pull/361)))
+
+* CHANGE: We've updated the parent image of the [Salesforce CLI Docker images](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_docker.htm) to the [Heroku-22 stack](https://devcenter.heroku.com/articles/heroku-22-stack). (cli PR [#1028](https://github.com/salesforcecli/cli/pull/1028))
+
+* FIX: We updated the README in this repo because it was a tad out of date. (GitHub issue [#2332](https://github.com/forcedotcom/cli/issues/2332))
+
+* FIX: You can now successfully run `org delete sandbox` to delete a sandbox that you created in the Setup UI and then authenticated with Salesforce CLI.  We've also improved the error messages around deleting a sandbox. (GitHub issues [#1718](https://github.com/forcedotcom/cli/issues/1718) and [#1667](https://github.com/forcedotcom/cli/issues/1667), sfdx-core PR [#862](https://github.com/forcedotcom/sfdx-core/pull/862), plugin-org PR [#717](https://github.com/salesforcecli/plugin-org/pull/717))
+
+* FIX: The telemetry plugin now works correctly behind a proxy. (GitHub issue [#1752](https://github.com/forcedotcom/cli/issues/1752), telemetry PR [#268](https://github.com/forcedotcom/telemetry/pull/268))
+
+* FIX: The SF_CONTENT_TYPE environment variable now works correctly for all Salesforce CLI commands. (GitHub issue [#2331](https://github.com/forcedotcom/cli/issues/2331), oclif/core PR [#753](https://github.com/oclif/core/pull/753))
+
+* FIX: The `data export tree --plan` command now correctly exports the number of rows returned by the `--query` flag (up to a maximum of 2,000 rows). Previously it would sometimes export only 1,000 rows, even when the query returned more. (GitHub issue [#1663](https://github.com/forcedotcom/cli/issues/1663))
+
+* FIX: The commands to deploy and retrieve, such as `project deploy start`, now correctly return a non-zero exit code when they fail due to a missing source file error. (GitHub issue [#2011](https://github.com/forcedotcom/cli/issues/2011), source-deploy-retrieve PR [#1062](https://github.com/forcedotcom/source-deploy-retrieve/pull/1062))
+
+* FIX: The `package version create` command no longer deletes Profile `fieldPermissions` on custom fields of the Activity object. (GitHub issue [#2278](https://github.com/forcedotcom/cli/issues/2278), packaging PR [#348](https://github.com/forcedotcom/packaging/pull/348))
+
+## 2.3.8 (Aug 9, 2023)
+
+* NEW: When you install an unsigned plugin with the `sf plugins install` command, and you answer Y to the warning, you now get information about adding the plugin to the `unsignedPluginAllowList.json` allow list file, and a link to the docs for more information. (plugin-trust PR [#545](https://github.com/salesforcecli/plugin-trust/pull/545))
+
+* FIX: Salesforce DX projects now support these metadata types:
+
+    * SearchCriteriaConfiguration
+    * SearchableObjDataSyncInfo
+
+## 2.2.7 (Aug 2, 2023)
+
+* FIX: The `package install` command now uses a reasonable number of API calls when it polls for installation status.  As a result, the performance of the command has improved and fewer writes are made to the log file. (GitHub issue [#2319](https://github.com/forcedotcom/cli/issues/2319), packaging PR [#355](https://github.com/forcedotcom/packaging/pull/355))
+
+* FIX: The `apex run test` command now correctly honors the `--output-dir` flag. (GitHub issue [#2321](https://github.com/forcedotcom/cli/issues/2321), plugin-apex PR [#178](https://github.com/salesforcecli/plugin-apex/pull/178))
+
+* FIX: We've reduced the amount of time between the end of a deployment to the target org (such as with the `project deploy start` command) and when the command itself exits.  (GitHub issue [#2012](https://github.com/forcedotcom/cli/issues/2012), source-tracking PR [#446](https://github.com/forcedotcom/source-tracking/pull/446))
+
+* FIX: Salesforce DX projects now support the MessagingChannel metadata type.
+
+* FIX: Really large retrieves won't throw a `Maximum call stack size exceeded` anymore. SDR PR [#1046](https://github.com/forcedotcom/source-deploy-retrieve/pull/1046)    
+
+* FIX: When retrieving a CustomObject (including CustomMetadataTypes), the top-level `Whatever__c.object-meta.xml` will no longer be saved to your project when it's ignored by `.forceignore`.  SDR PR [#1053](https://github.com/forcedotcom/source-deploy-retrieve/pull/1053)
+
+## 2.1.7 (July 26, 2023)
+
+* NEW: View the package name and version when you run `package version create list` with the new `--verbose` flag. The information is displayed in both the human-readable table and JSON results.   For example:
+
+    ```bash
+    sf package version create list --created-last-days 3 --target-dev-hub --verbose
+    ```
+   (GitHub issue [#222](https://github.com/forcedotcom/cli/issues/222), plugin-packaging PR [#370](https://github.com/salesforcecli/plugin-packaging/pull/370))
+
+* NEW: Specify test formats and destructive changes for the `project deploy validate` command with these new flags:
+
+    * `--coverage-formatters` : Format of the code coverage results.
+    * `--junit` : Output JUnit test results.
+    * `--results-dir` : Output directory for code coverage and JUnit results; defaults to the deploy ID.
+    * `--post-destructive-changes` : File path for a manifest (destructiveChangesPost.xml) of components to delete after the deploy.
+    * `--pre-destructive-changes` : File path for a manifest (destructiveChangesPre.xml) of components to delete before the deploy
+    * `--purge-on-delete` : Specify that deleted components in the destructive changes manifest file are immediately eligible for deletion rather than being stored in the Recycle Bin.
+
+    These flags already exist on the `project deploy start` command; use them in the same way when validating a deployment. For example:
+
+    ```bash
+    sf project deploy validate --source-dir path/to/source --test-level RunAllTestsInOrg --junit --results-dir results --post-destructive-changes path/to/destructiveChangesPost.xml
+    ```
+    (GitHub issues [#2265](https://github.com/forcedotcom/cli/issues/2265) and [#2255](https://github.com/forcedotcom/cli/issues/2255) and [#2246](https://github.com/forcedotcom/cli/issues/2246), plugin-deploy-retrieve PR [#675](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/675))
+
+* NEW: The JSON output of the `sf project deploy validate --json` command now contains a `deployId` property, which is useful if the validation fails and you want the ID to figure out the problem. The ID is in the new `data` property of the JSON output. For example:
+
+    ```json
+    {
+      "code": 1,
+      "context": "DeployMetadataValidate",
+      "commandName": "DeployMetadataValidate",
+      "data": {
+        "deployId": "0Af1nFakeID123"
+      },
+      "message": "Failed to validate the deployment (0Af1nFakeID123).",
+      "name": "FailedValidationError",
+    ...
+    ```
+    (GitHub issue [#2312](https://github.com/forcedotcom/cli/issues/2312), plugin-deploy-retrieve PR [#702](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/702))
+
+* NEW: Easily determine which records failed to bulk upsert or delete by specifying the new `--verbose` flag of the `sf data upsert|delete bulk` commands.  If one or more records fail to bulk upsert or delete, the command displays a table with the record IDs and error.
+
+    Thank you, [Robin Windey](https://github.com/R0Wi), for the great idea, and then contributing the code.  We love it. And this is your second contribution, which is awesome. Are you planning a third?  We hope so! (GitHub issue [#2221](https://github.com/forcedotcom/cli/issues/2221), plugin-data PR [#615](https://github.com/salesforcecli/plugin-data/pull/615))
+ 
+* CHANGE: Previously, when deploying metadata, Salesforce CLI allowed you to include multiple files with identical file paths in the ZIP file that's sent to the org to deploy, and the org would deploy them. Crazy, huh. We recently swapped out a library to fix a different issue, and the new library no longer supports that incorrect behavior.  (GitHub issue [#2191](https://github.com/forcedotcom/cli/issues/2191))
+
+* FIX: Salesforce CLI now detects when you include the word `help` in a command and asks if you're looking for help information about the rest of the command.  For example, if you type `sf package install help`, the CLI asks if you want help about `package install`.  (GitHub issue [#2240](https://github.com/forcedotcom/cli/issues/2240), oclif PR [#409](https://github.com/oclif/plugin-not-found/pull/409))
+ 
+* FIX: If you run `project deploy report --results-dir`, the command now uses the new results directory rather than the one from the original `project deploy start` command, if specified. (GitHub issue [#2265](https://github.com/forcedotcom/cli/issues/2265), plugin-deploy-retrieve PR [#675](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/675))
+
+* FIX: You can now run `project deploy validate --metdata-dir` outside of a Salesforce DX project. (GitHub issue [#2275](https://github.com/forcedotcom/cli/issues/2275), plugin-deploy-retrieve PR [#691](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/691))
+
+* FIX: Deploy and retrieves when running the `project deploy|retrieve` commands now correctly show the progress bar by default. (GitHub issues [2276](https://github.com/forcedotcom/cli/issues/2276) and [2249](https://github.com/forcedotcom/cli/issues/2249), plugin-deploy-retrieve PR [#681](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/681)
+
+* FIX: The `project retrieve` command now clearly displays the API version it's using for the HTTP request/response (`apiVersion`) and the metadata shape (`sourceApiVersion`). See [How API Version and Source API Version Work in Salesforce CLI](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_apiversion.htm) for more information.  (GitHub issue [#353](https://github.com/forcedotcom/cli/issues/353), plugin-deploy-retrieve [#669](https://github.com/salesforcecli/plugin-deploy-retrieve/pull/669))
+
+* FIX: We now display the help for partial commands if Salesforce CLI finds only one possible match.  For example, `sf project create --help` correctly displays the help for `project generate` because it's the only (aliased) match.  Previously you'd get a `Command not found.` error.  (GitHub issue [#2301](https://github.com/forcedotcom/cli/issues/2301), oclif PR [#733](https://github.com/oclif/core/pull/733))
+
+* FIX: `package:version:create` no longer remove Profiles just because they are empty.  (GitHub issues [#2192](https://github.com/forcedotcom/cli/issues/2192)/[#2218](https://github.com/forcedotcom/cli/issues/2218) , packaging PR [#349](https://github.com/forcedotcom/packaging/pull/349))
+
+* FIX: `package:version:create` was briefly erroring because of a change in the xml2js library.  They fixed it and that fixed these commands.  If you encounter the issue, uninstall the packaging plugin and run your command again to get the new fixed version. (GitHub issue [#2324](https://github.com/forcedotcom/cli/issues/2324)).  
+
+* FIX: Salesforce DX projects now support these metadata types:
+
+    * ExtlClntAppMobileConfigurablePolicies
+    * ExtlClntAppMobileSettings
+    * ServiceProcess
+    * ProcessFlowMigration
+
+
+## 2.0.2 (July 19, 2023)
+
+Welcome to the GA of `sf` (v2)! 
+
+Check out [this blog post](https://developer.salesforce.com/blogs/2023/07/salesforce-cli-sf-v2-is-here) for information about this new Salesforce CLI version. 
+
+We recommend that you start using the `sf`-style CLI commands soon, such as `sf org create scratch`. Don't worry, the `sfdx`-style commands continue to work just fine, such as `sfdx force:org:create`. But we think you'll like the new ones better. See [this document](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_migrate.htm) for migration information. We're in the process of updating the [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_intro.htm) to show `sf`-style examples and usage. 
+
+We hope you enjoy `sf` (v2)!  And now on to our regular ole release notes. 
+
+----------------------------------------------------
+
+* FIX: When you run `org delete scratch | sandbox` to delete your default org, the CLI now also unsets the `target-org` configuration variable (if set) and any aliases which point to the deleted org.  (sfdx-core PR [#874](https://github.com/forcedotcom/sfdx-core/pull/874))
+
+* FIX: The `package version create` command now correctly displays an error if the `definitionFile` parameter of `packageDirectories` in the `sfdx-project.json` file is set to an incorrect file location. Previously the command would fail silently.  (GitHub issue [#2193](https://github.com/forcedotcom/cli/issues/2193), plugin-packaging PR [#364](https://github.com/salesforcecli/plugin-packaging/pull/364))

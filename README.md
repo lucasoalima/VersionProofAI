@@ -8,12 +8,13 @@ hybrid retrieval, explicit version-applicability metadata, document revision tra
 reproducible evaluation lab that measures whether version-aware retrieval actually reduces
 outdated recommendations compared with conventional RAG.
 
-> **Status: Phase 5 (Evaluation) complete, with stated gaps.** Everything through version
-> comparison, plus baselines B (traditional RAG) and C (VersionProof) measured on a dev and a
-> held-out split, exports (JSON / CSV / Ragas-shaped), and request logging. **Not done:**
-> baseline A and any LLM-generated answer were never run against a real model; no real embedding
-> model was exercised; Ragas scoring and OpenTelemetry are not implemented; real Salesforce
-> documentation is Phase 6. See [docs/limitations.md](docs/limitations.md).
+> **Status: Phase 6 (real documentation) complete, with stated gaps.** The system now ingests
+> the real Salesforce CLI release notes (157 versions, Apache-2.0) alongside the synthetic corpus,
+> and reports B (traditional RAG) vs C (VersionProof) on synthetic dev, synthetic held-out and a
+> real question set. **The first run on real data was a negative result** and is reported as
+> such below. **Not done:** no LLM or real embedding model has been exercised; baseline A, Ragas
+> scoring and OpenTelemetry are not implemented or not run; there is no real held-out set yet.
+> See [docs/limitations.md](docs/limitations.md).
 
 ## 1. The problem
 
@@ -88,7 +89,10 @@ curl -X POST localhost:8000/api/ingestion/local -H 'content-type: application/js
 # or: cd backend && python scripts/seed.py
 ```
 
-Supported inputs: JSON fixtures, Markdown with YAML front matter, plain text with a `.meta.yaml`
+Real documentation: `python scripts/fetch_source.py` refreshes the Salesforce CLI release notes
+snapshot in `data/real/salesforce-cli/` (allowlisted URL only), then ingest the path `real`.
+
+Supported inputs: Salesforce CLI release-notes Markdown, JSON fixtures, Markdown with YAML front matter, plain text with a `.meta.yaml`
 sidecar. The shipped corpus is **Nimbus CRM**, a fictional product — see
 [data/synthetic/README.md](data/synthetic/README.md). It is not Salesforce documentation.
 
@@ -128,19 +132,29 @@ excluded list exists: the supporting document is still found, labelled *not appl
 kept out of the recommendations. The remaining applicability miss is the not-in-KB question;
 retrieval always returns *something*; abstaining is the answer engine's job.
 
-Answer-level comparison on the **held-out** split (12 questions never used for tuning; hybrid
-retrieval, extractive generation, `hashed-bow-v1` embeddings):
+All runs: hybrid retrieval, k=5, extractive generation, `hashed-bow-v1` embeddings (a
+deterministic bag-of-words stand-in, not a semantic model). Reproduce with
+`python scripts/benchmark_all.py`.
 
-| | Outdated source recommended | Citation validity | Applicability accuracy | Correct abstention |
-|---|---|---|---|---|
-| B: traditional RAG | 0.67 | 0.67 | 0.58 | 0.83 |
-| C: VersionProof | **0.00** | **1.00** | 0.92 | 1.00 |
+| dataset | engine | outdated source recommended | citation validity | applicability accuracy | correct abstention |
+|---|---|---|---|---|---|
+| synthetic held-out (12 q) | B traditional RAG | 0.33 | 0.75 | 0.58 | 0.83 |
+| synthetic held-out (12 q) | C VersionProof | 0.00 | 1.00 | 0.92 | 1.00 |
+| real, first run (11 q) | B traditional RAG | 0.43 | 0.91 | 0.82 | 0.91 |
+| real, first run (11 q) | C VersionProof | **0.57** | 1.00 | **0.18** | **0.18** |
+| real, after two rule changes | C VersionProof | 0.00 | 1.00 | 0.91 | 1.00 |
 
-C's one miss is documented, not patched: an applicable document that merely mentions a feature
-was taken as evidence that the feature exists in that release. Twelve questions on a fictional
-corpus built to contain version traps support the mechanism, not a general claim; baseline A
-(LLM without retrieval) has not been run. Reproduce with `python scripts/benchmark_all.py`.
-Details and threats to validity: [docs/evaluation-methodology.md](docs/evaluation-methodology.md).
+How to read this:
+- On real release notes the engine tuned on synthetic data **lost to traditional RAG**. Two
+  assumptions broke: "similar titles + different numbers = conflict" (every release note has the
+  same title pattern) and "the product's own name counts as topical evidence".
+- After fixing those two rules the engine recommends no outdated source on this set, but the set
+  was used to find the fixes, so that row is tuned, not evidence.
+- The one stable failure across synthetic and real data: a document that *mentions* a feature is
+  taken as proof the feature exists in that version.
+- Nothing here is a general claim. A real held-out set, a real embedding model and LLM generation
+  are the missing pieces. Details: [docs/evaluation-methodology.md](docs/evaluation-methodology.md),
+  sources and licences: [docs/sources.md](docs/sources.md).
 
 ## 8. What the system cannot reliably determine
 

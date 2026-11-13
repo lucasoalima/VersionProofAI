@@ -26,7 +26,7 @@ from app.generation.interfaces import LLMProvider, LLMUnavailable
 from app.generation.prompt import SYSTEM_PROMPT, build_user_prompt
 from app.retrieval.interfaces import Evidence, RetrievalFilters, Retriever
 from app.retrieval.service import retrieve_with_exclusions
-from app.retrieval.tokens import extract_technical_tokens
+from app.retrieval.tokens import extract_technical_tokens, technical_tsquery_literal
 
 _NUM = re.compile(r"\b\d[\d,]*(?:\.\d+)?\b")
 _WORD = re.compile(r"[a-z0-9]+")
@@ -69,6 +69,14 @@ def detect_conflicts(evidence: list[Evidence], min_title_similarity: float = 0.6
         for b in evidence[i + 1 :]:
             pair = frozenset({a.document_id, b.document_id})
             if a.document_id == b.document_id or pair in seen:
+                continue
+            # Changelog entries of different releases are deltas, not competing statements;
+            # they are ordered by release, not flagged as conflicts.
+            if (
+                a.diagnostics.get("content_format")
+                == b.diagnostics.get("content_format")
+                == "release_notes"
+            ):
                 continue
             if title_similarity(a.title, b.title) < min_title_similarity:
                 continue
@@ -125,6 +133,34 @@ class AnswerEngine:
         self.llm = llm
 
     TECH_WEIGHT = 3.0
+    # Terms present in more than this share of a product's chunks carry no evidence of topicality
+    # (e.g. the product's own name). Applied only when the corpus is large enough for the
+    # statistic to mean something.
+    MAX_TERM_DOC_SHARE = 0.25
+    MIN_CHUNKS_FOR_TERM_STATS = 100
+
+    def _drop_ubiquitous(self, terms: dict[str, float], product_slug: str) -> dict[str, float]:
+        base = (
+            "FROM document_chunks c JOIN documents d ON d.current_revision_id = c.revision_id "
+            "JOIN products p ON p.id = d.product_id WHERE p.slug = :slug"
+        )
+        total = (
+            self.db.execute(text(f"SELECT count(*) {base}"), {"slug": product_slug}).scalar() or 0
+        )
+        if total < self.MIN_CHUNKS_FOR_TERM_STATS:
+            return terms
+        kept = {}
+        for term, weight in terms.items():
+            df = (
+                self.db.execute(
+                    text(f"SELECT count(*) {base} AND c.search_vector @@ CAST(:q AS tsquery)"),
+                    {"slug": product_slug, "q": technical_tsquery_literal([term])},
+                ).scalar()
+                or 0
+            )
+            if df / total <= self.MAX_TERM_DOC_SHARE:
+                kept[term] = weight
+        return kept or terms
 
     def _query_terms(self, question: str, target_version: str | None = None) -> dict[str, float]:
         """Question terms with weights: stemmed content words = 1, technical identifiers = 3.
@@ -148,11 +184,16 @@ class AnswerEngine:
         (an answer often spans several chunks of one document)."""
         if not terms:
             return 0.0
+        # Changelog entries are self-contained, so they are scored per chunk; other documents per revision.
+        if e.diagnostics.get("content_format") == "release_notes":
+            column, key = "id", e.chunk_id
+        else:
+            column, key = "revision_id", e.revision_id
         rows = self.db.execute(
             text(
-                "SELECT tsvector_to_array(search_vector) FROM document_chunks WHERE revision_id = CAST(:id AS uuid)"
+                f"SELECT tsvector_to_array(search_vector) FROM document_chunks WHERE {column} = CAST(:id AS uuid)"
             ),
-            {"id": e.revision_id},
+            {"id": key},
         ).scalars()
         lex: set[str] = set()
         for r in rows:
@@ -167,7 +208,9 @@ class AnswerEngine:
         warnings: list[str] = []
         unresolved: list[str] = []
 
-        terms = self._query_terms(question, filters.target_version)
+        terms = self._drop_ubiquitous(
+            self._query_terms(question, filters.target_version), filters.product_slug
+        )
         cov_results = max((self._coverage(terms, e) for e in results[:3]), default=0.0)
         cov_excluded = max((self._coverage(terms, e) for e in excluded[:3]), default=0.0)
         threshold = settings.min_evidence_coverage
@@ -234,6 +277,11 @@ class AnswerEngine:
             ((self._coverage(terms, e), e) for e in results), key=lambda t: (-t[0], t[1].rank)
         )
         usable = [e for c, e in scored if c >= threshold] or [scored[0][1]]
+        # Release notes are cumulative deltas: among applicable entries that cover the question, a
+        # later release supersedes an earlier one, so the most recent applicable entry leads.
+        if usable and all(e.diagnostics.get("content_format") == "release_notes" for e in usable):
+            usable.sort(key=lambda e: -(e.diagnostics.get("effective_from_sequence") or 0))
+            diagnostics["evidence_ordering"] = "most_recent_applicable_release_first"
         conflicts = detect_conflicts(usable)
         statuses = {e.applicability_status.value for e in usable}
         if "applies" in statuses:

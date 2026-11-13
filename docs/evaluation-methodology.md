@@ -117,13 +117,15 @@ variable is version-awareness. Run with `scripts/benchmark_all.py` (writes JSON 
 |---|---|---|---|---|---|---|
 | dev | B traditional RAG | 0.80 | 0.60 | 0.50 | 0.60 | 0.67 |
 | dev | C VersionProof | 1.00 | 1.00 | 0.00 | 1.00 | 1.00 |
-| held-out | B traditional RAG | 0.83 | 0.58 | 0.67 | 0.67 | 0.71 |
+| held-out | B traditional RAG | 0.83 | 0.58 | 0.33 | 0.75 | 0.86 |
 | held-out | C VersionProof | 1.00 | 0.92 | 0.00 | 1.00 | 1.00 |
 
 Baseline A was **not run** (no LLM available in the development environment).
 
 ### What this does and does not show
-- On held-out questions C cited no outdated source (B: 2 of 3 outdated-trap questions) and its
+- On held-out questions C cited no outdated source (B: 1 of 3 outdated-trap questions; an earlier
+  run reported 2 of 3 because two near-identical documents tied in semantic search and the
+  tie-break was not deterministic. It now is, and the table shows the deterministic run) and its
   citations were all applicable (B: 0.67). This is consistent with H1 at the mechanism level.
 - C's held-out miss (h03, "Is the Async Trigger Framework available?" on Summer '24): an
   applicable document that merely *mentions* the framework cleared the coverage threshold, so C
@@ -147,3 +149,50 @@ Every HTTP request is logged as structured JSON (`request_id`, method, path, sta
 `duration_ms`) and returns `x-request-id` and `server-timing` headers; answers and benchmark rows
 carry retrieval and end-to-end latency. OpenTelemetry tracing and token-cost accounting are not
 implemented (cost is only measurable with a real LLM provider).
+
+## Phase 6: real documentation (Salesforce CLI release notes)
+
+Corpus: 157 released versions, 614 entries (see docs/sources.md). Dataset
+`salesforce-cli-real:1`: 11 questions whose reference answers were checked against the source
+text by the author. Hybrid retrieval, k=5, `hashed-bow-v1` embeddings, extractive generation.
+
+### First run: a negative result
+The questions were written before any run on this corpus. With the engine exactly as tuned on
+synthetic data, VersionProof was **worse** than traditional RAG:
+
+| run | engine | correct abstention | applicability acc. | outdated recommendation | citation validity | supported answer |
+|---|---|---|---|---|---|---|
+| first run | B traditional RAG | 0.91 | 0.82 | 0.43 | 0.91 | 0.44 |
+| first run | C VersionProof | **0.18** | **0.18** | **0.57** | 1.00 | 0.56 |
+
+Two design assumptions did not survive real data:
+1. **Conflict detection** treated "similar titles, different numbers" as a contradiction. Every
+   release note is titled "Salesforce CLI x.y.z release notes", so any two versions "conflicted"
+   and the engine abstained on 8 of 11 questions.
+2. **Coverage** counted the product's own name ("Salesforce", "CLI"), present in every chunk, as
+   evidence of topicality, so the not-in-corpus question was answered instead of abstained.
+
+### After two rule changes (this set is now a dev set)
+- Changelog entries of different releases are not conflicts (they are ordered by release).
+- Terms present in more than 25% of a product's chunks are ignored for coverage, when the product
+  has at least 100 chunks.
+
+| run | engine | correct abstention | applicability acc. | outdated recommendation | citation validity | supported answer |
+|---|---|---|---|---|---|---|
+| after changes | B traditional RAG | 0.91 | 0.82 | 0.43 | 0.91 | 0.44 |
+| after changes | C VersionProof | 1.00 | 0.91 | 0.00 | 1.00 | 1.00 |
+
+The synthetic dev and held-out results for C were unchanged by these changes (regression check).
+C's remaining miss (r08) is the same failure seen on synthetic held-out: an applicable entry that
+mentions `agent test run` was taken as evidence that `agent test run-eval` exists in that version.
+
+### What can be claimed
+- The first-run table is the only untuned measurement on real documentation, and it is negative.
+- The second table shows the mechanism works on this corpus once two corpus-shape assumptions
+  are fixed; it was tuned on these 11 questions and proves nothing about unseen questions.
+- A new real held-out set (different questions, ideally a different author, ideally a second
+  source) is required before H1 can be evaluated on real documentation.
+- "Most recent applicable release first" was decided before the first run, from the nature of
+  release notes, and is a heuristic, not verified applicability.
+- C's p50 latency on this corpus is about 4x B's (51 ms vs 13 ms): exclusion pass plus per-term
+  document-frequency queries. Not optimised.

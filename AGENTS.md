@@ -18,7 +18,8 @@
 - `backend/app/generation` `baselines.py` (A no-retrieval, B traditional RAG); `LLMProvider`; `AnswerEngine` (see docs/answer-engine.md); prompt builder
 - `backend/app/chunking`   `Chunker` protocol; `HeadingChunker`
 - `backend/app/api`        FastAPI routes; `capabilities()` reflects configured providers
-- `data/synthetic`         fixtures; `data/evaluation` datasets
+- `data/synthetic`         fixtures; `data/evaluation` datasets; `data/real` licensed snapshots (see docs/sources.md)
+- `backend/app/ingestion/remote.py` URL allowlist; `cli_release_notes.py` loader; `chunking/bullet_chunker.py`
 - `docs/`                  design docs; update them when behaviour changes
 
 ## Workflow
@@ -36,10 +37,12 @@ Implement `DocumentLoader` in `app/ingestion/loaders.py`. Do not touch the pipel
 Remote URLs (Phase 6) must go through an allowlist and SSRF guard; see docs/security.md.
 
 ## Phase status
-Phase 5 done with gaps (baselines B/C measured on dev + held-out; A, Ragas, OTel not run).
-DO NOT tune the answer engine against `nimbus-synthetic-heldout`; write a new held-out split first.
-Next:
-1. With real credentials: run baseline A and LLM generation; exercise `sentence_transformers`;
-   verify the Anthropic client; add Ragas scoring against the verified current API.
-2. Known failure to address (then validate on a NEW held-out set): "mentions X" vs "about X".
-3. Phase 6: real, permitted Salesforce documentation (review terms first; no arbitrary scraping).
+Phase 6 done with gaps (real Salesforce CLI release notes ingested; first real run was negative and
+is documented; two engine rules changed afterwards).
+DO NOT tune against `nimbus-synthetic-heldout`. `salesforce-cli-real:1` is now a DEV set.
+Next, in order:
+1. Write a NEW real held-out set before touching the engine again.
+2. Known failure on both corpora: "mentions X" vs "is about X" (h03, r08).
+3. With credentials: real embedding model, LLM generation, baseline A, Ragas (verify its current API).
+4. A second real source (review licence and terms first; record in docs/sources.md).
+5. Performance: C is ~4x slower than B on the real corpus.

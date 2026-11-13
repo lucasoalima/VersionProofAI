@@ -19,6 +19,7 @@ from sqlalchemy import func, literal_column, select
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Session
 
+from app.chunking.bullet_chunker import BulletChunker
 from app.chunking.heading_chunker import HeadingChunker
 from app.chunking.interfaces import Chunker
 from app.core.config import settings
@@ -41,6 +42,8 @@ from app.retrieval.tokens import extract_technical_tokens, technical_tsvector_li
 from app.versioning.ordering import ExplicitOrdering, VersionOrderingError, get_ordering
 
 log = get_logger(__name__)
+# Repository housekeeping files that live next to documentation and are never documents.
+_NON_DOCUMENT_PREFIXES = ("readme", "license", "notice", "source.json")
 
 
 def checksum(text: str) -> str:
@@ -88,6 +91,8 @@ class IngestionPipeline:
         self.db = db
         self.loaders = loaders or DEFAULT_LOADERS
         self.chunker = chunker or HeadingChunker()
+        # Changelog-style content is chunked one entry per chunk.
+        self.format_chunkers: dict[str, Chunker] = {"release_notes": BulletChunker()}
 
     # -- public ------------------------------------------------------------------
 
@@ -101,7 +106,7 @@ class IngestionPipeline:
             raw_docs: list[RawDocument] = []
             for f in files:
                 loader = next((ld for ld in self.loaders if ld.supports(f)), None)
-                if loader is None or f.name.lower().startswith("readme"):
+                if loader is None or f.name.lower().startswith(_NON_DOCUMENT_PREFIXES):
                     continue
                 if f.stat().st_size > settings.max_document_bytes:
                     result.failures.append({"file": str(f), "error": "exceeds max_document_bytes"})
@@ -298,7 +303,9 @@ class IngestionPipeline:
         )
         self.db.add(rev)
         self.db.flush()
-        for ch in self.chunker.chunk(content, raw.content_format):
+        for ch in self.format_chunkers.get(raw.content_format, self.chunker).chunk(
+            content, raw.content_format
+        ):
             ctoks = extract_technical_tokens(ch.content)
             self.db.add(
                 DocumentChunk(
